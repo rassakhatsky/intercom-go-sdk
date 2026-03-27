@@ -168,10 +168,10 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] List/ListRaw → `emails/listemails`
 
 ### Task 17: Add doc URLs to export_reporting.go (path-encoded URLs)
-- [ ] Enqueue/EnqueueRaw → `export/paths/~1export~1reporting_data~1enqueue/post`
-- [ ] GetStatus/GetStatusRaw → `export/paths/~1export~1reporting_data~1{job_identifier}/get`
-- [ ] GetDatasets/GetDatasetsRaw → `export/paths/~1export~1reporting_data~1get_datasets/get`
-- [ ] Download → `export/paths/~1download~1reporting_data~1{job_identifier}/get`
+- [x] Enqueue/EnqueueRaw → `export/paths/~1export~1reporting_data~1enqueue/post`
+- [x] GetStatus/GetStatusRaw → `export/paths/~1export~1reporting_data~1{job_identifier}/get`
+- [x] GetDatasets/GetDatasetsRaw → `export/paths/~1export~1reporting_data~1get_datasets/get`
+- [x] Download → `export/paths/~1download~1reporting_data~1{job_identifier}/get`
 
 ### Task 18: Add doc URLs to fin_voice.go
 - [ ] Register/RegisterRaw → `calls/registerfinvoicecall`
