@@ -14,7 +14,9 @@ func TestSingleFilterOf(t *testing.T) {
 	}
 
 	var got map[string]any
-	json.Unmarshal(data, &got)
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("Unmarshal error: %v", err)
+	}
 
 	if got["field"] != "created_at" {
 		t.Errorf("field = %v, want created_at", got["field"])
@@ -41,7 +43,9 @@ func TestSingleFilterOf_IntValue(t *testing.T) {
 	}
 
 	var got map[string]any
-	json.Unmarshal(data, &got)
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("Unmarshal error: %v", err)
+	}
 
 	// JSON numbers decode as float64
 	if got["value"] != float64(1306054154) {
@@ -61,7 +65,9 @@ func TestAnd(t *testing.T) {
 	}
 
 	var got map[string]any
-	json.Unmarshal(data, &got)
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("Unmarshal error: %v", err)
+	}
 
 	if got["operator"] != "AND" {
 		t.Errorf("operator = %v, want AND", got["operator"])
@@ -93,7 +99,9 @@ func TestOr(t *testing.T) {
 	}
 
 	var got map[string]any
-	json.Unmarshal(data, &got)
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("Unmarshal error: %v", err)
+	}
 
 	if got["operator"] != "OR" {
 		t.Errorf("operator = %v, want OR", got["operator"])
@@ -123,7 +131,9 @@ func TestNestedAndOr(t *testing.T) {
 	}
 
 	var got map[string]any
-	json.Unmarshal(data, &got)
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("Unmarshal error: %v", err)
+	}
 
 	if got["operator"] != "AND" {
 		t.Errorf("operator = %v, want AND", got["operator"])
@@ -162,7 +172,9 @@ func TestSearchRequest_MarshalJSON(t *testing.T) {
 	}
 
 	var got map[string]any
-	json.Unmarshal(data, &got)
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("Unmarshal error: %v", err)
+	}
 
 	// Check query is present
 	query, ok := got["query"].(map[string]any)
@@ -197,7 +209,9 @@ func TestSearchRequest_NoPagination(t *testing.T) {
 	}
 
 	var got map[string]any
-	json.Unmarshal(data, &got)
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("Unmarshal error: %v", err)
+	}
 
 	if _, ok := got["pagination"]; ok {
 		t.Error("pagination should be omitted when nil")

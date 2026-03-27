@@ -23,6 +23,11 @@ go vet ./...
 
 # Format check
 gofmt -l .
+
+# Or use Make targets
+make test        # go test -cover ./...
+make test-race   # go test -race -cover ./...
+make fix         # go vet + gofmt -l
 ```
 
 ## Architecture

@@ -256,7 +256,7 @@ func addQueryOptions(path string, opts any) (string, error) {
 	q := u.Query()
 	for k, vs := range params {
 		for _, v := range vs {
-			q.Set(k, v)
+			q.Add(k, v)
 		}
 	}
 	u.RawQuery = q.Encode()
