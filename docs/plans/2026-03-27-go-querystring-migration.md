@@ -43,13 +43,13 @@
 - [x] run `go vet ./...` — must pass
 
 ### Task 2: Replace addQueryOptions internals
-- [ ] import `github.com/google/go-querystring/query` in `intercom.go`
-- [ ] rewrite `addQueryOptions` body to use `query.Values(opts)` instead of custom reflection
-- [ ] remove `parseTag` function (no longer needed)
-- [ ] remove `isZero` function (no longer needed)
-- [ ] run existing `TestAddQueryOptions` and `TestAddQueryOptions_NilOpts` — must pass
-- [ ] write additional test cases: pointer fields (*bool), url:"-" skip, non-struct input
-- [ ] run `go test ./...` — all tests must pass
+- [x] import `github.com/google/go-querystring/query` in `intercom.go`
+- [x] rewrite `addQueryOptions` body to use `query.Values(opts)` instead of custom reflection
+- [x] remove `parseTag` function (no longer needed)
+- [x] remove `isZero` function (no longer needed)
+- [x] run existing `TestAddQueryOptions` and `TestAddQueryOptions_NilOpts` — must pass
+- [x] write additional test cases: pointer fields (*bool), url:"-" skip, non-struct input
+- [x] run `go test ./...` — all tests must pass
 
 ### Task 3: Simplify caller pattern across service files
 - [ ] audit all 15 call sites to confirm no caller-specific changes are needed

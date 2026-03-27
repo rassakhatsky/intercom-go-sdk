@@ -245,5 +245,59 @@ func TestAddQueryOptions_NilOpts(t *testing.T) {
 	}
 }
 
+func TestAddQueryOptions_PointerFields(t *testing.T) {
+	type opts struct {
+		Active *bool  `url:"active,omitempty"`
+		Name   *string `url:"name,omitempty"`
+	}
+
+	active := true
+	name := "bob"
+	got, err := addQueryOptions("contacts", &opts{Active: &active, Name: &name})
+	if err != nil {
+		t.Fatalf("addQueryOptions error: %v", err)
+	}
+	if !strings.Contains(got, "active=true") {
+		t.Errorf("expected active=true in %q", got)
+	}
+	if !strings.Contains(got, "name=bob") {
+		t.Errorf("expected name=bob in %q", got)
+	}
+
+	// nil pointers should be omitted
+	got, err = addQueryOptions("contacts", &opts{})
+	if err != nil {
+		t.Fatalf("addQueryOptions error: %v", err)
+	}
+	if got != "contacts" {
+		t.Errorf("expected no query params for nil pointers, got %q", got)
+	}
+}
+
+func TestAddQueryOptions_SkipTag(t *testing.T) {
+	type opts struct {
+		Page   int    `url:"page,omitempty"`
+		Secret string `url:"-"`
+	}
+
+	got, err := addQueryOptions("contacts", &opts{Page: 1, Secret: "hidden"})
+	if err != nil {
+		t.Fatalf("addQueryOptions error: %v", err)
+	}
+	if !strings.Contains(got, "page=1") {
+		t.Errorf("expected page=1 in %q", got)
+	}
+	if strings.Contains(got, "hidden") || strings.Contains(got, "Secret") {
+		t.Errorf("expected Secret to be skipped, got %q", got)
+	}
+}
+
+func TestAddQueryOptions_NonStruct(t *testing.T) {
+	_, err := addQueryOptions("contacts", "not-a-struct")
+	if err == nil {
+		t.Error("expected error for non-struct input")
+	}
+}
+
 // Ensure *slog.Logger satisfies the Logger interface at compile time.
 var _ Logger = slog.Default()

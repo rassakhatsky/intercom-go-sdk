@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
-	"reflect"
 	"strings"
+
+	"github.com/google/go-querystring/query"
 )
 
 const (
@@ -240,43 +240,9 @@ func addQueryOptions(path string, opts any) (string, error) {
 		return path, nil
 	}
 
-	v := reflect.ValueOf(opts)
-	if v.Kind() == reflect.Ptr {
-		if v.IsNil() {
-			return path, nil
-		}
-		v = v.Elem()
-	}
-
-	if v.Kind() != reflect.Struct {
-		return path, fmt.Errorf("opts must be a struct, got %s", v.Kind())
-	}
-
-	params := url.Values{}
-	t := v.Type()
-
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		tag := field.Tag.Get("url")
-		if tag == "" || tag == "-" {
-			continue
-		}
-
-		name, opts := parseTag(tag)
-		fv := v.Field(i)
-
-		if opts == "omitempty" && isZero(fv) {
-			continue
-		}
-
-		val := fv
-		if val.Kind() == reflect.Ptr {
-			if val.IsNil() {
-				continue
-			}
-			val = val.Elem()
-		}
-		params.Set(name, fmt.Sprintf("%v", val.Interface()))
+	params, err := query.Values(opts)
+	if err != nil {
+		return path, err
 	}
 
 	if len(params) == 0 {
@@ -295,31 +261,4 @@ func addQueryOptions(path string, opts any) (string, error) {
 	}
 	u.RawQuery = q.Encode()
 	return u.String(), nil
-}
-
-func parseTag(tag string) (string, string) {
-	parts := strings.SplitN(tag, ",", 2)
-	if len(parts) == 2 {
-		return parts[0], parts[1]
-	}
-	return parts[0], ""
-}
-
-func isZero(v reflect.Value) bool {
-	switch v.Kind() {
-	case reflect.String:
-		return v.Len() == 0
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return v.Int() == 0
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return v.Uint() == 0
-	case reflect.Float32, reflect.Float64:
-		return v.Float() == 0
-	case reflect.Bool:
-		return !v.Bool()
-	case reflect.Ptr, reflect.Interface, reflect.Slice, reflect.Map:
-		return v.IsNil()
-	default:
-		return false
-	}
 }
