@@ -309,6 +309,8 @@ func ParseConversationAddTagResult(r *Result) (*TagRef, error) { return Decode[T
 func ParseConversationRemoveTagResult(r *Result) (*TagRef, error) { return Decode[TagRef](r) }
 
 // Get retrieves a conversation by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/retrieveconversation
 func (s *ConversationsService) Get(ctx context.Context, id string) (*Conversation, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -321,6 +323,8 @@ func (s *ConversationsService) Get(ctx context.Context, id string) (*Conversatio
 }
 
 // List returns a single page of conversations.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/listconversations
 func (s *ConversationsService) List(ctx context.Context, opts *ListOptions) (*PagedResult[Conversation], error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
@@ -338,6 +342,8 @@ func (s *ConversationsService) ListAll(ctx context.Context, opts *ListOptions) *
 }
 
 // Create creates a new conversation initiated by a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/createconversation
 func (s *ConversationsService) Create(ctx context.Context, body *CreateConversationRequest) (*ConversationMessage, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
@@ -350,6 +356,8 @@ func (s *ConversationsService) Create(ctx context.Context, body *CreateConversat
 }
 
 // Update updates an existing conversation.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/updateconversation
 func (s *ConversationsService) Update(ctx context.Context, id string, body *UpdateConversationRequest) (*Conversation, error) {
 	result, err := s.UpdateRaw(ctx, id, body)
 	if err != nil {
@@ -362,6 +370,8 @@ func (s *ConversationsService) Update(ctx context.Context, id string, body *Upda
 }
 
 // Delete permanently deletes a conversation.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/deleteconversation
 func (s *ConversationsService) Delete(ctx context.Context, id string) (*ConversationDeleted, error) {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
@@ -374,6 +384,8 @@ func (s *ConversationsService) Delete(ctx context.Context, id string) (*Conversa
 }
 
 // Search searches for conversations using the provided query filters.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/searchconversations
 func (s *ConversationsService) Search(ctx context.Context, body *SearchRequest) (*PagedResult[Conversation], error) {
 	result, err := s.SearchRaw(ctx, body)
 	if err != nil {
@@ -386,6 +398,8 @@ func (s *ConversationsService) Search(ctx context.Context, body *SearchRequest) 
 }
 
 // Reply adds a reply to a conversation.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/replyconversation
 func (s *ConversationsService) Reply(ctx context.Context, id string, body *ReplyConversationRequest) (*Conversation, error) {
 	result, err := s.ReplyRaw(ctx, id, body)
 	if err != nil {
@@ -398,6 +412,8 @@ func (s *ConversationsService) Reply(ctx context.Context, id string, body *Reply
 }
 
 // Close closes a conversation. The request body should have MessageType "close".
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
 func (s *ConversationsService) Close(ctx context.Context, id string, body *ManageConversationRequest) (*Conversation, error) {
 	result, err := s.CloseRaw(ctx, id, body)
 	if err != nil {
@@ -410,6 +426,8 @@ func (s *ConversationsService) Close(ctx context.Context, id string, body *Manag
 }
 
 // Open opens a snoozed or closed conversation. The request body should have MessageType "open".
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
 func (s *ConversationsService) Open(ctx context.Context, id string, body *ManageConversationRequest) (*Conversation, error) {
 	result, err := s.OpenRaw(ctx, id, body)
 	if err != nil {
@@ -422,6 +440,8 @@ func (s *ConversationsService) Open(ctx context.Context, id string, body *Manage
 }
 
 // Snooze snoozes a conversation until a given time. The request body should have MessageType "snoozed".
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
 func (s *ConversationsService) Snooze(ctx context.Context, id string, body *ManageConversationRequest) (*Conversation, error) {
 	result, err := s.SnoozeRaw(ctx, id, body)
 	if err != nil {
@@ -434,6 +454,8 @@ func (s *ConversationsService) Snooze(ctx context.Context, id string, body *Mana
 }
 
 // Assign assigns a conversation to an admin or team. The request body should have MessageType "assignment".
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
 func (s *ConversationsService) Assign(ctx context.Context, id string, body *ManageConversationRequest) (*Conversation, error) {
 	result, err := s.AssignRaw(ctx, id, body)
 	if err != nil {
@@ -446,6 +468,8 @@ func (s *ConversationsService) Assign(ctx context.Context, id string, body *Mana
 }
 
 // Convert converts a conversation to a ticket.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/convertconversationtoticket
 func (s *ConversationsService) Convert(ctx context.Context, id string, body *ConvertConversationRequest) (*ConvertedTicket, error) {
 	result, err := s.ConvertRaw(ctx, id, body)
 	if err != nil {
@@ -458,6 +482,8 @@ func (s *ConversationsService) Convert(ctx context.Context, id string, body *Con
 }
 
 // Redact redacts a conversation part or source message.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/redactconversation
 func (s *ConversationsService) Redact(ctx context.Context, body *RedactConversationRequest) (*Conversation, error) {
 	result, err := s.RedactRaw(ctx, body)
 	if err != nil {
@@ -470,6 +496,8 @@ func (s *ConversationsService) Redact(ctx context.Context, body *RedactConversat
 }
 
 // AddCustomer attaches a contact as a participant to a conversation.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/attachcontacttoconversation
 func (s *ConversationsService) AddCustomer(ctx context.Context, conversationID string, body *AttachContactToConversationRequest) (*Conversation, error) {
 	result, err := s.AddCustomerRaw(ctx, conversationID, body)
 	if err != nil {
@@ -482,6 +510,8 @@ func (s *ConversationsService) AddCustomer(ctx context.Context, conversationID s
 }
 
 // RemoveCustomer detaches a contact from a conversation.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/detachcontactfromconversation
 func (s *ConversationsService) RemoveCustomer(ctx context.Context, conversationID, contactID string, body *DetachContactFromConversationRequest) (*Conversation, error) {
 	result, err := s.RemoveCustomerRaw(ctx, conversationID, contactID, body)
 	if err != nil {
@@ -494,6 +524,8 @@ func (s *ConversationsService) RemoveCustomer(ctx context.Context, conversationI
 }
 
 // AddTag adds a tag to a conversation. Requires both the tag ID and admin ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/attachtagtoconversation
 func (s *ConversationsService) AddTag(ctx context.Context, conversationID, tagID, adminID string) (*TagRef, error) {
 	result, err := s.AddTagRaw(ctx, conversationID, tagID, adminID)
 	if err != nil {
@@ -506,6 +538,8 @@ func (s *ConversationsService) AddTag(ctx context.Context, conversationID, tagID
 }
 
 // RemoveTag removes a tag from a conversation. Requires the admin ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/detachtagfromconversation
 func (s *ConversationsService) RemoveTag(ctx context.Context, conversationID, tagID, adminID string) (*TagRef, error) {
 	result, err := s.RemoveTagRaw(ctx, conversationID, tagID, adminID)
 	if err != nil {
@@ -518,6 +552,8 @@ func (s *ConversationsService) RemoveTag(ctx context.Context, conversationID, ta
 }
 
 // GetRaw retrieves a conversation by ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/retrieveconversation
 func (s *ConversationsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("conversations/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -527,6 +563,8 @@ func (s *ConversationsService) GetRaw(ctx context.Context, id string) (*Result, 
 }
 
 // ListRaw returns a single page of conversations with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/listconversations
 func (s *ConversationsService) ListRaw(ctx context.Context, opts *ListOptions) (*Result, error) {
 	path, err := addQueryOptions("conversations", opts)
 	if err != nil {
@@ -540,6 +578,8 @@ func (s *ConversationsService) ListRaw(ctx context.Context, opts *ListOptions) (
 }
 
 // CreateRaw creates a new conversation and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/createconversation
 func (s *ConversationsService) CreateRaw(ctx context.Context, body *CreateConversationRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "conversations", body)
 	if err != nil {
@@ -549,6 +589,8 @@ func (s *ConversationsService) CreateRaw(ctx context.Context, body *CreateConver
 }
 
 // UpdateRaw updates an existing conversation and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/updateconversation
 func (s *ConversationsService) UpdateRaw(ctx context.Context, id string, body *UpdateConversationRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("conversations/%s", url.PathEscape(id)), body)
 	if err != nil {
@@ -558,6 +600,8 @@ func (s *ConversationsService) UpdateRaw(ctx context.Context, id string, body *U
 }
 
 // DeleteRaw permanently deletes a conversation and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/deleteconversation
 func (s *ConversationsService) DeleteRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("conversations/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -567,6 +611,8 @@ func (s *ConversationsService) DeleteRaw(ctx context.Context, id string) (*Resul
 }
 
 // SearchRaw searches for conversations and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/searchconversations
 func (s *ConversationsService) SearchRaw(ctx context.Context, body *SearchRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "conversations/search", body)
 	if err != nil {
@@ -576,6 +622,8 @@ func (s *ConversationsService) SearchRaw(ctx context.Context, body *SearchReques
 }
 
 // ReplyRaw adds a reply to a conversation and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/replyconversation
 func (s *ConversationsService) ReplyRaw(ctx context.Context, id string, body *ReplyConversationRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("conversations/%s/reply", url.PathEscape(id)), body)
 	if err != nil {
@@ -585,21 +633,29 @@ func (s *ConversationsService) ReplyRaw(ctx context.Context, id string, body *Re
 }
 
 // CloseRaw closes a conversation and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
 func (s *ConversationsService) CloseRaw(ctx context.Context, id string, body *ManageConversationRequest) (*Result, error) {
 	return s.managePartsRaw(ctx, id, body)
 }
 
 // OpenRaw opens a conversation and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
 func (s *ConversationsService) OpenRaw(ctx context.Context, id string, body *ManageConversationRequest) (*Result, error) {
 	return s.managePartsRaw(ctx, id, body)
 }
 
 // SnoozeRaw snoozes a conversation and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
 func (s *ConversationsService) SnoozeRaw(ctx context.Context, id string, body *ManageConversationRequest) (*Result, error) {
 	return s.managePartsRaw(ctx, id, body)
 }
 
 // AssignRaw assigns a conversation and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
 func (s *ConversationsService) AssignRaw(ctx context.Context, id string, body *ManageConversationRequest) (*Result, error) {
 	return s.managePartsRaw(ctx, id, body)
 }
@@ -614,6 +670,8 @@ func (s *ConversationsService) managePartsRaw(ctx context.Context, id string, bo
 }
 
 // ConvertRaw converts a conversation to a ticket and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/convertconversationtoticket
 func (s *ConversationsService) ConvertRaw(ctx context.Context, id string, body *ConvertConversationRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("conversations/%s/convert", url.PathEscape(id)), body)
 	if err != nil {
@@ -623,6 +681,8 @@ func (s *ConversationsService) ConvertRaw(ctx context.Context, id string, body *
 }
 
 // RedactRaw redacts a conversation part or source and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/redactconversation
 func (s *ConversationsService) RedactRaw(ctx context.Context, body *RedactConversationRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "conversations/redact", body)
 	if err != nil {
@@ -632,6 +692,8 @@ func (s *ConversationsService) RedactRaw(ctx context.Context, body *RedactConver
 }
 
 // AddCustomerRaw attaches a contact to a conversation and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/attachcontacttoconversation
 func (s *ConversationsService) AddCustomerRaw(ctx context.Context, conversationID string, body *AttachContactToConversationRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("conversations/%s/customers", url.PathEscape(conversationID)), body)
 	if err != nil {
@@ -641,6 +703,8 @@ func (s *ConversationsService) AddCustomerRaw(ctx context.Context, conversationI
 }
 
 // RemoveCustomerRaw detaches a contact from a conversation and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/detachcontactfromconversation
 func (s *ConversationsService) RemoveCustomerRaw(ctx context.Context, conversationID, contactID string, body *DetachContactFromConversationRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("conversations/%s/customers/%s", url.PathEscape(conversationID), url.PathEscape(contactID)), body)
 	if err != nil {
@@ -650,6 +714,8 @@ func (s *ConversationsService) RemoveCustomerRaw(ctx context.Context, conversati
 }
 
 // AddTagRaw adds a tag to a conversation and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/attachtagtoconversation
 func (s *ConversationsService) AddTagRaw(ctx context.Context, conversationID, tagID, adminID string) (*Result, error) {
 	body := struct {
 		ID      string `json:"id"`
@@ -663,6 +729,8 @@ func (s *ConversationsService) AddTagRaw(ctx context.Context, conversationID, ta
 }
 
 // RemoveTagRaw removes a tag from a conversation and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/detachtagfromconversation
 func (s *ConversationsService) RemoveTagRaw(ctx context.Context, conversationID, tagID, adminID string) (*Result, error) {
 	body := struct {
 		AdminID string `json:"admin_id"`

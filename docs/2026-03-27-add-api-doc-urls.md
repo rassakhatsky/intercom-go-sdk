@@ -117,23 +117,23 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] RemoveTag/RemoveTagRaw → `tags/detachtagfromcontact`
 
 ### Task 10: Add doc URLs to conversations.go
-- [ ] Get/GetRaw → `conversations/retrieveconversation`
-- [ ] List/ListRaw → `conversations/listconversations`
-- [ ] Create/CreateRaw → `conversations/createconversation`
-- [ ] Update/UpdateRaw → `conversations/updateconversation`
-- [ ] Delete/DeleteRaw → `conversations/deleteconversation`
-- [ ] Search/SearchRaw → `conversations/searchconversations`
-- [ ] Reply/ReplyRaw → `conversations/replyconversation`
-- [ ] Close/CloseRaw → `conversations/manageconversation`
-- [ ] Open/OpenRaw → `conversations/manageconversation`
-- [ ] Snooze/SnoozeRaw → `conversations/manageconversation`
-- [ ] Assign/AssignRaw → `conversations/manageconversation`
-- [ ] Convert/ConvertRaw → `conversations/convertconversationtoticket`
-- [ ] Redact/RedactRaw → `conversations/redactconversation`
-- [ ] AddCustomer/AddCustomerRaw → `conversations/attachcontacttoconversation`
-- [ ] RemoveCustomer/RemoveCustomerRaw → `conversations/detachcontactfromconversation`
-- [ ] AddTag/AddTagRaw → `conversations/attachtagtoconversation`
-- [ ] RemoveTag/RemoveTagRaw → `conversations/detachtagfromconversation`
+- [x] Get/GetRaw → `conversations/retrieveconversation`
+- [x] List/ListRaw → `conversations/listconversations`
+- [x] Create/CreateRaw → `conversations/createconversation`
+- [x] Update/UpdateRaw → `conversations/updateconversation`
+- [x] Delete/DeleteRaw → `conversations/deleteconversation`
+- [x] Search/SearchRaw → `conversations/searchconversations`
+- [x] Reply/ReplyRaw → `conversations/replyconversation`
+- [x] Close/CloseRaw → `conversations/manageconversation`
+- [x] Open/OpenRaw → `conversations/manageconversation`
+- [x] Snooze/SnoozeRaw → `conversations/manageconversation`
+- [x] Assign/AssignRaw → `conversations/manageconversation`
+- [x] Convert/ConvertRaw → `conversations/convertconversationtoticket`
+- [x] Redact/RedactRaw → `conversations/redactconversation`
+- [x] AddCustomer/AddCustomerRaw → `conversations/attachcontacttoconversation`
+- [x] RemoveCustomer/RemoveCustomerRaw → `conversations/detachcontactfromconversation`
+- [x] AddTag/AddTagRaw → `conversations/attachtagtoconversation`
+- [x] RemoveTag/RemoveTagRaw → `conversations/detachtagfromconversation`
 
 ### Task 11: Add doc URLs to custom_channel_events.go
 - [ ] NotifyNewConversation/Raw → `custom-channel-events/notifynewconversation`
