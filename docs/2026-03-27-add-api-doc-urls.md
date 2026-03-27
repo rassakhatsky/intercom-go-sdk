@@ -174,11 +174,11 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] Download → `export/paths/~1download~1reporting_data~1{job_identifier}/get`
 
 ### Task 18: Add doc URLs to fin_voice.go
-- [ ] Register/RegisterRaw → `calls/registerfinvoicecall`
-- [ ] Collect/CollectRaw → `calls/collectfinvoicecallbyid`
-- [ ] GetByExternalID/GetByExternalIDRaw → `calls/collectfinvoicecallbyexternalid`
-- [ ] GetByConversationID/GetByConversationIDRaw → `calls/collectfinvoicecallsbyconversationid`
-- [ ] GetByPhoneNumber/GetByPhoneNumberRaw → `calls/collectfinvoicecallbyphonenumber`
+- [x] Register/RegisterRaw → `calls/registerfinvoicecall`
+- [x] Collect/CollectRaw → `calls/collectfinvoicecallbyid`
+- [x] GetByExternalID/GetByExternalIDRaw → `calls/collectfinvoicecallbyexternalid`
+- [x] GetByConversationID/GetByConversationIDRaw → `calls/collectfinvoicecallsbyconversationid`
+- [x] GetByPhoneNumber/GetByPhoneNumberRaw → `calls/collectfinvoicecallbyphonenumber`
 
 ### Task 19: Add doc URLs to help_center.go
 - [ ] ListCollections/ListCollectionsRaw → `help-center/listallcollections`

@@ -63,6 +63,8 @@ func ParseFinVoiceGetByPhoneNumberResult(r *Result) (*AICallResponse, error) {
 // --- Regular Methods ---
 
 // Register registers a new Fin Voice call.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/registerfinvoicecall
 func (s *FinVoiceService) Register(ctx context.Context, req *RegisterFinVoiceCallRequest) (*AICallResponse, error) {
 	result, err := s.RegisterRaw(ctx, req)
 	if err != nil {
@@ -75,6 +77,8 @@ func (s *FinVoiceService) Register(ctx context.Context, req *RegisterFinVoiceCal
 }
 
 // Collect retrieves a Fin Voice call by its external reference ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyid
 func (s *FinVoiceService) Collect(ctx context.Context, id int) (*AICallResponse, error) {
 	result, err := s.CollectRaw(ctx, id)
 	if err != nil {
@@ -87,6 +91,8 @@ func (s *FinVoiceService) Collect(ctx context.Context, id int) (*AICallResponse,
 }
 
 // GetByExternalID retrieves a Fin Voice call by its external call ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyexternalid
 func (s *FinVoiceService) GetByExternalID(ctx context.Context, externalID string) (*AICallResponse, error) {
 	result, err := s.GetByExternalIDRaw(ctx, externalID)
 	if err != nil {
@@ -99,6 +105,8 @@ func (s *FinVoiceService) GetByExternalID(ctx context.Context, externalID string
 }
 
 // GetByConversation retrieves all Fin Voice calls for a conversation.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallsbyconversationid
 func (s *FinVoiceService) GetByConversation(ctx context.Context, conversationID string) ([]AICallResponse, error) {
 	result, err := s.GetByConversationRaw(ctx, conversationID)
 	if err != nil {
@@ -115,6 +123,8 @@ func (s *FinVoiceService) GetByConversation(ctx context.Context, conversationID 
 }
 
 // GetByPhoneNumber retrieves the most recent Fin Voice call for a phone number.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyphonenumber
 func (s *FinVoiceService) GetByPhoneNumber(ctx context.Context, phoneNumber string) (*AICallResponse, error) {
 	result, err := s.GetByPhoneNumberRaw(ctx, phoneNumber)
 	if err != nil {
@@ -129,6 +139,8 @@ func (s *FinVoiceService) GetByPhoneNumber(ctx context.Context, phoneNumber stri
 // --- Raw Methods ---
 
 // RegisterRaw registers a new Fin Voice call with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/registerfinvoicecall
 func (s *FinVoiceService) RegisterRaw(ctx context.Context, req *RegisterFinVoiceCallRequest) (*Result, error) {
 	httpReq, err := s.client.NewRequest(http.MethodPost, "fin_voice/register", req)
 	if err != nil {
@@ -138,6 +150,8 @@ func (s *FinVoiceService) RegisterRaw(ctx context.Context, req *RegisterFinVoice
 }
 
 // CollectRaw retrieves a Fin Voice call by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyid
 func (s *FinVoiceService) CollectRaw(ctx context.Context, id int) (*Result, error) {
 	httpReq, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("fin_voice/collect/%d", id), nil)
 	if err != nil {
@@ -147,6 +161,8 @@ func (s *FinVoiceService) CollectRaw(ctx context.Context, id int) (*Result, erro
 }
 
 // GetByExternalIDRaw retrieves a Fin Voice call by external ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyexternalid
 func (s *FinVoiceService) GetByExternalIDRaw(ctx context.Context, externalID string) (*Result, error) {
 	httpReq, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("fin_voice/external_id/%s", url.PathEscape(externalID)), nil)
 	if err != nil {
@@ -156,6 +172,8 @@ func (s *FinVoiceService) GetByExternalIDRaw(ctx context.Context, externalID str
 }
 
 // GetByConversationRaw retrieves all Fin Voice calls for a conversation with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallsbyconversationid
 func (s *FinVoiceService) GetByConversationRaw(ctx context.Context, conversationID string) (*Result, error) {
 	httpReq, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("fin_voice/conversation/%s", url.PathEscape(conversationID)), nil)
 	if err != nil {
@@ -165,6 +183,8 @@ func (s *FinVoiceService) GetByConversationRaw(ctx context.Context, conversation
 }
 
 // GetByPhoneNumberRaw retrieves the most recent Fin Voice call for a phone number with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyphonenumber
 func (s *FinVoiceService) GetByPhoneNumberRaw(ctx context.Context, phoneNumber string) (*Result, error) {
 	httpReq, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("fin_voice/phone_number/%s", url.PathEscape(phoneNumber)), nil)
 	if err != nil {
