@@ -43,6 +43,8 @@ func ParseSubscriptionTypeListResult(r *Result) (*SubscriptionTypeList, error) {
 // --- Regular Methods ---
 
 // List returns all subscription types for the workspace.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/listsubscriptiontypes
 func (s *SubscriptionTypesService) List(ctx context.Context) (*SubscriptionTypeList, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
@@ -57,6 +59,8 @@ func (s *SubscriptionTypesService) List(ctx context.Context) (*SubscriptionTypeL
 // --- Raw Methods ---
 
 // ListRaw returns all subscription types with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/listsubscriptiontypes
 func (s *SubscriptionTypesService) ListRaw(ctx context.Context) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "subscription_types", nil)
 	if err != nil {
