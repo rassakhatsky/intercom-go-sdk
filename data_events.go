@@ -93,6 +93,8 @@ func ParseDataEventCreateSummariesResult(r *Result) error {
 // --- Regular Methods ---
 
 // Create submits a new data event. Returns nil on success (API returns 202 with empty body).
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/createdataevent
 func (s *DataEventsService) Create(ctx context.Context, body *CreateDataEventRequest) error {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
@@ -105,6 +107,8 @@ func (s *DataEventsService) Create(ctx context.Context, body *CreateDataEventReq
 }
 
 // List returns data events for a user or lead.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/lisdataevents
 func (s *DataEventsService) List(ctx context.Context, opts *ListDataEventsOptions) (*DataEventSummaryResponse, error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
@@ -117,6 +121,8 @@ func (s *DataEventsService) List(ctx context.Context, opts *ListDataEventsOption
 }
 
 // CreateSummaries creates event summaries for a user.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/dataeventsummaries
 func (s *DataEventsService) CreateSummaries(ctx context.Context, body *CreateEventSummariesRequest) error {
 	result, err := s.CreateSummariesRaw(ctx, body)
 	if err != nil {
@@ -131,6 +137,8 @@ func (s *DataEventsService) CreateSummaries(ctx context.Context, body *CreateEve
 // --- Raw Methods ---
 
 // CreateRaw submits a new data event and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/createdataevent
 func (s *DataEventsService) CreateRaw(ctx context.Context, body *CreateDataEventRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "events", body)
 	if err != nil {
@@ -140,6 +148,8 @@ func (s *DataEventsService) CreateRaw(ctx context.Context, body *CreateDataEvent
 }
 
 // ListRaw returns data events for a user or lead with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/lisdataevents
 func (s *DataEventsService) ListRaw(ctx context.Context, opts *ListDataEventsOptions) (*Result, error) {
 	path, err := addQueryOptions("events", opts)
 	if err != nil {
@@ -153,6 +163,8 @@ func (s *DataEventsService) ListRaw(ctx context.Context, opts *ListDataEventsOpt
 }
 
 // CreateSummariesRaw creates event summaries for a user and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/dataeventsummaries
 func (s *DataEventsService) CreateSummariesRaw(ctx context.Context, body *CreateEventSummariesRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "events/summaries", body)
 	if err != nil {

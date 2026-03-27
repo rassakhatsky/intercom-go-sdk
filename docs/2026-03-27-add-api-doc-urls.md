@@ -154,9 +154,9 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] Update/UpdateRaw → `data-attributes/updatedataattribute`
 
 ### Task 14: Add doc URLs to data_events.go
-- [ ] Create/CreateRaw → `data-events/createdataevent`
-- [ ] List/ListRaw → `data-events/lisdataevents`
-- [ ] CreateSummaries/CreateSummariesRaw → `data-events/dataeventsummaries`
+- [x] Create/CreateRaw → `data-events/createdataevent`
+- [x] List/ListRaw → `data-events/lisdataevents`
+- [x] CreateSummaries/CreateSummariesRaw → `data-events/dataeventsummaries`
 
 ### Task 15: Add doc URLs to data_export.go
 - [ ] Create/CreateRaw → `data-export/createdataexport`
