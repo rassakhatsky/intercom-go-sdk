@@ -70,8 +70,8 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] List/ListRaw → `away-status-reasons/listawaystatusreasons`
 
 ### Task 6: Add doc URLs to brands.go
-- [ ] Get/GetRaw → `brands/retrievebrand`
-- [ ] List/ListRaw → `brands/listbrands`
+- [x] Get/GetRaw → `brands/retrievebrand`
+- [x] List/ListRaw → `brands/listbrands`
 
 ### Task 7: Add doc URLs to calls.go
 - [ ] Get/GetRaw → `calls/showcall`

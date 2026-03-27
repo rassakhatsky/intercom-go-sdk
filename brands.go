@@ -44,6 +44,8 @@ func ParseBrandListResult(r *Result) (*BrandList, error) {
 // --- Regular Methods ---
 
 // Get retrieves a brand by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/brands/retrievebrand
 func (s *BrandsService) Get(ctx context.Context, id string) (*Brand, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -56,6 +58,8 @@ func (s *BrandsService) Get(ctx context.Context, id string) (*Brand, error) {
 }
 
 // List returns all brands.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/brands/listbrands
 func (s *BrandsService) List(ctx context.Context) (*BrandList, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
@@ -70,6 +74,8 @@ func (s *BrandsService) List(ctx context.Context) (*BrandList, error) {
 // --- Raw Methods ---
 
 // GetRaw retrieves a brand by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/brands/retrievebrand
 func (s *BrandsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("brands/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -79,6 +85,8 @@ func (s *BrandsService) GetRaw(ctx context.Context, id string) (*Result, error) 
 }
 
 // ListRaw returns all brands with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/brands/listbrands
 func (s *BrandsService) ListRaw(ctx context.Context) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "brands", nil)
 	if err != nil {
