@@ -35,6 +35,8 @@ func ParseTicketStateListResult(r *Result) (*TicketStateList, error) {
 // --- Regular Methods ---
 
 // List returns all ticket states for the workspace.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-states/listticketstates
 func (s *TicketStatesService) List(ctx context.Context) (*TicketStateList, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
@@ -49,6 +51,8 @@ func (s *TicketStatesService) List(ctx context.Context) (*TicketStateList, error
 // --- Raw Methods ---
 
 // ListRaw returns all ticket states with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-states/listticketstates
 func (s *TicketStatesService) ListRaw(ctx context.Context) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "ticket_states", nil)
 	if err != nil {

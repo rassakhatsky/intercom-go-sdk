@@ -241,7 +241,7 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] List/ListRaw → `teams/listteams`
 
 ### Task 31: Add doc URLs to ticket_states.go
-- [ ] List/ListRaw → `ticket-states/listticketstates`
+- [x] List/ListRaw → `ticket-states/listticketstates`
 
 ### Task 32: Add doc URLs to ticket_types.go
 - [ ] Get/GetRaw → `ticket-types/gettickettype`
