@@ -59,12 +59,12 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] DeleteExternalPage/Raw → `ai-content/deleteexternalpage`
 
 ### Task 4: Add doc URLs to articles.go
-- [ ] Get/GetRaw → `articles/retrievearticle`
-- [ ] List/ListRaw → `articles/listarticles`
-- [ ] Create/CreateRaw → `articles/createarticle`
-- [ ] Update/UpdateRaw → `articles/updatearticle`
-- [ ] Delete/DeleteRaw → `articles/deletearticle`
-- [ ] Search/SearchRaw → `articles/searcharticles`
+- [x] Get/GetRaw → `articles/retrievearticle`
+- [x] List/ListRaw → `articles/listarticles`
+- [x] Create/CreateRaw → `articles/createarticle`
+- [x] Update/UpdateRaw → `articles/updatearticle`
+- [x] Delete/DeleteRaw → `articles/deletearticle`
+- [x] Search/SearchRaw → `articles/searcharticles`
 
 ### Task 5: Add doc URLs to away_status_reasons.go
 - [ ] List/ListRaw → `away-status-reasons/listawaystatusreasons`

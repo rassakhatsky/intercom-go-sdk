@@ -198,6 +198,8 @@ func ParseArticleSearchResult(r *Result) (*ArticleSearchResponse, error) {
 // --- Regular Methods ---
 
 // Get retrieves an article by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/retrievearticle
 func (s *ArticlesService) Get(ctx context.Context, id string) (*Article, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -210,6 +212,8 @@ func (s *ArticlesService) Get(ctx context.Context, id string) (*Article, error) 
 }
 
 // List returns a single page of articles.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/listarticles
 func (s *ArticlesService) List(ctx context.Context, opts *ListOptions) (*PagedResult[Article], error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
@@ -227,6 +231,8 @@ func (s *ArticlesService) ListAll(ctx context.Context, opts *ListOptions) *Iter[
 }
 
 // Create creates a new article.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/createarticle
 func (s *ArticlesService) Create(ctx context.Context, body *CreateArticleRequest) (*Article, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
@@ -239,6 +245,8 @@ func (s *ArticlesService) Create(ctx context.Context, body *CreateArticleRequest
 }
 
 // Update updates an existing article by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/updatearticle
 func (s *ArticlesService) Update(ctx context.Context, id string, body *UpdateArticleRequest) (*Article, error) {
 	result, err := s.UpdateRaw(ctx, id, body)
 	if err != nil {
@@ -251,6 +259,8 @@ func (s *ArticlesService) Update(ctx context.Context, id string, body *UpdateArt
 }
 
 // Delete deletes an article by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/deletearticle
 func (s *ArticlesService) Delete(ctx context.Context, id string) (*ArticleDeleted, error) {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
@@ -263,6 +273,8 @@ func (s *ArticlesService) Delete(ctx context.Context, id string) (*ArticleDelete
 }
 
 // Search searches for articles using query parameters.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/searcharticles
 func (s *ArticlesService) Search(ctx context.Context, opts *ArticleSearchOptions) (*ArticleSearchResponse, error) {
 	result, err := s.SearchRaw(ctx, opts)
 	if err != nil {
@@ -277,6 +289,8 @@ func (s *ArticlesService) Search(ctx context.Context, opts *ArticleSearchOptions
 // --- Raw Methods ---
 
 // GetRaw retrieves an article by ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/retrievearticle
 func (s *ArticlesService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("articles/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -286,6 +300,8 @@ func (s *ArticlesService) GetRaw(ctx context.Context, id string) (*Result, error
 }
 
 // ListRaw returns a single page of articles with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/listarticles
 func (s *ArticlesService) ListRaw(ctx context.Context, opts *ListOptions) (*Result, error) {
 	path, err := addQueryOptions("articles", opts)
 	if err != nil {
@@ -299,6 +315,8 @@ func (s *ArticlesService) ListRaw(ctx context.Context, opts *ListOptions) (*Resu
 }
 
 // CreateRaw creates a new article and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/createarticle
 func (s *ArticlesService) CreateRaw(ctx context.Context, body *CreateArticleRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "articles", body)
 	if err != nil {
@@ -308,6 +326,8 @@ func (s *ArticlesService) CreateRaw(ctx context.Context, body *CreateArticleRequ
 }
 
 // UpdateRaw updates an existing article by ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/updatearticle
 func (s *ArticlesService) UpdateRaw(ctx context.Context, id string, body *UpdateArticleRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("articles/%s", url.PathEscape(id)), body)
 	if err != nil {
@@ -317,6 +337,8 @@ func (s *ArticlesService) UpdateRaw(ctx context.Context, id string, body *Update
 }
 
 // DeleteRaw deletes an article by ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/deletearticle
 func (s *ArticlesService) DeleteRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("articles/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -326,6 +348,8 @@ func (s *ArticlesService) DeleteRaw(ctx context.Context, id string) (*Result, er
 }
 
 // SearchRaw searches for articles using query parameters and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/searcharticles
 func (s *ArticlesService) SearchRaw(ctx context.Context, opts *ArticleSearchOptions) (*Result, error) {
 	path, err := addQueryOptions("articles/search", opts)
 	if err != nil {
