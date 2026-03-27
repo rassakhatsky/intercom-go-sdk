@@ -38,9 +38,9 @@
 ## Implementation Steps
 
 ### Task 1: Add google/go-querystring dependency
-- [ ] run `go get github.com/google/go-querystring`
-- [ ] verify `go.mod` and `go.sum` are updated
-- [ ] run `go vet ./...` — must pass
+- [x] run `go get github.com/google/go-querystring`
+- [x] verify `go.mod` and `go.sum` are updated
+- [x] run `go vet ./...` — must pass
 
 ### Task 2: Replace addQueryOptions internals
 - [ ] import `github.com/google/go-querystring/query` in `intercom.go`
