@@ -208,12 +208,12 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] Create/CreateRaw → `messages/createmessage`
 
 ### Task 24: Add doc URLs to news.go
-- [ ] ListNewsItems/ListNewsItemsRaw → `news/listnewsitems`
-- [ ] GetNewsItem/GetNewsItemRaw → `news/retrievenewsitem`
-- [ ] CreateNewsItem/CreateNewsItemRaw → `news/createnewsitem`
-- [ ] UpdateNewsItem/UpdateNewsItemRaw → `news/updatenewsitem`
-- [ ] DeleteNewsItem/DeleteNewsItemRaw → `news/deletenewsitem`
-- [ ] ListNewsfeeds/ListNewsfeedsRaw → `news/listnewsfeeds`
+- [x] ListNewsItems/ListNewsItemsRaw → `news/listnewsitems`
+- [x] GetNewsItem/GetNewsItemRaw → `news/retrievenewsitem`
+- [x] CreateNewsItem/CreateNewsItemRaw → `news/createnewsitem`
+- [x] UpdateNewsItem/UpdateNewsItemRaw → `news/updatenewsitem`
+- [x] DeleteNewsItem/DeleteNewsItemRaw → `news/deletenewsitem`
+- [x] ListNewsfeeds/ListNewsfeedsRaw → `news/listnewsfeeds`
 
 ### Task 25: Add doc URLs to notes.go
 - [ ] Get/GetRaw → `notes/retrievenote`

@@ -120,6 +120,8 @@ func ParseNewsListNewsfeedItemsResult(r *Result) (*PagedResult[NewsItem], error)
 // --- Regular Methods ---
 
 // ListNewsItems returns a single page of news items.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/listnewsitems
 func (s *NewsService) ListNewsItems(ctx context.Context, opts *ListOptions) (*PagedResult[NewsItem], error) {
 	result, err := s.ListNewsItemsRaw(ctx, opts)
 	if err != nil {
@@ -132,6 +134,8 @@ func (s *NewsService) ListNewsItems(ctx context.Context, opts *ListOptions) (*Pa
 }
 
 // GetNewsItem retrieves a news item by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/retrievenewsitem
 func (s *NewsService) GetNewsItem(ctx context.Context, id string) (*NewsItem, error) {
 	result, err := s.GetNewsItemRaw(ctx, id)
 	if err != nil {
@@ -144,6 +148,8 @@ func (s *NewsService) GetNewsItem(ctx context.Context, id string) (*NewsItem, er
 }
 
 // CreateNewsItem creates a new news item.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/createnewsitem
 func (s *NewsService) CreateNewsItem(ctx context.Context, body *CreateNewsItemRequest) (*NewsItem, error) {
 	result, err := s.CreateNewsItemRaw(ctx, body)
 	if err != nil {
@@ -156,6 +162,8 @@ func (s *NewsService) CreateNewsItem(ctx context.Context, body *CreateNewsItemRe
 }
 
 // UpdateNewsItem updates an existing news item by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/updatenewsitem
 func (s *NewsService) UpdateNewsItem(ctx context.Context, id string, body *UpdateNewsItemRequest) (*NewsItem, error) {
 	result, err := s.UpdateNewsItemRaw(ctx, id, body)
 	if err != nil {
@@ -168,6 +176,8 @@ func (s *NewsService) UpdateNewsItem(ctx context.Context, id string, body *Updat
 }
 
 // DeleteNewsItem deletes a news item by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/deletenewsitem
 func (s *NewsService) DeleteNewsItem(ctx context.Context, id string) (*NewsItemDeleted, error) {
 	result, err := s.DeleteNewsItemRaw(ctx, id)
 	if err != nil {
@@ -180,6 +190,8 @@ func (s *NewsService) DeleteNewsItem(ctx context.Context, id string) (*NewsItemD
 }
 
 // ListNewsfeeds returns a single page of newsfeeds.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/listnewsfeeds
 func (s *NewsService) ListNewsfeeds(ctx context.Context, opts *ListOptions) (*PagedResult[Newsfeed], error) {
 	result, err := s.ListNewsfeedsRaw(ctx, opts)
 	if err != nil {
@@ -192,6 +204,8 @@ func (s *NewsService) ListNewsfeeds(ctx context.Context, opts *ListOptions) (*Pa
 }
 
 // GetNewsfeed retrieves a newsfeed by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/retrievenewsfeed
 func (s *NewsService) GetNewsfeed(ctx context.Context, id string) (*Newsfeed, error) {
 	result, err := s.GetNewsfeedRaw(ctx, id)
 	if err != nil {
@@ -204,6 +218,8 @@ func (s *NewsService) GetNewsfeed(ctx context.Context, id string) (*Newsfeed, er
 }
 
 // ListNewsfeedItems returns a single page of live news items for a specific newsfeed.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/listnewsfeeditems
 func (s *NewsService) ListNewsfeedItems(ctx context.Context, newsfeedID string, opts *ListOptions) (*PagedResult[NewsItem], error) {
 	result, err := s.ListNewsfeedItemsRaw(ctx, newsfeedID, opts)
 	if err != nil {
@@ -218,6 +234,8 @@ func (s *NewsService) ListNewsfeedItems(ctx context.Context, newsfeedID string, 
 // --- Raw Methods ---
 
 // ListNewsItemsRaw returns a single page of news items with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/listnewsitems
 func (s *NewsService) ListNewsItemsRaw(ctx context.Context, opts *ListOptions) (*Result, error) {
 	path, err := addQueryOptions("news/news_items", opts)
 	if err != nil {
@@ -231,6 +249,8 @@ func (s *NewsService) ListNewsItemsRaw(ctx context.Context, opts *ListOptions) (
 }
 
 // GetNewsItemRaw retrieves a news item by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/retrievenewsitem
 func (s *NewsService) GetNewsItemRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("news/news_items/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -240,6 +260,8 @@ func (s *NewsService) GetNewsItemRaw(ctx context.Context, id string) (*Result, e
 }
 
 // CreateNewsItemRaw creates a new news item with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/createnewsitem
 func (s *NewsService) CreateNewsItemRaw(ctx context.Context, body *CreateNewsItemRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "news/news_items", body)
 	if err != nil {
@@ -249,6 +271,8 @@ func (s *NewsService) CreateNewsItemRaw(ctx context.Context, body *CreateNewsIte
 }
 
 // UpdateNewsItemRaw updates an existing news item by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/updatenewsitem
 func (s *NewsService) UpdateNewsItemRaw(ctx context.Context, id string, body *UpdateNewsItemRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("news/news_items/%s", url.PathEscape(id)), body)
 	if err != nil {
@@ -258,6 +282,8 @@ func (s *NewsService) UpdateNewsItemRaw(ctx context.Context, id string, body *Up
 }
 
 // DeleteNewsItemRaw deletes a news item by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/deletenewsitem
 func (s *NewsService) DeleteNewsItemRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("news/news_items/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -267,6 +293,8 @@ func (s *NewsService) DeleteNewsItemRaw(ctx context.Context, id string) (*Result
 }
 
 // ListNewsfeedsRaw returns a single page of newsfeeds with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/listnewsfeeds
 func (s *NewsService) ListNewsfeedsRaw(ctx context.Context, opts *ListOptions) (*Result, error) {
 	path, err := addQueryOptions("news/newsfeeds", opts)
 	if err != nil {
@@ -280,6 +308,8 @@ func (s *NewsService) ListNewsfeedsRaw(ctx context.Context, opts *ListOptions) (
 }
 
 // GetNewsfeedRaw retrieves a newsfeed by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/retrievenewsfeed
 func (s *NewsService) GetNewsfeedRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("news/newsfeeds/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -289,6 +319,8 @@ func (s *NewsService) GetNewsfeedRaw(ctx context.Context, id string) (*Result, e
 }
 
 // ListNewsfeedItemsRaw returns a single page of live news items for a specific newsfeed with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/news/listnewsfeeditems
 func (s *NewsService) ListNewsfeedItemsRaw(ctx context.Context, newsfeedID string, opts *ListOptions) (*Result, error) {
 	path, err := addQueryOptions(fmt.Sprintf("news/newsfeeds/%s/items", url.PathEscape(newsfeedID)), opts)
 	if err != nil {
