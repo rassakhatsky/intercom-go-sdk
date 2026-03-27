@@ -35,6 +35,8 @@ func ParseAwayStatusReasonListResult(r *Result) ([]AwayStatusReason, error) {
 // --- Regular Methods ---
 
 // List returns all away status reasons (including deleted ones).
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/away-status-reasons/listawaystatusreasons
 func (s *AwayStatusReasonsService) List(ctx context.Context) ([]AwayStatusReason, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
@@ -49,6 +51,8 @@ func (s *AwayStatusReasonsService) List(ctx context.Context) ([]AwayStatusReason
 // --- Raw Methods ---
 
 // ListRaw returns all away status reasons with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/away-status-reasons/listawaystatusreasons
 func (s *AwayStatusReasonsService) ListRaw(ctx context.Context) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "away_status_reasons", nil)
 	if err != nil {
