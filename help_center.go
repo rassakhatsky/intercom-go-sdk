@@ -113,6 +113,8 @@ func ParseHelpCenterGetHelpCenterResult(r *Result) (*HelpCenter, error) {
 // --- Regular Methods ---
 
 // ListCollections returns a single page of collections.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/listallcollections
 func (s *HelpCenterService) ListCollections(ctx context.Context, opts *ListOptions) (*PagedResult[Collection], error) {
 	result, err := s.ListCollectionsRaw(ctx, opts)
 	if err != nil {
@@ -125,6 +127,8 @@ func (s *HelpCenterService) ListCollections(ctx context.Context, opts *ListOptio
 }
 
 // GetCollection retrieves a collection by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/retrievecollection
 func (s *HelpCenterService) GetCollection(ctx context.Context, id string) (*Collection, error) {
 	result, err := s.GetCollectionRaw(ctx, id)
 	if err != nil {
@@ -137,6 +141,8 @@ func (s *HelpCenterService) GetCollection(ctx context.Context, id string) (*Coll
 }
 
 // CreateCollection creates a new collection.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/createcollection
 func (s *HelpCenterService) CreateCollection(ctx context.Context, body *CreateCollectionRequest) (*Collection, error) {
 	result, err := s.CreateCollectionRaw(ctx, body)
 	if err != nil {
@@ -149,6 +155,8 @@ func (s *HelpCenterService) CreateCollection(ctx context.Context, body *CreateCo
 }
 
 // UpdateCollection updates an existing collection by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/updatecollection
 func (s *HelpCenterService) UpdateCollection(ctx context.Context, id string, body *UpdateCollectionRequest) (*Collection, error) {
 	result, err := s.UpdateCollectionRaw(ctx, id, body)
 	if err != nil {
@@ -161,6 +169,8 @@ func (s *HelpCenterService) UpdateCollection(ctx context.Context, id string, bod
 }
 
 // DeleteCollection deletes a collection by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/deletecollection
 func (s *HelpCenterService) DeleteCollection(ctx context.Context, id string) (*CollectionDeleted, error) {
 	result, err := s.DeleteCollectionRaw(ctx, id)
 	if err != nil {
@@ -173,6 +183,8 @@ func (s *HelpCenterService) DeleteCollection(ctx context.Context, id string) (*C
 }
 
 // ListHelpCenters returns all help centers.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/listhelpcenters
 func (s *HelpCenterService) ListHelpCenters(ctx context.Context) (*HelpCenterList, error) {
 	result, err := s.ListHelpCentersRaw(ctx)
 	if err != nil {
@@ -185,6 +197,8 @@ func (s *HelpCenterService) ListHelpCenters(ctx context.Context) (*HelpCenterLis
 }
 
 // GetHelpCenter retrieves a help center by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/retrievehelpcenter
 func (s *HelpCenterService) GetHelpCenter(ctx context.Context, id string) (*HelpCenter, error) {
 	result, err := s.GetHelpCenterRaw(ctx, id)
 	if err != nil {
@@ -199,6 +213,8 @@ func (s *HelpCenterService) GetHelpCenter(ctx context.Context, id string) (*Help
 // --- Raw Methods ---
 
 // ListCollectionsRaw returns a single page of collections with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/listallcollections
 func (s *HelpCenterService) ListCollectionsRaw(ctx context.Context, opts *ListOptions) (*Result, error) {
 	path, err := addQueryOptions("help_center/collections", opts)
 	if err != nil {
@@ -212,6 +228,8 @@ func (s *HelpCenterService) ListCollectionsRaw(ctx context.Context, opts *ListOp
 }
 
 // GetCollectionRaw retrieves a collection by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/retrievecollection
 func (s *HelpCenterService) GetCollectionRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("help_center/collections/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -221,6 +239,8 @@ func (s *HelpCenterService) GetCollectionRaw(ctx context.Context, id string) (*R
 }
 
 // CreateCollectionRaw creates a new collection with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/createcollection
 func (s *HelpCenterService) CreateCollectionRaw(ctx context.Context, body *CreateCollectionRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "help_center/collections", body)
 	if err != nil {
@@ -230,6 +250,8 @@ func (s *HelpCenterService) CreateCollectionRaw(ctx context.Context, body *Creat
 }
 
 // UpdateCollectionRaw updates an existing collection by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/updatecollection
 func (s *HelpCenterService) UpdateCollectionRaw(ctx context.Context, id string, body *UpdateCollectionRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("help_center/collections/%s", url.PathEscape(id)), body)
 	if err != nil {
@@ -239,6 +261,8 @@ func (s *HelpCenterService) UpdateCollectionRaw(ctx context.Context, id string, 
 }
 
 // DeleteCollectionRaw deletes a collection by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/deletecollection
 func (s *HelpCenterService) DeleteCollectionRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("help_center/collections/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -248,6 +272,8 @@ func (s *HelpCenterService) DeleteCollectionRaw(ctx context.Context, id string) 
 }
 
 // ListHelpCentersRaw returns all help centers with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/listhelpcenters
 func (s *HelpCenterService) ListHelpCentersRaw(ctx context.Context) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "help_center/help_centers", nil)
 	if err != nil {
@@ -257,6 +283,8 @@ func (s *HelpCenterService) ListHelpCentersRaw(ctx context.Context) (*Result, er
 }
 
 // GetHelpCenterRaw retrieves a help center by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/retrievehelpcenter
 func (s *HelpCenterService) GetHelpCenterRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("help_center/help_centers/%s", url.PathEscape(id)), nil)
 	if err != nil {

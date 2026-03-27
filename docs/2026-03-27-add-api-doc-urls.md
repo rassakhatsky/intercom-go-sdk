@@ -181,13 +181,13 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] GetByPhoneNumber/GetByPhoneNumberRaw → `calls/collectfinvoicecallbyphonenumber`
 
 ### Task 19: Add doc URLs to help_center.go
-- [ ] ListCollections/ListCollectionsRaw → `help-center/listallcollections`
-- [ ] GetCollection/GetCollectionRaw → `help-center/retrievecollection`
-- [ ] CreateCollection/CreateCollectionRaw → `help-center/createcollection`
-- [ ] UpdateCollection/UpdateCollectionRaw → `help-center/updatecollection`
-- [ ] DeleteCollection/DeleteCollectionRaw → `help-center/deletecollection`
-- [ ] ListHelpCenters/ListHelpCentersRaw → `help-center/listhelpcenters`
-- [ ] GetHelpCenter/GetHelpCenterRaw → `help-center/retrievehelpcenter`
+- [x] ListCollections/ListCollectionsRaw → `help-center/listallcollections`
+- [x] GetCollection/GetCollectionRaw → `help-center/retrievecollection`
+- [x] CreateCollection/CreateCollectionRaw → `help-center/createcollection`
+- [x] UpdateCollection/UpdateCollectionRaw → `help-center/updatecollection`
+- [x] DeleteCollection/DeleteCollectionRaw → `help-center/deletecollection`
+- [x] ListHelpCenters/ListHelpCentersRaw → `help-center/listhelpcenters`
+- [x] GetHelpCenter/GetHelpCenterRaw → `help-center/retrievehelpcenter`
 
 ### Task 20: Add doc URLs to internal_articles.go
 - [ ] Get/GetRaw → `internal-articles/retrieveinternalarticle`
