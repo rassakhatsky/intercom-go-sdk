@@ -92,6 +92,8 @@ func ParseTagUntagCompanyResult(r *Result) (*Tag, error) {
 // --- Regular Methods ---
 
 // Get retrieves a tag by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/findtag
 func (s *TagsService) Get(ctx context.Context, id string) (*Tag, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -104,6 +106,8 @@ func (s *TagsService) Get(ctx context.Context, id string) (*Tag, error) {
 }
 
 // List returns all tags in the workspace.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/listtags
 func (s *TagsService) List(ctx context.Context) (*TagList, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
@@ -117,6 +121,8 @@ func (s *TagsService) List(ctx context.Context) (*TagList, error) {
 
 // CreateOrUpdate creates a new tag or updates an existing one.
 // To update, include the ID field in the request.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/createtag
 func (s *TagsService) CreateOrUpdate(ctx context.Context, body *CreateOrUpdateTagRequest) (*Tag, error) {
 	result, err := s.CreateOrUpdateRaw(ctx, body)
 	if err != nil {
@@ -129,6 +135,8 @@ func (s *TagsService) CreateOrUpdate(ctx context.Context, body *CreateOrUpdateTa
 }
 
 // Delete deletes a tag by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/deletetag
 func (s *TagsService) Delete(ctx context.Context, id string) error {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
@@ -142,6 +150,8 @@ func (s *TagsService) Delete(ctx context.Context, id string) error {
 
 // TagCompany tags one or more companies with a tag.
 // The tag will be created if it doesn't already exist.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/createtag
 func (s *TagsService) TagCompany(ctx context.Context, body *TagCompanyRequest) (*Tag, error) {
 	result, err := s.TagCompanyRaw(ctx, body)
 	if err != nil {
@@ -154,6 +164,8 @@ func (s *TagsService) TagCompany(ctx context.Context, body *TagCompanyRequest) (
 }
 
 // UntagCompany removes a tag from one or more companies.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/createtag
 func (s *TagsService) UntagCompany(ctx context.Context, body *UntagCompanyRequest) (*Tag, error) {
 	result, err := s.UntagCompanyRaw(ctx, body)
 	if err != nil {
@@ -168,6 +180,8 @@ func (s *TagsService) UntagCompany(ctx context.Context, body *UntagCompanyReques
 // --- Raw Methods ---
 
 // GetRaw retrieves a tag by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/findtag
 func (s *TagsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("tags/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -177,6 +191,8 @@ func (s *TagsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 }
 
 // ListRaw returns all tags with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/listtags
 func (s *TagsService) ListRaw(ctx context.Context) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "tags", nil)
 	if err != nil {
@@ -186,6 +202,8 @@ func (s *TagsService) ListRaw(ctx context.Context) (*Result, error) {
 }
 
 // CreateOrUpdateRaw creates or updates a tag with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/createtag
 func (s *TagsService) CreateOrUpdateRaw(ctx context.Context, body *CreateOrUpdateTagRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "tags", body)
 	if err != nil {
@@ -195,6 +213,8 @@ func (s *TagsService) CreateOrUpdateRaw(ctx context.Context, body *CreateOrUpdat
 }
 
 // DeleteRaw deletes a tag by ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/deletetag
 func (s *TagsService) DeleteRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("tags/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -204,6 +224,8 @@ func (s *TagsService) DeleteRaw(ctx context.Context, id string) (*Result, error)
 }
 
 // TagCompanyRaw tags companies with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/createtag
 func (s *TagsService) TagCompanyRaw(ctx context.Context, body *TagCompanyRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "tags", body)
 	if err != nil {
@@ -213,6 +235,8 @@ func (s *TagsService) TagCompanyRaw(ctx context.Context, body *TagCompanyRequest
 }
 
 // UntagCompanyRaw untags companies with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/createtag
 func (s *TagsService) UntagCompanyRaw(ctx context.Context, body *UntagCompanyRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "tags", body)
 	if err != nil {

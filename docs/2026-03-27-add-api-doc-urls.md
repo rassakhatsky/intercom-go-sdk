@@ -229,12 +229,12 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] List/ListRaw → `subscription-types/listsubscriptiontypes`
 
 ### Task 29: Add doc URLs to tags.go
-- [ ] Get/GetRaw → `tags/findtag`
-- [ ] List/ListRaw → `tags/listtags`
-- [ ] CreateOrUpdate/CreateOrUpdateRaw → `tags/createtag`
-- [ ] Delete/DeleteRaw → `tags/deletetag`
-- [ ] TagCompany/TagCompanyRaw → `tags/createtag`
-- [ ] UntagCompany/UntagCompanyRaw → `tags/createtag`
+- [x] Get/GetRaw → `tags/findtag`
+- [x] List/ListRaw → `tags/listtags`
+- [x] CreateOrUpdate/CreateOrUpdateRaw → `tags/createtag`
+- [x] Delete/DeleteRaw → `tags/deletetag`
+- [x] TagCompany/TagCompanyRaw → `tags/createtag`
+- [x] UntagCompany/UntagCompanyRaw → `tags/createtag`
 
 ### Task 30: Add doc URLs to teams.go
 - [ ] Get/GetRaw → `teams/retrieveteam`
