@@ -86,6 +86,8 @@ func ParseDataAttributeUpdateResult(r *Result) (*DataAttribute, error) {
 // --- Regular Methods ---
 
 // List returns all data attributes for the workspace.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/lisdataattributes
 func (s *DataAttributesService) List(ctx context.Context, opts *ListDataAttributesOptions) (*DataAttributeList, error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
@@ -98,6 +100,8 @@ func (s *DataAttributesService) List(ctx context.Context, opts *ListDataAttribut
 }
 
 // Create creates a new data attribute.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/createdataattribute
 func (s *DataAttributesService) Create(ctx context.Context, body *CreateDataAttributeRequest) (*DataAttribute, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
@@ -110,6 +114,8 @@ func (s *DataAttributesService) Create(ctx context.Context, body *CreateDataAttr
 }
 
 // Update updates a data attribute by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/updatedataattribute
 func (s *DataAttributesService) Update(ctx context.Context, id int, body *UpdateDataAttributeRequest) (*DataAttribute, error) {
 	result, err := s.UpdateRaw(ctx, id, body)
 	if err != nil {
@@ -124,6 +130,8 @@ func (s *DataAttributesService) Update(ctx context.Context, id int, body *Update
 // --- Raw Methods ---
 
 // ListRaw returns all data attributes for the workspace with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/lisdataattributes
 func (s *DataAttributesService) ListRaw(ctx context.Context, opts *ListDataAttributesOptions) (*Result, error) {
 	path, err := addQueryOptions("data_attributes", opts)
 	if err != nil {
@@ -137,6 +145,8 @@ func (s *DataAttributesService) ListRaw(ctx context.Context, opts *ListDataAttri
 }
 
 // CreateRaw creates a new data attribute with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/createdataattribute
 func (s *DataAttributesService) CreateRaw(ctx context.Context, body *CreateDataAttributeRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "data_attributes", body)
 	if err != nil {
@@ -146,6 +156,8 @@ func (s *DataAttributesService) CreateRaw(ctx context.Context, body *CreateDataA
 }
 
 // UpdateRaw updates a data attribute by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/updatedataattribute
 func (s *DataAttributesService) UpdateRaw(ctx context.Context, id int, body *UpdateDataAttributeRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("data_attributes/%d", id), body)
 	if err != nil {

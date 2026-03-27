@@ -149,9 +149,9 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] DeleteByExternalID/DeleteByExternalIDRaw → `custom-object-instances/deletecustomobjectinstancesbyid`
 
 ### Task 13: Add doc URLs to data_attributes.go
-- [ ] List/ListRaw → `data-attributes/lisdataattributes`
-- [ ] Create/CreateRaw → `data-attributes/createdataattribute`
-- [ ] Update/UpdateRaw → `data-attributes/updatedataattribute`
+- [x] List/ListRaw → `data-attributes/lisdataattributes`
+- [x] Create/CreateRaw → `data-attributes/createdataattribute`
+- [x] Update/UpdateRaw → `data-attributes/updatedataattribute`
 
 ### Task 14: Add doc URLs to data_events.go
 - [ ] Create/CreateRaw → `data-events/createdataevent`
