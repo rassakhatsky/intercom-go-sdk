@@ -108,6 +108,8 @@ func ParseAdminListActivityLogsResult(r *Result) (*ActivityLogList, error) {
 }
 
 // Me returns the currently authenticated admin along with the app.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/identifyadmin
 func (s *AdminsService) Me(ctx context.Context) (*Admin, error) {
 	result, err := s.MeRaw(ctx)
 	if err != nil {
@@ -120,6 +122,8 @@ func (s *AdminsService) Me(ctx context.Context) (*Admin, error) {
 }
 
 // Get retrieves an admin by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/retrieveadmin
 func (s *AdminsService) Get(ctx context.Context, id string) (*Admin, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -132,6 +136,8 @@ func (s *AdminsService) Get(ctx context.Context, id string) (*Admin, error) {
 }
 
 // List returns all admins for the workspace.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/listadmins
 func (s *AdminsService) List(ctx context.Context) (*AdminList, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
@@ -144,6 +150,8 @@ func (s *AdminsService) List(ctx context.Context) (*AdminList, error) {
 }
 
 // SetAway sets an admin's away status.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/setawayadmin
 func (s *AdminsService) SetAway(ctx context.Context, id string, body *SetAwayRequest) (*Admin, error) {
 	result, err := s.SetAwayRaw(ctx, id, body)
 	if err != nil {
@@ -156,6 +164,8 @@ func (s *AdminsService) SetAway(ctx context.Context, id string, body *SetAwayReq
 }
 
 // ListActivityLogs returns activity logs for the workspace.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/listactivitylogs
 func (s *AdminsService) ListActivityLogs(ctx context.Context, opts *ActivityLogListOptions) (*ActivityLogList, error) {
 	result, err := s.ListActivityLogsRaw(ctx, opts)
 	if err != nil {
@@ -168,6 +178,8 @@ func (s *AdminsService) ListActivityLogs(ctx context.Context, opts *ActivityLogL
 }
 
 // MeRaw returns the currently authenticated admin with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/identifyadmin
 func (s *AdminsService) MeRaw(ctx context.Context) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "me", nil)
 	if err != nil {
@@ -177,6 +189,8 @@ func (s *AdminsService) MeRaw(ctx context.Context) (*Result, error) {
 }
 
 // GetRaw retrieves an admin by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/retrieveadmin
 func (s *AdminsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("admins/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -186,6 +200,8 @@ func (s *AdminsService) GetRaw(ctx context.Context, id string) (*Result, error) 
 }
 
 // ListRaw returns all admins for the workspace with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/listadmins
 func (s *AdminsService) ListRaw(ctx context.Context) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "admins", nil)
 	if err != nil {
@@ -195,6 +211,8 @@ func (s *AdminsService) ListRaw(ctx context.Context) (*Result, error) {
 }
 
 // SetAwayRaw sets an admin's away status with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/setawayadmin
 func (s *AdminsService) SetAwayRaw(ctx context.Context, id string, body *SetAwayRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("admins/%s/away", url.PathEscape(id)), body)
 	if err != nil {
@@ -204,6 +222,8 @@ func (s *AdminsService) SetAwayRaw(ctx context.Context, id string, body *SetAway
 }
 
 // ListActivityLogsRaw returns activity logs for the workspace with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/listactivitylogs
 func (s *AdminsService) ListActivityLogsRaw(ctx context.Context, opts *ActivityLogListOptions) (*Result, error) {
 	path, err := addQueryOptions("admins/activity_logs", opts)
 	if err != nil {

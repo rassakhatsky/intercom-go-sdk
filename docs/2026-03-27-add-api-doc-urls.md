@@ -40,11 +40,11 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] Run `go vet ./...` and `go test ./...`
 
 ### Task 2: Add doc URLs to admins.go
-- [ ] Me/MeRaw → `admins/identifyadmin`
-- [ ] Get/GetRaw → `admins/retrieveadmin`
-- [ ] List/ListRaw → `admins/listadmins`
-- [ ] SetAway/SetAwayRaw → `admins/setawayadmin`
-- [ ] ListActivityLogs/ListActivityLogsRaw → `admins/listactivitylogs`
+- [x] Me/MeRaw → `admins/identifyadmin`
+- [x] Get/GetRaw → `admins/retrieveadmin`
+- [x] List/ListRaw → `admins/listadmins`
+- [x] SetAway/SetAwayRaw → `admins/setawayadmin`
+- [x] ListActivityLogs/ListActivityLogsRaw → `admins/listactivitylogs`
 
 ### Task 3: Add doc URLs to ai_content.go
 - [ ] ListContentImportSources/Raw → `ai-content/listcontentimportsources`
