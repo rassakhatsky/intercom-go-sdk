@@ -136,10 +136,10 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] RemoveTag/RemoveTagRaw → `conversations/detachtagfromconversation`
 
 ### Task 11: Add doc URLs to custom_channel_events.go
-- [ ] NotifyNewConversation/Raw → `custom-channel-events/notifynewconversation`
-- [ ] NotifyNewMessage/Raw → `custom-channel-events/notifynewmessage`
-- [ ] NotifyQuickReply/Raw → `custom-channel-events/notifyquickreplyselected`
-- [ ] NotifyAttributeCollected/Raw → `custom-channel-events/notifyattributecollected`
+- [x] NotifyNewConversation/Raw → `custom-channel-events/notifynewconversation`
+- [x] NotifyNewMessage/Raw → `custom-channel-events/notifynewmessage`
+- [x] NotifyQuickReply/Raw → `custom-channel-events/notifyquickreplyselected`
+- [x] NotifyAttributeCollected/Raw → `custom-channel-events/notifyattributecollected`
 
 ### Task 12: Add doc URLs to custom_objects.go
 - [ ] Get/GetRaw → `custom-object-instances/getcustomobjectinstancesbyid`

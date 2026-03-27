@@ -81,6 +81,8 @@ func ParseCustomChannelEventNotifyAttributeCollectedResult(r *Result) (*CustomCh
 // --- Regular Methods ---
 
 // NotifyNewConversation notifies Intercom of a new conversation on a custom channel.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-channel-events/notifynewconversation
 func (s *CustomChannelEventsService) NotifyNewConversation(ctx context.Context, event *CustomChannelBaseEvent) (*CustomChannelNotificationResponse, error) {
 	result, err := s.NotifyNewConversationRaw(ctx, event)
 	if err != nil {
@@ -93,6 +95,8 @@ func (s *CustomChannelEventsService) NotifyNewConversation(ctx context.Context, 
 }
 
 // NotifyNewMessage notifies Intercom of a new message on a custom channel.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-channel-events/notifynewmessage
 func (s *CustomChannelEventsService) NotifyNewMessage(ctx context.Context, event *CustomChannelMessageEvent) (*CustomChannelNotificationResponse, error) {
 	result, err := s.NotifyNewMessageRaw(ctx, event)
 	if err != nil {
@@ -105,6 +109,8 @@ func (s *CustomChannelEventsService) NotifyNewMessage(ctx context.Context, event
 }
 
 // NotifyQuickReply notifies Intercom of a quick reply selection on a custom channel.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-channel-events/notifyquickreplyselected
 func (s *CustomChannelEventsService) NotifyQuickReply(ctx context.Context, event *CustomChannelQuickReplyEvent) (*CustomChannelNotificationResponse, error) {
 	result, err := s.NotifyQuickReplyRaw(ctx, event)
 	if err != nil {
@@ -117,6 +123,8 @@ func (s *CustomChannelEventsService) NotifyQuickReply(ctx context.Context, event
 }
 
 // NotifyAttributeCollected notifies Intercom of an attribute collected on a custom channel.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-channel-events/notifyattributecollected
 func (s *CustomChannelEventsService) NotifyAttributeCollected(ctx context.Context, event *CustomChannelAttributeEvent) (*CustomChannelNotificationResponse, error) {
 	result, err := s.NotifyAttributeCollectedRaw(ctx, event)
 	if err != nil {
@@ -131,6 +139,8 @@ func (s *CustomChannelEventsService) NotifyAttributeCollected(ctx context.Contex
 // --- Raw Methods ---
 
 // NotifyNewConversationRaw notifies Intercom of a new conversation on a custom channel with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-channel-events/notifynewconversation
 func (s *CustomChannelEventsService) NotifyNewConversationRaw(ctx context.Context, event *CustomChannelBaseEvent) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "custom_channel_events/notify_new_conversation", event)
 	if err != nil {
@@ -140,6 +150,8 @@ func (s *CustomChannelEventsService) NotifyNewConversationRaw(ctx context.Contex
 }
 
 // NotifyNewMessageRaw notifies Intercom of a new message on a custom channel with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-channel-events/notifynewmessage
 func (s *CustomChannelEventsService) NotifyNewMessageRaw(ctx context.Context, event *CustomChannelMessageEvent) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "custom_channel_events/notify_new_message", event)
 	if err != nil {
@@ -149,6 +161,8 @@ func (s *CustomChannelEventsService) NotifyNewMessageRaw(ctx context.Context, ev
 }
 
 // NotifyQuickReplyRaw notifies Intercom of a quick reply selection on a custom channel with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-channel-events/notifyquickreplyselected
 func (s *CustomChannelEventsService) NotifyQuickReplyRaw(ctx context.Context, event *CustomChannelQuickReplyEvent) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "custom_channel_events/notify_quick_reply_selected", event)
 	if err != nil {
@@ -158,6 +172,8 @@ func (s *CustomChannelEventsService) NotifyQuickReplyRaw(ctx context.Context, ev
 }
 
 // NotifyAttributeCollectedRaw notifies Intercom of an attribute collected on a custom channel with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-channel-events/notifyattributecollected
 func (s *CustomChannelEventsService) NotifyAttributeCollectedRaw(ctx context.Context, event *CustomChannelAttributeEvent) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "custom_channel_events/notify_attribute_collected", event)
 	if err != nil {
