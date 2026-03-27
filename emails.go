@@ -46,6 +46,8 @@ func ParseEmailListResult(r *Result) (*EmailSettingList, error) {
 // --- Regular Methods ---
 
 // Get retrieves an email setting by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/emails/retrieveemail
 func (s *EmailsService) Get(ctx context.Context, id string) (*EmailSetting, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -58,6 +60,8 @@ func (s *EmailsService) Get(ctx context.Context, id string) (*EmailSetting, erro
 }
 
 // List returns all email settings.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/emails/listemails
 func (s *EmailsService) List(ctx context.Context) (*EmailSettingList, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
@@ -72,6 +76,8 @@ func (s *EmailsService) List(ctx context.Context) (*EmailSettingList, error) {
 // --- Raw Methods ---
 
 // GetRaw retrieves an email setting by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/emails/retrieveemail
 func (s *EmailsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("emails/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -81,6 +87,8 @@ func (s *EmailsService) GetRaw(ctx context.Context, id string) (*Result, error) 
 }
 
 // ListRaw returns all email settings with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/emails/listemails
 func (s *EmailsService) ListRaw(ctx context.Context) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "emails", nil)
 	if err != nil {

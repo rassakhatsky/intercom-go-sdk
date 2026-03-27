@@ -164,8 +164,8 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] Cancel/CancelRaw → `data-export/canceldataexport`
 
 ### Task 16: Add doc URLs to emails.go
-- [ ] Get/GetRaw → `emails/retrieveemail`
-- [ ] List/ListRaw → `emails/listemails`
+- [x] Get/GetRaw → `emails/retrieveemail`
+- [x] List/ListRaw → `emails/listemails`
 
 ### Task 17: Add doc URLs to export_reporting.go (path-encoded URLs)
 - [ ] Enqueue/EnqueueRaw → `export/paths/~1export~1reporting_data~1enqueue/post`
