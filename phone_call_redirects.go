@@ -31,6 +31,8 @@ func ParsePhoneCallRedirectCreateResult(r *Result) (*PhoneCallRedirect, error) {
 // --- Regular Methods ---
 
 // Create creates a new phone call redirect (sends SMS to initiate a phone switch).
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/switch/createphoneswitch
 func (s *PhoneCallRedirectsService) Create(ctx context.Context, body *CreatePhoneCallRedirectRequest) (*PhoneCallRedirect, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
@@ -45,6 +47,8 @@ func (s *PhoneCallRedirectsService) Create(ctx context.Context, body *CreatePhon
 // --- Raw Methods ---
 
 // CreateRaw creates a new phone call redirect with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/switch/createphoneswitch
 func (s *PhoneCallRedirectsService) CreateRaw(ctx context.Context, body *CreatePhoneCallRedirectRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "phone_call_redirects", body)
 	if err != nil {

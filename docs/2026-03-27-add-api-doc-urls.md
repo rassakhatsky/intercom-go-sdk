@@ -219,7 +219,7 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] Get/GetRaw → `notes/retrievenote`
 
 ### Task 26: Add doc URLs to phone_call_redirects.go
-- [ ] Create/CreateRaw → `switch/createphoneswitch`
+- [x] Create/CreateRaw → `switch/createphoneswitch`
 
 ### Task 27: Add doc URLs to segments.go
 - [ ] Get/GetRaw → `segments/retrievesegment`
