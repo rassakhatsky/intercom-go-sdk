@@ -143,6 +143,8 @@ func ParseCompanyCompanyListResult(r *Result) (*PagedResult[Company], error) {
 }
 
 // Get retrieves a company by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/retrieveacompanybyid
 func (s *CompaniesService) Get(ctx context.Context, id string) (*Company, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -155,6 +157,8 @@ func (s *CompaniesService) Get(ctx context.Context, id string) (*Company, error)
 }
 
 // List returns a single page of companies using GET /companies.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/retrievecompany
 func (s *CompaniesService) List(ctx context.Context, opts *ListOptions) (*PagedResult[Company], error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
@@ -172,6 +176,8 @@ func (s *CompaniesService) ListAll(ctx context.Context, opts *ListOptions) *Iter
 }
 
 // Create creates or updates a company (upsert by company_id).
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/createorupdatecompany
 func (s *CompaniesService) Create(ctx context.Context, body *CreateOrUpdateCompanyRequest) (*Company, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
@@ -184,6 +190,8 @@ func (s *CompaniesService) Create(ctx context.Context, body *CreateOrUpdateCompa
 }
 
 // Update updates an existing company by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/updatecompany
 func (s *CompaniesService) Update(ctx context.Context, id string, body *UpdateCompanyRequest) (*Company, error) {
 	result, err := s.UpdateRaw(ctx, id, body)
 	if err != nil {
@@ -196,6 +204,8 @@ func (s *CompaniesService) Update(ctx context.Context, id string, body *UpdateCo
 }
 
 // Delete deletes a company by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/deletecompany
 func (s *CompaniesService) Delete(ctx context.Context, id string) (*CompanyDeleted, error) {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
@@ -210,6 +220,8 @@ func (s *CompaniesService) Delete(ctx context.Context, id string) (*CompanyDelet
 // Scroll iterates over all companies using scroll-based pagination.
 // Pass an empty scrollParam for the first request. Use the returned
 // ScrollParam for subsequent requests.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/scrolloverallcompanies
 func (s *CompaniesService) Scroll(ctx context.Context, scrollParam string) (*CompanyScrollResponse, error) {
 	result, err := s.ScrollRaw(ctx, scrollParam)
 	if err != nil {
@@ -222,6 +234,8 @@ func (s *CompaniesService) Scroll(ctx context.Context, scrollParam string) (*Com
 }
 
 // ListContacts returns the contacts attached to a company.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/listattachedcontacts
 func (s *CompaniesService) ListContacts(ctx context.Context, companyID string, opts *ListOptions) (*PagedResult[Contact], error) {
 	result, err := s.ListContactsRaw(ctx, companyID, opts)
 	if err != nil {
@@ -234,6 +248,8 @@ func (s *CompaniesService) ListContacts(ctx context.Context, companyID string, o
 }
 
 // ListSegments returns the segments attached to a company.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/listattachedsegmentsforcompanies
 func (s *CompaniesService) ListSegments(ctx context.Context, companyID string) (*SegmentListResult, error) {
 	result, err := s.ListSegmentsRaw(ctx, companyID)
 	if err != nil {
@@ -246,6 +262,8 @@ func (s *CompaniesService) ListSegments(ctx context.Context, companyID string) (
 }
 
 // ListNotes returns the notes for a company.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/listcompanynotes
 func (s *CompaniesService) ListNotes(ctx context.Context, companyID string) (*NoteListResult, error) {
 	result, err := s.ListNotesRaw(ctx, companyID)
 	if err != nil {
@@ -259,6 +277,8 @@ func (s *CompaniesService) ListNotes(ctx context.Context, companyID string) (*No
 
 // CompanyList lists all companies using the POST /companies/list endpoint.
 // This endpoint supports page-based pagination with ordering.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/listallcompanies
 func (s *CompaniesService) CompanyList(ctx context.Context, opts *CompanyListOptions) (*PagedResult[Company], error) {
 	result, err := s.CompanyListRaw(ctx, opts)
 	if err != nil {
@@ -271,6 +291,8 @@ func (s *CompaniesService) CompanyList(ctx context.Context, opts *CompanyListOpt
 }
 
 // GetRaw retrieves a company by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/retrieveacompanybyid
 func (s *CompaniesService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("companies/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -280,6 +302,8 @@ func (s *CompaniesService) GetRaw(ctx context.Context, id string) (*Result, erro
 }
 
 // ListRaw returns a single page of companies with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/retrievecompany
 func (s *CompaniesService) ListRaw(ctx context.Context, opts *ListOptions) (*Result, error) {
 	path, err := addQueryOptions("companies", opts)
 	if err != nil {
@@ -293,6 +317,8 @@ func (s *CompaniesService) ListRaw(ctx context.Context, opts *ListOptions) (*Res
 }
 
 // CompanyListRaw lists all companies using POST /companies/list with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/listallcompanies
 func (s *CompaniesService) CompanyListRaw(ctx context.Context, opts *CompanyListOptions) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "companies/list", opts)
 	if err != nil {
@@ -302,6 +328,8 @@ func (s *CompaniesService) CompanyListRaw(ctx context.Context, opts *CompanyList
 }
 
 // CreateRaw creates or updates a company with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/createorupdatecompany
 func (s *CompaniesService) CreateRaw(ctx context.Context, body *CreateOrUpdateCompanyRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "companies", body)
 	if err != nil {
@@ -311,6 +339,8 @@ func (s *CompaniesService) CreateRaw(ctx context.Context, body *CreateOrUpdateCo
 }
 
 // UpdateRaw updates an existing company by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/updatecompany
 func (s *CompaniesService) UpdateRaw(ctx context.Context, id string, body *UpdateCompanyRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("companies/%s", url.PathEscape(id)), body)
 	if err != nil {
@@ -320,6 +350,8 @@ func (s *CompaniesService) UpdateRaw(ctx context.Context, id string, body *Updat
 }
 
 // DeleteRaw deletes a company by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/deletecompany
 func (s *CompaniesService) DeleteRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("companies/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -329,6 +361,8 @@ func (s *CompaniesService) DeleteRaw(ctx context.Context, id string) (*Result, e
 }
 
 // ScrollRaw iterates over companies using scroll-based pagination with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/scrolloverallcompanies
 func (s *CompaniesService) ScrollRaw(ctx context.Context, scrollParam string) (*Result, error) {
 	opts := &ScrollOptions{ScrollParam: scrollParam}
 	path, err := addQueryOptions("companies/scroll", opts)
@@ -343,6 +377,8 @@ func (s *CompaniesService) ScrollRaw(ctx context.Context, scrollParam string) (*
 }
 
 // ListContactsRaw returns the contacts attached to a company with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/listattachedcontacts
 func (s *CompaniesService) ListContactsRaw(ctx context.Context, companyID string, opts *ListOptions) (*Result, error) {
 	path, err := addQueryOptions(fmt.Sprintf("companies/%s/contacts", url.PathEscape(companyID)), opts)
 	if err != nil {
@@ -356,6 +392,8 @@ func (s *CompaniesService) ListContactsRaw(ctx context.Context, companyID string
 }
 
 // ListSegmentsRaw returns the segments attached to a company with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/listattachedsegmentsforcompanies
 func (s *CompaniesService) ListSegmentsRaw(ctx context.Context, companyID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("companies/%s/segments", url.PathEscape(companyID)), nil)
 	if err != nil {
@@ -365,6 +403,8 @@ func (s *CompaniesService) ListSegmentsRaw(ctx context.Context, companyID string
 }
 
 // ListNotesRaw returns the notes for a company with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/listcompanynotes
 func (s *CompaniesService) ListNotesRaw(ctx context.Context, companyID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("companies/%s/notes", url.PathEscape(companyID)), nil)
 	if err != nil {

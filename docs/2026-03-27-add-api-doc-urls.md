@@ -81,16 +81,16 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] GetTranscript/GetTranscriptRaw → `calls/showcalltranscript`
 
 ### Task 8: Add doc URLs to companies.go
-- [ ] Get/GetRaw → `companies/retrieveacompanybyid`
-- [ ] List/ListRaw → `companies/retrievecompany`
-- [ ] Create/CreateRaw → `companies/createorupdatecompany`
-- [ ] Update/UpdateRaw → `companies/updatecompany`
-- [ ] Delete/DeleteRaw → `companies/deletecompany`
-- [ ] Scroll/ScrollRaw → `companies/scrolloverallcompanies`
-- [ ] ListContacts/ListContactsRaw → `companies/listattachedcontacts`
-- [ ] ListSegments/ListSegmentsRaw → `companies/listattachedsegmentsforcompanies`
-- [ ] ListNotes/ListNotesRaw → `companies/listcompanynotes`
-- [ ] CompanyList/CompanyListRaw → `companies/listallcompanies`
+- [x] Get/GetRaw → `companies/retrieveacompanybyid`
+- [x] List/ListRaw → `companies/retrievecompany`
+- [x] Create/CreateRaw → `companies/createorupdatecompany`
+- [x] Update/UpdateRaw → `companies/updatecompany`
+- [x] Delete/DeleteRaw → `companies/deletecompany`
+- [x] Scroll/ScrollRaw → `companies/scrolloverallcompanies`
+- [x] ListContacts/ListContactsRaw → `companies/listattachedcontacts`
+- [x] ListSegments/ListSegmentsRaw → `companies/listattachedsegmentsforcompanies`
+- [x] ListNotes/ListNotesRaw → `companies/listcompanynotes`
+- [x] CompanyList/CompanyListRaw → `companies/listallcompanies`
 
 ### Task 9: Add doc URLs to contacts.go
 - [ ] Get/GetRaw → `contacts/showcontact`
