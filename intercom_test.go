@@ -247,7 +247,7 @@ func TestAddQueryOptions_NilOpts(t *testing.T) {
 
 func TestAddQueryOptions_PointerFields(t *testing.T) {
 	type opts struct {
-		Active *bool  `url:"active,omitempty"`
+		Active *bool   `url:"active,omitempty"`
 		Name   *string `url:"name,omitempty"`
 	}
 

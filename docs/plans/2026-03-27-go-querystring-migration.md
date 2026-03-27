@@ -57,12 +57,12 @@
 - [x] run `go test ./...` — all tests must pass
 
 ### Task 4: Verify acceptance criteria
-- [ ] verify `addQueryOptions` works identically to before (same query string output)
-- [ ] verify `parseTag` and `isZero` are fully removed
-- [ ] verify no other code references removed functions
-- [ ] run full test suite: `go test ./...`
-- [ ] run `go vet ./...` — all issues must be fixed
-- [ ] run `gofmt -l .` — no formatting issues
+- [x] verify `addQueryOptions` works identically to before (same query string output)
+- [x] verify `parseTag` and `isZero` are fully removed
+- [x] verify no other code references removed functions
+- [x] run full test suite: `go test ./...`
+- [x] run `go vet ./...` — all issues must be fixed
+- [x] run `gofmt -l .` — no formatting issues
 
 ### Task 5: [Final] Update documentation
 - [ ] update CLAUDE.md if architecture section needs changes (mention go-querystring)
