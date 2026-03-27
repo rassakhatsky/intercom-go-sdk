@@ -190,12 +190,12 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] GetHelpCenter/GetHelpCenterRaw → `help-center/retrievehelpcenter`
 
 ### Task 20: Add doc URLs to internal_articles.go
-- [ ] Get/GetRaw → `internal-articles/retrieveinternalarticle`
-- [ ] List/ListRaw → `internal-articles/listinternalarticles`
-- [ ] Create/CreateRaw → `internal-articles/createinternalarticle`
-- [ ] Update/UpdateRaw → `internal-articles/updateinternalarticle`
-- [ ] Delete/DeleteRaw → `internal-articles/deleteinternalarticle`
-- [ ] Search/SearchRaw → `internal-articles/searchinternalarticles`
+- [x] Get/GetRaw → `internal-articles/retrieveinternalarticle`
+- [x] List/ListRaw → `internal-articles/listinternalarticles`
+- [x] Create/CreateRaw → `internal-articles/createinternalarticle`
+- [x] Update/UpdateRaw → `internal-articles/updateinternalarticle`
+- [x] Delete/DeleteRaw → `internal-articles/deleteinternalarticle`
+- [x] Search/SearchRaw → `internal-articles/searchinternalarticles`
 
 ### Task 21: Add doc URLs to ip_allowlist.go
 - [ ] Get/GetRaw → `ip-allowlist/getipallowlist`
