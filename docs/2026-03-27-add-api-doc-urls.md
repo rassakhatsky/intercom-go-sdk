@@ -244,13 +244,13 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] List/ListRaw → `ticket-states/listticketstates`
 
 ### Task 32: Add doc URLs to ticket_types.go
-- [ ] Get/GetRaw → `ticket-types/gettickettype`
-- [ ] List/ListRaw → `ticket-types/listtickettypes`
-- [ ] Create/CreateRaw → `ticket-types/createtickettype`
-- [ ] Update/UpdateRaw → `ticket-types/updatetickettype`
-- [ ] ListAttributes/ListAttributesRaw → `ticket-type-attributes/createtickettypeattribute`
-- [ ] CreateAttribute/CreateAttributeRaw → `ticket-type-attributes/createtickettypeattribute`
-- [ ] UpdateAttribute/UpdateAttributeRaw → `ticket-type-attributes/updatetickettypeattribute`
+- [x] Get/GetRaw → `ticket-types/gettickettype`
+- [x] List/ListRaw → `ticket-types/listtickettypes`
+- [x] Create/CreateRaw → `ticket-types/createtickettype`
+- [x] Update/UpdateRaw → `ticket-types/updatetickettype`
+- [x] ListAttributes/ListAttributesRaw → `ticket-type-attributes/createtickettypeattribute` (skipped - method does not exist in codebase)
+- [x] CreateAttribute/CreateAttributeRaw → `ticket-type-attributes/createtickettypeattribute`
+- [x] UpdateAttribute/UpdateAttributeRaw → `ticket-type-attributes/updatetickettypeattribute`
 
 ### Task 33: Add doc URLs to tickets.go
 - [ ] Get/GetRaw → `tickets/getticket`

@@ -146,6 +146,8 @@ func ParseTicketTypeUpdateAttributeResult(r *Result) (*TicketTypeAttribute, erro
 // --- Regular Methods ---
 
 // Get retrieves a ticket type by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/gettickettype
 func (s *TicketTypesService) Get(ctx context.Context, id string) (*TicketType, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -158,6 +160,8 @@ func (s *TicketTypesService) Get(ctx context.Context, id string) (*TicketType, e
 }
 
 // List returns all ticket types.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/listtickettypes
 func (s *TicketTypesService) List(ctx context.Context) (*TicketTypeList, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
@@ -170,6 +174,8 @@ func (s *TicketTypesService) List(ctx context.Context) (*TicketTypeList, error) 
 }
 
 // Create creates a new ticket type.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/createtickettype
 func (s *TicketTypesService) Create(ctx context.Context, body *CreateTicketTypeRequest) (*TicketType, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
@@ -182,6 +188,8 @@ func (s *TicketTypesService) Create(ctx context.Context, body *CreateTicketTypeR
 }
 
 // Update updates an existing ticket type.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/updatetickettype
 func (s *TicketTypesService) Update(ctx context.Context, id string, body *UpdateTicketTypeRequest) (*TicketType, error) {
 	result, err := s.UpdateRaw(ctx, id, body)
 	if err != nil {
@@ -194,6 +202,8 @@ func (s *TicketTypesService) Update(ctx context.Context, id string, body *Update
 }
 
 // CreateAttribute creates a new attribute for a ticket type.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-type-attributes/createtickettypeattribute
 func (s *TicketTypesService) CreateAttribute(ctx context.Context, ticketTypeID string, body *CreateTicketTypeAttributeRequest) (*TicketTypeAttribute, error) {
 	result, err := s.CreateAttributeRaw(ctx, ticketTypeID, body)
 	if err != nil {
@@ -206,6 +216,8 @@ func (s *TicketTypesService) CreateAttribute(ctx context.Context, ticketTypeID s
 }
 
 // UpdateAttribute updates an existing attribute for a ticket type.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-type-attributes/updatetickettypeattribute
 func (s *TicketTypesService) UpdateAttribute(ctx context.Context, ticketTypeID, attributeID string, body *UpdateTicketTypeAttributeRequest) (*TicketTypeAttribute, error) {
 	result, err := s.UpdateAttributeRaw(ctx, ticketTypeID, attributeID, body)
 	if err != nil {
@@ -220,6 +232,8 @@ func (s *TicketTypesService) UpdateAttribute(ctx context.Context, ticketTypeID, 
 // --- Raw Methods ---
 
 // GetRaw retrieves a ticket type by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/gettickettype
 func (s *TicketTypesService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("ticket_types/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -229,6 +243,8 @@ func (s *TicketTypesService) GetRaw(ctx context.Context, id string) (*Result, er
 }
 
 // ListRaw returns all ticket types with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/listtickettypes
 func (s *TicketTypesService) ListRaw(ctx context.Context) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "ticket_types", nil)
 	if err != nil {
@@ -238,6 +254,8 @@ func (s *TicketTypesService) ListRaw(ctx context.Context) (*Result, error) {
 }
 
 // CreateRaw creates a new ticket type with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/createtickettype
 func (s *TicketTypesService) CreateRaw(ctx context.Context, body *CreateTicketTypeRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "ticket_types", body)
 	if err != nil {
@@ -247,6 +265,8 @@ func (s *TicketTypesService) CreateRaw(ctx context.Context, body *CreateTicketTy
 }
 
 // UpdateRaw updates an existing ticket type with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/updatetickettype
 func (s *TicketTypesService) UpdateRaw(ctx context.Context, id string, body *UpdateTicketTypeRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("ticket_types/%s", url.PathEscape(id)), body)
 	if err != nil {
@@ -256,6 +276,8 @@ func (s *TicketTypesService) UpdateRaw(ctx context.Context, id string, body *Upd
 }
 
 // CreateAttributeRaw creates a new attribute for a ticket type with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-type-attributes/createtickettypeattribute
 func (s *TicketTypesService) CreateAttributeRaw(ctx context.Context, ticketTypeID string, body *CreateTicketTypeAttributeRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("ticket_types/%s/attributes", url.PathEscape(ticketTypeID)), body)
 	if err != nil {
@@ -265,6 +287,8 @@ func (s *TicketTypesService) CreateAttributeRaw(ctx context.Context, ticketTypeI
 }
 
 // UpdateAttributeRaw updates an existing attribute for a ticket type with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-type-attributes/updatetickettypeattribute
 func (s *TicketTypesService) UpdateAttributeRaw(ctx context.Context, ticketTypeID, attributeID string, body *UpdateTicketTypeAttributeRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("ticket_types/%s/attributes/%s", url.PathEscape(ticketTypeID), url.PathEscape(attributeID)), body)
 	if err != nil {
