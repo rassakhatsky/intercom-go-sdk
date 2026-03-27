@@ -142,11 +142,11 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] NotifyAttributeCollected/Raw → `custom-channel-events/notifyattributecollected`
 
 ### Task 12: Add doc URLs to custom_objects.go
-- [ ] Get/GetRaw → `custom-object-instances/getcustomobjectinstancesbyid`
-- [ ] GetByExternalID/GetByExternalIDRaw → `custom-object-instances/getcustomobjectinstancesbyexternalid`
-- [ ] CreateOrUpdate/CreateOrUpdateRaw → `custom-object-instances/createcustomobjectinstances`
-- [ ] Delete/DeleteRaw → `custom-object-instances/deletecustomobjectinstancesbyexternalid`
-- [ ] DeleteByExternalID/DeleteByExternalIDRaw → `custom-object-instances/deletecustomobjectinstancesbyid`
+- [x] Get/GetRaw → `custom-object-instances/getcustomobjectinstancesbyid`
+- [x] GetByExternalID/GetByExternalIDRaw → `custom-object-instances/getcustomobjectinstancesbyexternalid`
+- [x] CreateOrUpdate/CreateOrUpdateRaw → `custom-object-instances/createcustomobjectinstances`
+- [x] Delete/DeleteRaw → `custom-object-instances/deletecustomobjectinstancesbyexternalid`
+- [x] DeleteByExternalID/DeleteByExternalIDRaw → `custom-object-instances/deletecustomobjectinstancesbyid`
 
 ### Task 13: Add doc URLs to data_attributes.go
 - [ ] List/ListRaw → `data-attributes/lisdataattributes`
