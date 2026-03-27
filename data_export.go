@@ -46,6 +46,8 @@ func ParseDataExportCancelResult(r *Result) (*DataExport, error) {
 // --- Regular Methods ---
 
 // Create starts a new content data export job for the given time range.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-export/createdataexport
 func (s *DataExportService) Create(ctx context.Context, body *CreateDataExportRequest) (*DataExport, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
@@ -58,6 +60,8 @@ func (s *DataExportService) Create(ctx context.Context, body *CreateDataExportRe
 }
 
 // GetStatus retrieves the status of a data export job.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-export/getdataexport
 func (s *DataExportService) GetStatus(ctx context.Context, jobID string) (*DataExport, error) {
 	result, err := s.GetStatusRaw(ctx, jobID)
 	if err != nil {
@@ -70,6 +74,8 @@ func (s *DataExportService) GetStatus(ctx context.Context, jobID string) (*DataE
 }
 
 // Cancel cancels an in-progress data export job.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-export/canceldataexport
 func (s *DataExportService) Cancel(ctx context.Context, jobID string) (*DataExport, error) {
 	result, err := s.CancelRaw(ctx, jobID)
 	if err != nil {
@@ -84,6 +90,8 @@ func (s *DataExportService) Cancel(ctx context.Context, jobID string) (*DataExpo
 // --- Raw Methods ---
 
 // CreateRaw starts a new content data export job and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-export/createdataexport
 func (s *DataExportService) CreateRaw(ctx context.Context, body *CreateDataExportRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "export/content/data", body)
 	if err != nil {
@@ -93,6 +101,8 @@ func (s *DataExportService) CreateRaw(ctx context.Context, body *CreateDataExpor
 }
 
 // GetStatusRaw retrieves the status of a data export job with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-export/getdataexport
 func (s *DataExportService) GetStatusRaw(ctx context.Context, jobID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("export/content/data/%s", url.PathEscape(jobID)), nil)
 	if err != nil {
@@ -102,6 +112,8 @@ func (s *DataExportService) GetStatusRaw(ctx context.Context, jobID string) (*Re
 }
 
 // CancelRaw cancels an in-progress data export job and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-export/canceldataexport
 func (s *DataExportService) CancelRaw(ctx context.Context, jobID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("export/cancel/%s", url.PathEscape(jobID)), nil)
 	if err != nil {
