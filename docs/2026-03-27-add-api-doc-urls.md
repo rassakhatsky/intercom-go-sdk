@@ -198,8 +198,8 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] Search/SearchRaw → `internal-articles/searchinternalarticles`
 
 ### Task 21: Add doc URLs to ip_allowlist.go
-- [ ] Get/GetRaw → `ip-allowlist/getipallowlist`
-- [ ] Update/UpdateRaw → `ip-allowlist/updateipallowlist`
+- [x] Get/GetRaw → `ip-allowlist/getipallowlist`
+- [x] Update/UpdateRaw → `ip-allowlist/updateipallowlist`
 
 ### Task 22: Add doc URLs to jobs.go
 - [ ] GetStatus/GetStatusRaw → `jobs/jobsstatus`
