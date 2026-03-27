@@ -54,6 +54,8 @@ func ParseMessageCreateResult(r *Result) (*Message, error) {
 // --- Regular Methods ---
 
 // Create creates a new message initiated by an admin.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/messages/createmessage
 func (s *MessagesService) Create(ctx context.Context, body *CreateMessageRequest) (*Message, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
@@ -68,6 +70,8 @@ func (s *MessagesService) Create(ctx context.Context, body *CreateMessageRequest
 // --- Raw Methods ---
 
 // CreateRaw creates a new message initiated by an admin and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/messages/createmessage
 func (s *MessagesService) CreateRaw(ctx context.Context, body *CreateMessageRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "messages", body)
 	if err != nil {

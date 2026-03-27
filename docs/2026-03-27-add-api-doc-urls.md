@@ -205,7 +205,7 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] GetStatus/GetStatusRaw → `jobs/jobsstatus`
 
 ### Task 23: Add doc URLs to messages.go
-- [ ] Create/CreateRaw → `messages/createmessage`
+- [x] Create/CreateRaw → `messages/createmessage`
 
 ### Task 24: Add doc URLs to news.go
 - [ ] ListNewsItems/ListNewsItemsRaw → `news/listnewsitems`
