@@ -65,8 +65,8 @@
 - [x] run `gofmt -l .` — no formatting issues
 
 ### Task 5: [Final] Update documentation
-- [ ] update CLAUDE.md if architecture section needs changes (mention go-querystring)
-- [ ] update README.md if dependency section needs changes
+- [x] update CLAUDE.md if architecture section needs changes (mention go-querystring)
+- [x] update README.md if dependency section needs changes
 
 ## Technical Details
 - **Import**: `github.com/google/go-querystring/query`
