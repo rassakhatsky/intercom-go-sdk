@@ -308,11 +308,6 @@ func ParseConversationAddTagResult(r *Result) (*TagRef, error) { return Decode[T
 // ParseConversationRemoveTagResult decodes a Result into a TagRef.
 func ParseConversationRemoveTagResult(r *Result) (*TagRef, error) { return Decode[TagRef](r) }
 
-// ParseConversationRunAssignmentRulesResult decodes a Result into a Conversation.
-func ParseConversationRunAssignmentRulesResult(r *Result) (*Conversation, error) {
-	return Decode[Conversation](r)
-}
-
 // Get retrieves a conversation by ID.
 func (s *ConversationsService) Get(ctx context.Context, id string) (*Conversation, error) {
 	result, err := s.GetRaw(ctx, id)
@@ -510,18 +505,6 @@ func (s *ConversationsService) AddTag(ctx context.Context, conversationID, tagID
 	return ParseConversationAddTagResult(result)
 }
 
-// RunAssignmentRules triggers the assignment rules for a conversation.
-func (s *ConversationsService) RunAssignmentRules(ctx context.Context, id string) (*Conversation, error) {
-	result, err := s.RunAssignmentRulesRaw(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	if result.Error != nil {
-		return nil, resultError(result)
-	}
-	return ParseConversationRunAssignmentRulesResult(result)
-}
-
 // RemoveTag removes a tag from a conversation. Requires the admin ID.
 func (s *ConversationsService) RemoveTag(ctx context.Context, conversationID, tagID, adminID string) (*TagRef, error) {
 	result, err := s.RemoveTagRaw(ctx, conversationID, tagID, adminID)
@@ -691,11 +674,3 @@ func (s *ConversationsService) RemoveTagRaw(ctx context.Context, conversationID,
 	return s.client.DoRaw(ctx, req)
 }
 
-// RunAssignmentRulesRaw triggers assignment rules and returns the full HTTP result.
-func (s *ConversationsService) RunAssignmentRulesRaw(ctx context.Context, id string) (*Result, error) {
-	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("conversations/%s/run_assignment_rules", url.PathEscape(id)), nil)
-	if err != nil {
-		return nil, err
-	}
-	return s.client.DoRaw(ctx, req)
-}

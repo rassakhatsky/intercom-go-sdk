@@ -698,25 +698,6 @@ func TestConversationsService_Get_NotFound(t *testing.T) {
 	}
 }
 
-func TestConversationsService_RunAssignmentRules(t *testing.T) {
-	client, mux, teardown := setup()
-	defer teardown()
-
-	mux.HandleFunc("/conversations/123/run_assignment_rules", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, http.MethodPost)
-		fmt.Fprint(w, `{"type":"conversation","id":"123"}`)
-	})
-
-	ctx := context.Background()
-	conv, err := client.Conversations.RunAssignmentRules(ctx, "123")
-	if err != nil {
-		t.Fatalf("Conversations.RunAssignmentRules returned error: %v", err)
-	}
-	if conv.ID != "123" {
-		t.Errorf("ID = %v, want 123", conv.ID)
-	}
-}
-
 func TestConversationsService_List_RateLimit(t *testing.T) {
 	client, mux, teardown := setup()
 	defer teardown()
@@ -1243,25 +1224,3 @@ func TestConversationsService_RemoveTagRaw(t *testing.T) {
 	}
 }
 
-func TestConversationsService_RunAssignmentRulesRaw(t *testing.T) {
-	client, mux, teardown := setup()
-	defer teardown()
-
-	mux.HandleFunc("/conversations/123/run_assignment_rules", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, http.MethodPost)
-		fmt.Fprint(w, `{"type":"conversation","id":"123"}`)
-	})
-
-	ctx := context.Background()
-	result, err := client.Conversations.RunAssignmentRulesRaw(ctx, "123")
-	if err != nil {
-		t.Fatalf("RunAssignmentRulesRaw returned error: %v", err)
-	}
-	conv, err := ParseConversationRunAssignmentRulesResult(result)
-	if err != nil {
-		t.Fatalf("ParseConversationRunAssignmentRulesResult returned error: %v", err)
-	}
-	if conv.ID != "123" {
-		t.Errorf("conv.ID = %v, want 123", conv.ID)
-	}
-}
