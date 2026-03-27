@@ -98,6 +98,8 @@ func ParseCallGetTranscriptResult(r *Result) (string, error) {
 }
 
 // Get retrieves a call by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/showcall
 func (s *CallsService) Get(ctx context.Context, callID string) (*Call, error) {
 	result, err := s.GetRaw(ctx, callID)
 	if err != nil {
@@ -110,6 +112,8 @@ func (s *CallsService) Get(ctx context.Context, callID string) (*Call, error) {
 }
 
 // List returns calls with optional pagination.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/listcalls
 func (s *CallsService) List(ctx context.Context, opts *CallListOptions) (*CallList, error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
@@ -122,6 +126,8 @@ func (s *CallsService) List(ctx context.Context, opts *CallListOptions) (*CallLi
 }
 
 // Search searches for calls with transcripts by conversation IDs.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/listcallswithtranscripts
 func (s *CallsService) Search(ctx context.Context, searchReq *CallSearchRequest) (*CallList, error) {
 	result, err := s.SearchRaw(ctx, searchReq)
 	if err != nil {
@@ -135,6 +141,8 @@ func (s *CallsService) Search(ctx context.Context, searchReq *CallSearchRequest)
 
 // GetRecordingURL returns the signed URL for a call recording.
 // The API responds with a 302 redirect; this method returns the Location header.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/showcallrecording
 func (s *CallsService) GetRecordingURL(ctx context.Context, callID string) (string, error) {
 	result, err := s.GetRecordingURLRaw(ctx, callID)
 	if err != nil {
@@ -147,6 +155,8 @@ func (s *CallsService) GetRecordingURL(ctx context.Context, callID string) (stri
 }
 
 // GetTranscript returns the plain text transcript of a call.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/showcalltranscript
 func (s *CallsService) GetTranscript(ctx context.Context, callID string) (string, error) {
 	result, err := s.GetTranscriptRaw(ctx, callID)
 	if err != nil {
@@ -159,6 +169,8 @@ func (s *CallsService) GetTranscript(ctx context.Context, callID string) (string
 }
 
 // GetRaw retrieves a call by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/showcall
 func (s *CallsService) GetRaw(ctx context.Context, callID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("calls/%s", url.PathEscape(callID)), nil)
 	if err != nil {
@@ -168,6 +180,8 @@ func (s *CallsService) GetRaw(ctx context.Context, callID string) (*Result, erro
 }
 
 // ListRaw returns calls with optional pagination and the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/listcalls
 func (s *CallsService) ListRaw(ctx context.Context, opts *CallListOptions) (*Result, error) {
 	path, err := addQueryOptions("calls", opts)
 	if err != nil {
@@ -181,6 +195,8 @@ func (s *CallsService) ListRaw(ctx context.Context, opts *CallListOptions) (*Res
 }
 
 // SearchRaw searches for calls with transcripts by conversation IDs with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/listcallswithtranscripts
 func (s *CallsService) SearchRaw(ctx context.Context, searchReq *CallSearchRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "calls/search", searchReq)
 	if err != nil {
@@ -191,6 +207,8 @@ func (s *CallsService) SearchRaw(ctx context.Context, searchReq *CallSearchReque
 
 // GetRecordingURLRaw returns the full HTTP result for a call recording URL request.
 // The recording URL is available in Result.Header.Get("Location") for redirect responses.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/showcallrecording
 func (s *CallsService) GetRecordingURLRaw(ctx context.Context, callID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("calls/%s/recording", url.PathEscape(callID)), nil)
 	if err != nil {
@@ -223,6 +241,8 @@ func (s *CallsService) GetRecordingURLRaw(ctx context.Context, callID string) (*
 
 // GetTranscriptRaw returns the plain text transcript of a call with the full HTTP result.
 // The transcript text is available in string(Result.Body).
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/showcalltranscript
 func (s *CallsService) GetTranscriptRaw(ctx context.Context, callID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("calls/%s/transcript", url.PathEscape(callID)), nil)
 	if err != nil {
