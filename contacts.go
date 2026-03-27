@@ -343,6 +343,8 @@ func ParseContactAddTagResult(r *Result) (*TagRef, error) { return Decode[TagRef
 func ParseContactRemoveTagResult(r *Result) (*TagRef, error) { return Decode[TagRef](r) }
 
 // Get retrieves a contact by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/showcontact
 func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -355,6 +357,8 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 }
 
 // List returns a single page of contacts.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listcontacts
 func (s *ContactsService) List(ctx context.Context, opts *ListOptions) (*PagedResult[Contact], error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
@@ -372,6 +376,8 @@ func (s *ContactsService) ListAll(ctx context.Context, opts *ListOptions) *Iter[
 }
 
 // Create creates a new contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/createcontact
 func (s *ContactsService) Create(ctx context.Context, body *CreateContactRequest) (*Contact, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
@@ -384,6 +390,8 @@ func (s *ContactsService) Create(ctx context.Context, body *CreateContactRequest
 }
 
 // Update updates an existing contact by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/updatecontact
 func (s *ContactsService) Update(ctx context.Context, id string, body *UpdateContactRequest) (*Contact, error) {
 	result, err := s.UpdateRaw(ctx, id, body)
 	if err != nil {
@@ -396,6 +404,8 @@ func (s *ContactsService) Update(ctx context.Context, id string, body *UpdateCon
 }
 
 // Delete deletes a contact by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/deletecontact
 func (s *ContactsService) Delete(ctx context.Context, id string) (*ContactDeleted, error) {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
@@ -408,6 +418,8 @@ func (s *ContactsService) Delete(ctx context.Context, id string) (*ContactDelete
 }
 
 // Search searches for contacts using the provided query filters.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/searchcontacts
 func (s *ContactsService) Search(ctx context.Context, body *SearchRequest) (*PagedResult[Contact], error) {
 	result, err := s.SearchRaw(ctx, body)
 	if err != nil {
@@ -421,6 +433,8 @@ func (s *ContactsService) Search(ctx context.Context, body *SearchRequest) (*Pag
 
 // Merge merges a lead into a user. The From field must be a lead, and
 // the Into field must be a user.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/mergecontact
 func (s *ContactsService) Merge(ctx context.Context, body *MergeContactsRequest) (*Contact, error) {
 	result, err := s.MergeRaw(ctx, body)
 	if err != nil {
@@ -433,6 +447,8 @@ func (s *ContactsService) Merge(ctx context.Context, body *MergeContactsRequest)
 }
 
 // Archive archives a contact by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/archivecontact
 func (s *ContactsService) Archive(ctx context.Context, id string) (*ContactArchived, error) {
 	result, err := s.ArchiveRaw(ctx, id)
 	if err != nil {
@@ -445,6 +461,8 @@ func (s *ContactsService) Archive(ctx context.Context, id string) (*ContactArchi
 }
 
 // Unarchive unarchives a contact by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/unarchivecontact
 func (s *ContactsService) Unarchive(ctx context.Context, id string) (*ContactUnarchived, error) {
 	result, err := s.UnarchiveRaw(ctx, id)
 	if err != nil {
@@ -457,6 +475,8 @@ func (s *ContactsService) Unarchive(ctx context.Context, id string) (*ContactUna
 }
 
 // Block blocks a contact by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/blockcontact
 func (s *ContactsService) Block(ctx context.Context, id string) (*ContactBlocked, error) {
 	result, err := s.BlockRaw(ctx, id)
 	if err != nil {
@@ -469,6 +489,8 @@ func (s *ContactsService) Block(ctx context.Context, id string) (*ContactBlocked
 }
 
 // FindByExternalID retrieves a contact by its external ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/showcontactbyexternalid
 func (s *ContactsService) FindByExternalID(ctx context.Context, externalID string) (*Contact, error) {
 	result, err := s.FindByExternalIDRaw(ctx, externalID)
 	if err != nil {
@@ -481,6 +503,8 @@ func (s *ContactsService) FindByExternalID(ctx context.Context, externalID strin
 }
 
 // ListCompanies returns the companies attached to a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listcompaniesforacontact
 func (s *ContactsService) ListCompanies(ctx context.Context, contactID string) (*CompanyListResult, error) {
 	result, err := s.ListCompaniesRaw(ctx, contactID)
 	if err != nil {
@@ -493,6 +517,8 @@ func (s *ContactsService) ListCompanies(ctx context.Context, contactID string) (
 }
 
 // AddCompany attaches a company to a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/attachcontacttoacompany
 func (s *ContactsService) AddCompany(ctx context.Context, contactID, companyID string) (*CompanyRef, error) {
 	result, err := s.AddCompanyRaw(ctx, contactID, companyID)
 	if err != nil {
@@ -505,6 +531,8 @@ func (s *ContactsService) AddCompany(ctx context.Context, contactID, companyID s
 }
 
 // RemoveCompany detaches a company from a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/detachcontactfromacompany
 func (s *ContactsService) RemoveCompany(ctx context.Context, contactID, companyID string) (*CompanyRef, error) {
 	result, err := s.RemoveCompanyRaw(ctx, contactID, companyID)
 	if err != nil {
@@ -517,6 +545,8 @@ func (s *ContactsService) RemoveCompany(ctx context.Context, contactID, companyI
 }
 
 // ListNotes returns the notes for a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listnotes
 func (s *ContactsService) ListNotes(ctx context.Context, contactID string) (*NoteListResult, error) {
 	result, err := s.ListNotesRaw(ctx, contactID)
 	if err != nil {
@@ -529,6 +559,8 @@ func (s *ContactsService) ListNotes(ctx context.Context, contactID string) (*Not
 }
 
 // CreateNote creates a note on a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/createnote
 func (s *ContactsService) CreateNote(ctx context.Context, contactID string, body *CreateNoteRequest) (*Note, error) {
 	result, err := s.CreateNoteRaw(ctx, contactID, body)
 	if err != nil {
@@ -541,6 +573,8 @@ func (s *ContactsService) CreateNote(ctx context.Context, contactID string, body
 }
 
 // ListSegments returns the segments for a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listsegmentsforacontact
 func (s *ContactsService) ListSegments(ctx context.Context, contactID string) (*SegmentListResult, error) {
 	result, err := s.ListSegmentsRaw(ctx, contactID)
 	if err != nil {
@@ -553,6 +587,8 @@ func (s *ContactsService) ListSegments(ctx context.Context, contactID string) (*
 }
 
 // ListSubscriptions returns the subscriptions for a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/listsubscriptionsforacontact
 func (s *ContactsService) ListSubscriptions(ctx context.Context, contactID string) (*SubscriptionListResult, error) {
 	result, err := s.ListSubscriptionsRaw(ctx, contactID)
 	if err != nil {
@@ -565,6 +601,8 @@ func (s *ContactsService) ListSubscriptions(ctx context.Context, contactID strin
 }
 
 // AddSubscription adds a subscription to a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/attachsubscriptiontypetocontact
 func (s *ContactsService) AddSubscription(ctx context.Context, contactID string, body *AddSubscriptionRequest) (*SubscriptionType, error) {
 	result, err := s.AddSubscriptionRaw(ctx, contactID, body)
 	if err != nil {
@@ -577,6 +615,8 @@ func (s *ContactsService) AddSubscription(ctx context.Context, contactID string,
 }
 
 // RemoveSubscription removes a subscription from a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/detachsubscriptiontypetocontact
 func (s *ContactsService) RemoveSubscription(ctx context.Context, contactID, subscriptionID string) (*SubscriptionType, error) {
 	result, err := s.RemoveSubscriptionRaw(ctx, contactID, subscriptionID)
 	if err != nil {
@@ -589,6 +629,8 @@ func (s *ContactsService) RemoveSubscription(ctx context.Context, contactID, sub
 }
 
 // AddTag adds a tag to a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/attachtagtocontact
 func (s *ContactsService) AddTag(ctx context.Context, contactID, tagID string) (*TagRef, error) {
 	result, err := s.AddTagRaw(ctx, contactID, tagID)
 	if err != nil {
@@ -601,6 +643,8 @@ func (s *ContactsService) AddTag(ctx context.Context, contactID, tagID string) (
 }
 
 // RemoveTag removes a tag from a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/detachtagfromcontact
 func (s *ContactsService) RemoveTag(ctx context.Context, contactID, tagID string) (*TagRef, error) {
 	result, err := s.RemoveTagRaw(ctx, contactID, tagID)
 	if err != nil {
@@ -613,6 +657,8 @@ func (s *ContactsService) RemoveTag(ctx context.Context, contactID, tagID string
 }
 
 // GetRaw retrieves a contact by ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/showcontact
 func (s *ContactsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -622,6 +668,8 @@ func (s *ContactsService) GetRaw(ctx context.Context, id string) (*Result, error
 }
 
 // ListRaw returns a single page of contacts with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listcontacts
 func (s *ContactsService) ListRaw(ctx context.Context, opts *ListOptions) (*Result, error) {
 	path, err := addQueryOptions("contacts", opts)
 	if err != nil {
@@ -635,6 +683,8 @@ func (s *ContactsService) ListRaw(ctx context.Context, opts *ListOptions) (*Resu
 }
 
 // CreateRaw creates a new contact and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/createcontact
 func (s *ContactsService) CreateRaw(ctx context.Context, body *CreateContactRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "contacts", body)
 	if err != nil {
@@ -644,6 +694,8 @@ func (s *ContactsService) CreateRaw(ctx context.Context, body *CreateContactRequ
 }
 
 // UpdateRaw updates an existing contact by ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/updatecontact
 func (s *ContactsService) UpdateRaw(ctx context.Context, id string, body *UpdateContactRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("contacts/%s", url.PathEscape(id)), body)
 	if err != nil {
@@ -653,6 +705,8 @@ func (s *ContactsService) UpdateRaw(ctx context.Context, id string, body *Update
 }
 
 // DeleteRaw deletes a contact by ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/deletecontact
 func (s *ContactsService) DeleteRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("contacts/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -662,6 +716,8 @@ func (s *ContactsService) DeleteRaw(ctx context.Context, id string) (*Result, er
 }
 
 // SearchRaw searches for contacts and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/searchcontacts
 func (s *ContactsService) SearchRaw(ctx context.Context, body *SearchRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "contacts/search", body)
 	if err != nil {
@@ -671,6 +727,8 @@ func (s *ContactsService) SearchRaw(ctx context.Context, body *SearchRequest) (*
 }
 
 // MergeRaw merges a lead into a user and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/mergecontact
 func (s *ContactsService) MergeRaw(ctx context.Context, body *MergeContactsRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "contacts/merge", body)
 	if err != nil {
@@ -680,6 +738,8 @@ func (s *ContactsService) MergeRaw(ctx context.Context, body *MergeContactsReque
 }
 
 // ArchiveRaw archives a contact by ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/archivecontact
 func (s *ContactsService) ArchiveRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("contacts/%s/archive", url.PathEscape(id)), nil)
 	if err != nil {
@@ -689,6 +749,8 @@ func (s *ContactsService) ArchiveRaw(ctx context.Context, id string) (*Result, e
 }
 
 // UnarchiveRaw unarchives a contact by ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/unarchivecontact
 func (s *ContactsService) UnarchiveRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("contacts/%s/unarchive", url.PathEscape(id)), nil)
 	if err != nil {
@@ -698,6 +760,8 @@ func (s *ContactsService) UnarchiveRaw(ctx context.Context, id string) (*Result,
 }
 
 // BlockRaw blocks a contact by ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/blockcontact
 func (s *ContactsService) BlockRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("contacts/%s/block", url.PathEscape(id)), nil)
 	if err != nil {
@@ -707,6 +771,8 @@ func (s *ContactsService) BlockRaw(ctx context.Context, id string) (*Result, err
 }
 
 // FindByExternalIDRaw retrieves a contact by external ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/showcontactbyexternalid
 func (s *ContactsService) FindByExternalIDRaw(ctx context.Context, externalID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/find_by_external_id/%s", url.PathEscape(externalID)), nil)
 	if err != nil {
@@ -716,6 +782,8 @@ func (s *ContactsService) FindByExternalIDRaw(ctx context.Context, externalID st
 }
 
 // ListCompaniesRaw returns the companies attached to a contact with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listcompaniesforacontact
 func (s *ContactsService) ListCompaniesRaw(ctx context.Context, contactID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/%s/companies", url.PathEscape(contactID)), nil)
 	if err != nil {
@@ -725,6 +793,8 @@ func (s *ContactsService) ListCompaniesRaw(ctx context.Context, contactID string
 }
 
 // AddCompanyRaw attaches a company to a contact and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/attachcontacttoacompany
 func (s *ContactsService) AddCompanyRaw(ctx context.Context, contactID, companyID string) (*Result, error) {
 	body := struct {
 		ID string `json:"id"`
@@ -737,6 +807,8 @@ func (s *ContactsService) AddCompanyRaw(ctx context.Context, contactID, companyI
 }
 
 // RemoveCompanyRaw detaches a company from a contact and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/detachcontactfromacompany
 func (s *ContactsService) RemoveCompanyRaw(ctx context.Context, contactID, companyID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("contacts/%s/companies/%s", url.PathEscape(contactID), url.PathEscape(companyID)), nil)
 	if err != nil {
@@ -746,6 +818,8 @@ func (s *ContactsService) RemoveCompanyRaw(ctx context.Context, contactID, compa
 }
 
 // ListNotesRaw returns the notes for a contact with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listnotes
 func (s *ContactsService) ListNotesRaw(ctx context.Context, contactID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/%s/notes", url.PathEscape(contactID)), nil)
 	if err != nil {
@@ -755,6 +829,8 @@ func (s *ContactsService) ListNotesRaw(ctx context.Context, contactID string) (*
 }
 
 // CreateNoteRaw creates a note on a contact and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/createnote
 func (s *ContactsService) CreateNoteRaw(ctx context.Context, contactID string, body *CreateNoteRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("contacts/%s/notes", url.PathEscape(contactID)), body)
 	if err != nil {
@@ -764,6 +840,8 @@ func (s *ContactsService) CreateNoteRaw(ctx context.Context, contactID string, b
 }
 
 // ListSegmentsRaw returns the segments for a contact with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listsegmentsforacontact
 func (s *ContactsService) ListSegmentsRaw(ctx context.Context, contactID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/%s/segments", url.PathEscape(contactID)), nil)
 	if err != nil {
@@ -773,6 +851,8 @@ func (s *ContactsService) ListSegmentsRaw(ctx context.Context, contactID string)
 }
 
 // ListSubscriptionsRaw returns the subscriptions for a contact with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/listsubscriptionsforacontact
 func (s *ContactsService) ListSubscriptionsRaw(ctx context.Context, contactID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/%s/subscriptions", url.PathEscape(contactID)), nil)
 	if err != nil {
@@ -782,6 +862,8 @@ func (s *ContactsService) ListSubscriptionsRaw(ctx context.Context, contactID st
 }
 
 // AddSubscriptionRaw adds a subscription to a contact and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/attachsubscriptiontypetocontact
 func (s *ContactsService) AddSubscriptionRaw(ctx context.Context, contactID string, body *AddSubscriptionRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("contacts/%s/subscriptions", url.PathEscape(contactID)), body)
 	if err != nil {
@@ -791,6 +873,8 @@ func (s *ContactsService) AddSubscriptionRaw(ctx context.Context, contactID stri
 }
 
 // RemoveSubscriptionRaw removes a subscription from a contact and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/detachsubscriptiontypetocontact
 func (s *ContactsService) RemoveSubscriptionRaw(ctx context.Context, contactID, subscriptionID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("contacts/%s/subscriptions/%s", url.PathEscape(contactID), url.PathEscape(subscriptionID)), nil)
 	if err != nil {
@@ -800,6 +884,8 @@ func (s *ContactsService) RemoveSubscriptionRaw(ctx context.Context, contactID, 
 }
 
 // AddTagRaw adds a tag to a contact and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/attachtagtocontact
 func (s *ContactsService) AddTagRaw(ctx context.Context, contactID, tagID string) (*Result, error) {
 	body := struct {
 		ID string `json:"id"`
@@ -812,6 +898,8 @@ func (s *ContactsService) AddTagRaw(ctx context.Context, contactID, tagID string
 }
 
 // RemoveTagRaw removes a tag from a contact and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/detachtagfromcontact
 func (s *ContactsService) RemoveTagRaw(ctx context.Context, contactID, tagID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("contacts/%s/tags/%s", url.PathEscape(contactID), url.PathEscape(tagID)), nil)
 	if err != nil {

@@ -93,28 +93,28 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] CompanyList/CompanyListRaw → `companies/listallcompanies`
 
 ### Task 9: Add doc URLs to contacts.go
-- [ ] Get/GetRaw → `contacts/showcontact`
-- [ ] List/ListRaw → `contacts/listcontacts`
-- [ ] Create/CreateRaw → `contacts/createcontact`
-- [ ] Update/UpdateRaw → `contacts/updatecontact`
-- [ ] Delete/DeleteRaw → `contacts/deletecontact`
-- [ ] Search/SearchRaw → `contacts/searchcontacts`
-- [ ] Merge/MergeRaw → `contacts/mergecontact`
-- [ ] Archive/ArchiveRaw → `contacts/archivecontact`
-- [ ] Unarchive/UnarchiveRaw → `contacts/unarchivecontact`
-- [ ] Block/BlockRaw → `contacts/blockcontact`
-- [ ] FindByExternalID/FindByExternalIDRaw → `contacts/showcontactbyexternalid`
-- [ ] ListCompanies/ListCompaniesRaw → `contacts/listcompaniesforacontact`
-- [ ] AddCompany/AddCompanyRaw → `contacts/attachcontacttoacompany`
-- [ ] RemoveCompany/RemoveCompanyRaw → `contacts/detachcontactfromacompany`
-- [ ] ListNotes/ListNotesRaw → `contacts/listnotes`
-- [ ] CreateNote/CreateNoteRaw → `contacts/createnote`
-- [ ] ListSegments/ListSegmentsRaw → `contacts/listsegmentsforacontact`
-- [ ] ListSubscriptions/ListSubscriptionsRaw → `subscription-types/listsubscriptionsforacontact`
-- [ ] AddSubscription/AddSubscriptionRaw → `subscription-types/attachsubscriptiontypetocontact`
-- [ ] RemoveSubscription/RemoveSubscriptionRaw → `subscription-types/detachsubscriptiontypetocontact`
-- [ ] AddTag/AddTagRaw → `tags/attachtagtocontact`
-- [ ] RemoveTag/RemoveTagRaw → `tags/detachtagfromcontact`
+- [x] Get/GetRaw → `contacts/showcontact`
+- [x] List/ListRaw → `contacts/listcontacts`
+- [x] Create/CreateRaw → `contacts/createcontact`
+- [x] Update/UpdateRaw → `contacts/updatecontact`
+- [x] Delete/DeleteRaw → `contacts/deletecontact`
+- [x] Search/SearchRaw → `contacts/searchcontacts`
+- [x] Merge/MergeRaw → `contacts/mergecontact`
+- [x] Archive/ArchiveRaw → `contacts/archivecontact`
+- [x] Unarchive/UnarchiveRaw → `contacts/unarchivecontact`
+- [x] Block/BlockRaw → `contacts/blockcontact`
+- [x] FindByExternalID/FindByExternalIDRaw → `contacts/showcontactbyexternalid`
+- [x] ListCompanies/ListCompaniesRaw → `contacts/listcompaniesforacontact`
+- [x] AddCompany/AddCompanyRaw → `contacts/attachcontacttoacompany`
+- [x] RemoveCompany/RemoveCompanyRaw → `contacts/detachcontactfromacompany`
+- [x] ListNotes/ListNotesRaw → `contacts/listnotes`
+- [x] CreateNote/CreateNoteRaw → `contacts/createnote`
+- [x] ListSegments/ListSegmentsRaw → `contacts/listsegmentsforacontact`
+- [x] ListSubscriptions/ListSubscriptionsRaw → `subscription-types/listsubscriptionsforacontact`
+- [x] AddSubscription/AddSubscriptionRaw → `subscription-types/attachsubscriptiontypetocontact`
+- [x] RemoveSubscription/RemoveSubscriptionRaw → `subscription-types/detachsubscriptiontypetocontact`
+- [x] AddTag/AddTagRaw → `tags/attachtagtocontact`
+- [x] RemoveTag/RemoveTagRaw → `tags/detachtagfromcontact`
 
 ### Task 10: Add doc URLs to conversations.go
 - [ ] Get/GetRaw → `conversations/retrieveconversation`
