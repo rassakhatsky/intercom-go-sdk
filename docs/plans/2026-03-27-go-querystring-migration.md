@@ -52,9 +52,9 @@
 - [x] run `go test ./...` — all tests must pass
 
 ### Task 3: Simplify caller pattern across service files
-- [ ] audit all 15 call sites to confirm no caller-specific changes are needed
-- [ ] if any callers use `addQueryOptions` in a non-standard way, refactor them
-- [ ] run `go test ./...` — all tests must pass
+- [x] audit all 15 call sites to confirm no caller-specific changes are needed
+- [x] if any callers use `addQueryOptions` in a non-standard way, refactor them
+- [x] run `go test ./...` — all tests must pass
 
 ### Task 4: Verify acceptance criteria
 - [ ] verify `addQueryOptions` works identically to before (same query string output)
