@@ -202,7 +202,7 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] Update/UpdateRaw → `ip-allowlist/updateipallowlist`
 
 ### Task 22: Add doc URLs to jobs.go
-- [ ] GetStatus/GetStatusRaw → `jobs/jobsstatus`
+- [x] GetStatus/GetStatusRaw → `jobs/jobsstatus`
 
 ### Task 23: Add doc URLs to messages.go
 - [ ] Create/CreateRaw → `messages/createmessage`

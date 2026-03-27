@@ -32,6 +32,8 @@ func ParseJobGetStatusResult(r *Result) (*Job, error) {
 // --- Regular Methods ---
 
 // GetStatus retrieves the status of a job by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/jobs/jobsstatus
 func (s *JobsService) GetStatus(ctx context.Context, jobID string) (*Job, error) {
 	result, err := s.GetStatusRaw(ctx, jobID)
 	if err != nil {
@@ -46,6 +48,8 @@ func (s *JobsService) GetStatus(ctx context.Context, jobID string) (*Job, error)
 // --- Raw Methods ---
 
 // GetStatusRaw retrieves the status of a job by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/jobs/jobsstatus
 func (s *JobsService) GetStatusRaw(ctx context.Context, jobID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("jobs/status/%s", url.PathEscape(jobID)), nil)
 	if err != nil {
