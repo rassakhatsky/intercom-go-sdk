@@ -48,6 +48,8 @@ func ParseSegmentListResult(r *Result) (*SegmentList, error) {
 // --- Regular Methods ---
 
 // Get retrieves a segment by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/segments/retrievesegment
 func (s *SegmentsService) Get(ctx context.Context, id string) (*Segment, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -60,6 +62,8 @@ func (s *SegmentsService) Get(ctx context.Context, id string) (*Segment, error) 
 }
 
 // List returns all segments.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/segments/listsegments
 func (s *SegmentsService) List(ctx context.Context, opts *SegmentListOptions) (*SegmentList, error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
@@ -74,6 +78,8 @@ func (s *SegmentsService) List(ctx context.Context, opts *SegmentListOptions) (*
 // --- Raw Methods ---
 
 // GetRaw retrieves a segment by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/segments/retrievesegment
 func (s *SegmentsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("segments/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -83,6 +89,8 @@ func (s *SegmentsService) GetRaw(ctx context.Context, id string) (*Result, error
 }
 
 // ListRaw returns all segments with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/segments/listsegments
 func (s *SegmentsService) ListRaw(ctx context.Context, opts *SegmentListOptions) (*Result, error) {
 	path, err := addQueryOptions("segments", opts)
 	if err != nil {

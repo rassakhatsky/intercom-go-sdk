@@ -222,8 +222,8 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] Create/CreateRaw → `switch/createphoneswitch`
 
 ### Task 27: Add doc URLs to segments.go
-- [ ] Get/GetRaw → `segments/retrievesegment`
-- [ ] List/ListRaw → `segments/listsegments`
+- [x] Get/GetRaw → `segments/retrievesegment`
+- [x] List/ListRaw → `segments/listsegments`
 
 ### Task 28: Add doc URLs to subscription_types.go
 - [ ] List/ListRaw → `subscription-types/listsubscriptiontypes`
