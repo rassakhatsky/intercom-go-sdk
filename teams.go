@@ -42,6 +42,8 @@ func ParseTeamListResult(r *Result) (*TeamList, error) {
 // --- Regular Methods ---
 
 // Get retrieves a team by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/teams/retrieveteam
 func (s *TeamsService) Get(ctx context.Context, id string) (*Team, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -54,6 +56,8 @@ func (s *TeamsService) Get(ctx context.Context, id string) (*Team, error) {
 }
 
 // List returns all teams.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/teams/listteams
 func (s *TeamsService) List(ctx context.Context) (*TeamList, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
@@ -68,6 +72,8 @@ func (s *TeamsService) List(ctx context.Context) (*TeamList, error) {
 // --- Raw Methods ---
 
 // GetRaw retrieves a team by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/teams/retrieveteam
 func (s *TeamsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("teams/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -77,6 +83,8 @@ func (s *TeamsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 }
 
 // ListRaw returns all teams with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/teams/listteams
 func (s *TeamsService) ListRaw(ctx context.Context) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "teams", nil)
 	if err != nil {

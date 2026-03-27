@@ -237,8 +237,8 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] UntagCompany/UntagCompanyRaw → `tags/createtag`
 
 ### Task 30: Add doc URLs to teams.go
-- [ ] Get/GetRaw → `teams/retrieveteam`
-- [ ] List/ListRaw → `teams/listteams`
+- [x] Get/GetRaw → `teams/retrieveteam`
+- [x] List/ListRaw → `teams/listteams`
 
 ### Task 31: Add doc URLs to ticket_states.go
 - [ ] List/ListRaw → `ticket-states/listticketstates`
