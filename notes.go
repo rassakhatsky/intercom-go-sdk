@@ -21,6 +21,8 @@ func ParseNoteGetResult(r *Result) (*Note, error) {
 // --- Regular Methods ---
 
 // Get retrieves a note by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/notes/retrievenote
 func (s *NotesService) Get(ctx context.Context, id string) (*Note, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -35,6 +37,8 @@ func (s *NotesService) Get(ctx context.Context, id string) (*Note, error) {
 // --- Raw Methods ---
 
 // GetRaw retrieves a note by ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/notes/retrievenote
 func (s *NotesService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("notes/%s", url.PathEscape(id)), nil)
 	if err != nil {
