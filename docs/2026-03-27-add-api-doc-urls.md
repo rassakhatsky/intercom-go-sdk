@@ -47,16 +47,16 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] ListActivityLogs/ListActivityLogsRaw → `admins/listactivitylogs`
 
 ### Task 3: Add doc URLs to ai_content.go
-- [ ] ListContentImportSources/Raw → `ai-content/listcontentimportsources`
-- [ ] GetContentImportSource/Raw → `ai-content/getcontentimportsource`
-- [ ] CreateContentImportSource/Raw → `ai-content/createcontentimportsource`
-- [ ] UpdateContentImportSource/Raw → `ai-content/updatecontentimportsource`
-- [ ] DeleteContentImportSource/Raw → `ai-content/deletecontentimportsource`
-- [ ] ListExternalPages/Raw → `ai-content/listexternalpages`
-- [ ] GetExternalPage/Raw → `ai-content/getexternalpage`
-- [ ] CreateExternalPage/Raw → `ai-content/createexternalpage`
-- [ ] UpdateExternalPage/Raw → `ai-content/updateexternalpage`
-- [ ] DeleteExternalPage/Raw → `ai-content/deleteexternalpage`
+- [x] ListContentImportSources/Raw → `ai-content/listcontentimportsources`
+- [x] GetContentImportSource/Raw → `ai-content/getcontentimportsource`
+- [x] CreateContentImportSource/Raw → `ai-content/createcontentimportsource`
+- [x] UpdateContentImportSource/Raw → `ai-content/updatecontentimportsource`
+- [x] DeleteContentImportSource/Raw → `ai-content/deletecontentimportsource`
+- [x] ListExternalPages/Raw → `ai-content/listexternalpages`
+- [x] GetExternalPage/Raw → `ai-content/getexternalpage`
+- [x] CreateExternalPage/Raw → `ai-content/createexternalpage`
+- [x] UpdateExternalPage/Raw → `ai-content/updateexternalpage`
+- [x] DeleteExternalPage/Raw → `ai-content/deleteexternalpage`
 
 ### Task 4: Add doc URLs to articles.go
 - [ ] Get/GetRaw → `articles/retrievearticle`
