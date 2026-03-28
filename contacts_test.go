@@ -1219,3 +1219,82 @@ func TestContactsService_List_RateLimit(t *testing.T) {
 		t.Errorf("IsRateLimited = false, want true")
 	}
 }
+
+func TestContactsService_ListTags(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/contacts/123/tags", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodGet)
+		fmt.Fprint(w, `{
+			"type":"list",
+			"data":[
+				{"type":"tag","id":"80","name":"Manual tag","applied_at":1663597223,"applied_by":{"type":"admin","id":"456"}},
+				{"type":"tag","id":"81","name":"Auto tag"}
+			]
+		}`)
+	})
+
+	ctx := context.Background()
+	result, err := client.Contacts.ListTags(ctx, "123")
+	if err != nil {
+		t.Fatalf("Contacts.ListTags returned error: %v", err)
+	}
+	if result.Type != "list" {
+		t.Errorf("TagList.Type = %v, want list", result.Type)
+	}
+	if len(result.Data) != 2 {
+		t.Fatalf("ListTags returned %d tags, want 2", len(result.Data))
+	}
+	if result.Data[0].Name != "Manual tag" {
+		t.Errorf("Tag[0].Name = %v, want Manual tag", result.Data[0].Name)
+	}
+	if result.Data[0].AppliedAt == nil || *result.Data[0].AppliedAt != 1663597223 {
+		t.Errorf("Tag[0].AppliedAt = %v, want 1663597223", result.Data[0].AppliedAt)
+	}
+}
+
+func TestContactsService_ListTags_NotFound(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/contacts/999/tags", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(w, `{"type":"error.list","request_id":"req-1","errors":[{"code":"not_found","message":"User Not Found"}]}`)
+	})
+
+	ctx := context.Background()
+	_, err := client.Contacts.ListTags(ctx, "999")
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+	if !IsNotFound(err) {
+		t.Errorf("IsNotFound = false, want true")
+	}
+}
+
+func TestContactsService_ListTagsRaw(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/contacts/123/tags", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodGet)
+		fmt.Fprint(w, `{
+			"type":"list",
+			"data":[{"type":"tag","id":"80","name":"Manual tag"}]
+		}`)
+	})
+
+	ctx := context.Background()
+	result, err := client.Contacts.ListTagsRaw(ctx, "123")
+	if err != nil {
+		t.Fatalf("ListTagsRaw returned error: %v", err)
+	}
+	tags, err := ParseContactListTagsResult(result)
+	if err != nil {
+		t.Fatalf("ParseContactListTagsResult returned error: %v", err)
+	}
+	if len(tags.Data) != 1 {
+		t.Errorf("Data len = %d, want 1", len(tags.Data))
+	}
+}

@@ -342,6 +342,11 @@ func ParseContactAddTagResult(r *Result) (*TagRef, error) { return Decode[TagRef
 // ParseContactRemoveTagResult decodes a Result into a TagRef.
 func ParseContactRemoveTagResult(r *Result) (*TagRef, error) { return Decode[TagRef](r) }
 
+// ParseContactListTagsResult decodes a Result into a TagList.
+func ParseContactListTagsResult(r *Result) (*TagList, error) {
+	return Decode[TagList](r)
+}
+
 // Get retrieves a contact by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/showcontact
@@ -656,6 +661,20 @@ func (s *ContactsService) RemoveTag(ctx context.Context, contactID, tagID string
 	return ParseContactRemoveTagResult(result)
 }
 
+// ListTags returns the tags attached to a contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listtagsforacontact
+func (s *ContactsService) ListTags(ctx context.Context, contactID string) (*TagList, error) {
+	result, err := s.ListTagsRaw(ctx, contactID)
+	if err != nil {
+		return nil, err
+	}
+	if result.Error != nil {
+		return nil, resultError(result)
+	}
+	return ParseContactListTagsResult(result)
+}
+
 // GetRaw retrieves a contact by ID and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/showcontact
@@ -902,6 +921,17 @@ func (s *ContactsService) AddTagRaw(ctx context.Context, contactID, tagID string
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/detachtagfromcontact
 func (s *ContactsService) RemoveTagRaw(ctx context.Context, contactID, tagID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("contacts/%s/tags/%s", url.PathEscape(contactID), url.PathEscape(tagID)), nil)
+	if err != nil {
+		return nil, err
+	}
+	return s.client.DoRaw(ctx, req)
+}
+
+// ListTagsRaw returns the tags attached to a contact with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listtagsforacontact
+func (s *ContactsService) ListTagsRaw(ctx context.Context, contactID string) (*Result, error) {
+	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/%s/tags", url.PathEscape(contactID)), nil)
 	if err != nil {
 		return nil, err
 	}

@@ -63,12 +63,12 @@ Extend the script to:
 ### Task 3: Fix gap — add `ContactsService.ListTags`
 Add the missing `GET /contacts/{contact_id}/tags` operation.
 
-- [ ] Add `ListTags` method + `ListTagsRaw` to `contacts.go` following 3-layer pattern
-- [ ] Add `ParseListTagsResult` function
-- [ ] Add `// See:` doc URL comments
-- [ ] Write tests for `ListTags` in `contacts_test.go` (success case)
-- [ ] Write test for error/edge case
-- [ ] Run tests — must pass before next task
+- [x] Add `ListTags` method + `ListTagsRaw` to `contacts.go` following 3-layer pattern
+- [x] Add `ParseListTagsResult` function
+- [x] Add `// See:` doc URL comments
+- [x] Write tests for `ListTags` in `contacts_test.go` (success case)
+- [x] Write test for error/edge case
+- [x] Run tests — must pass before next task
 
 ### Task 4: Fix gap — add `GET /export/workflows/{id}` support
 Add the missing exportWorkflow operation. Decide service placement (new WorkflowsService or add to existing).
