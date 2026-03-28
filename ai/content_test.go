@@ -1,4 +1,4 @@
-package intercom
+package ai_test
 
 import (
 	"context"
@@ -6,12 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/ai"
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
 // --- Content Import Sources ---
 
-func TestAIContentService_ListContentImportSources(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_ListContentImportSources(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/content_import_sources", func(w http.ResponseWriter, r *http.Request) {
@@ -47,9 +50,9 @@ func TestAIContentService_ListContentImportSources(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.ListContentImportSources(ctx)
+	result, err := svc.ListContentImportSources(ctx)
 	if err != nil {
-		t.Fatalf("AIContent.ListContentImportSources returned error: %v", err)
+		t.Fatalf("ListContentImportSources returned error: %v", err)
 	}
 	if result.TotalCount != 2 {
 		t.Errorf("TotalCount = %v, want 2", result.TotalCount)
@@ -75,8 +78,8 @@ func TestAIContentService_ListContentImportSources(t *testing.T) {
 	}
 }
 
-func TestAIContentService_GetContentImportSource(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_GetContentImportSource(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/content_import_sources/5", func(w http.ResponseWriter, r *http.Request) {
@@ -94,9 +97,9 @@ func TestAIContentService_GetContentImportSource(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	src, err := client.AIContent.GetContentImportSource(ctx, "5")
+	src, err := svc.GetContentImportSource(ctx, "5")
 	if err != nil {
-		t.Fatalf("AIContent.GetContentImportSource returned error: %v", err)
+		t.Fatalf("GetContentImportSource returned error: %v", err)
 	}
 	if src.ID != 5 {
 		t.Errorf("ID = %v, want 5", src.ID)
@@ -109,13 +112,13 @@ func TestAIContentService_GetContentImportSource(t *testing.T) {
 	}
 }
 
-func TestAIContentService_CreateContentImportSource(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_CreateContentImportSource(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/content_import_sources", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body CreateContentImportSourceRequest
+		var body ai.CreateContentImportSourceRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -138,12 +141,12 @@ func TestAIContentService_CreateContentImportSource(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	src, err := client.AIContent.CreateContentImportSource(ctx, &CreateContentImportSourceRequest{
+	src, err := svc.CreateContentImportSource(ctx, &ai.CreateContentImportSourceRequest{
 		SyncBehavior: "api",
 		URL:          "https://www.example.com",
 	})
 	if err != nil {
-		t.Fatalf("AIContent.CreateContentImportSource returned error: %v", err)
+		t.Fatalf("CreateContentImportSource returned error: %v", err)
 	}
 	if src.ID != 10 {
 		t.Errorf("ID = %v, want 10", src.ID)
@@ -153,13 +156,13 @@ func TestAIContentService_CreateContentImportSource(t *testing.T) {
 	}
 }
 
-func TestAIContentService_UpdateContentImportSource(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_UpdateContentImportSource(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/content_import_sources/10", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPut)
-		var body UpdateContentImportSourceRequest
+		var body ai.UpdateContentImportSourceRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -182,12 +185,12 @@ func TestAIContentService_UpdateContentImportSource(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	src, err := client.AIContent.UpdateContentImportSource(ctx, "10", &UpdateContentImportSourceRequest{
+	src, err := svc.UpdateContentImportSource(ctx, "10", &ai.UpdateContentImportSourceRequest{
 		SyncBehavior: "api",
 		URL:          "https://www.example.com",
 	})
 	if err != nil {
-		t.Fatalf("AIContent.UpdateContentImportSource returned error: %v", err)
+		t.Fatalf("UpdateContentImportSource returned error: %v", err)
 	}
 	if src.ID != 10 {
 		t.Errorf("ID = %v, want 10", src.ID)
@@ -197,8 +200,8 @@ func TestAIContentService_UpdateContentImportSource(t *testing.T) {
 	}
 }
 
-func TestAIContentService_DeleteContentImportSource(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_DeleteContentImportSource(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/content_import_sources/10", func(w http.ResponseWriter, r *http.Request) {
@@ -207,14 +210,14 @@ func TestAIContentService_DeleteContentImportSource(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	err := client.AIContent.DeleteContentImportSource(ctx, "10")
+	err := svc.DeleteContentImportSource(ctx, "10")
 	if err != nil {
-		t.Fatalf("AIContent.DeleteContentImportSource returned error: %v", err)
+		t.Fatalf("DeleteContentImportSource returned error: %v", err)
 	}
 }
 
-func TestAIContentService_GetContentImportSource_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_GetContentImportSource_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/content_import_sources/999", func(w http.ResponseWriter, r *http.Request) {
@@ -227,19 +230,19 @@ func TestAIContentService_GetContentImportSource_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.AIContent.GetContentImportSource(ctx, "999")
+	_, err := svc.GetContentImportSource(ctx, "999")
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("expected not found error, got %v", err)
 	}
 }
 
 // --- External Pages ---
 
-func TestAIContentService_ListExternalPages(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_ListExternalPages(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages", func(w http.ResponseWriter, r *http.Request) {
@@ -285,9 +288,9 @@ func TestAIContentService_ListExternalPages(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.ListExternalPages(ctx)
+	result, err := svc.ListExternalPages(ctx)
 	if err != nil {
-		t.Fatalf("AIContent.ListExternalPages returned error: %v", err)
+		t.Fatalf("ListExternalPages returned error: %v", err)
 	}
 	if result.TotalCount != 2 {
 		t.Errorf("TotalCount = %v, want 2", result.TotalCount)
@@ -322,8 +325,8 @@ func TestAIContentService_ListExternalPages(t *testing.T) {
 	}
 }
 
-func TestAIContentService_GetExternalPage(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_GetExternalPage(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages/22", func(w http.ResponseWriter, r *http.Request) {
@@ -346,9 +349,9 @@ func TestAIContentService_GetExternalPage(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	page, err := client.AIContent.GetExternalPage(ctx, "22")
+	page, err := svc.GetExternalPage(ctx, "22")
 	if err != nil {
-		t.Fatalf("AIContent.GetExternalPage returned error: %v", err)
+		t.Fatalf("GetExternalPage returned error: %v", err)
 	}
 	if page.ID != "22" {
 		t.Errorf("ID = %v, want 22", page.ID)
@@ -361,13 +364,13 @@ func TestAIContentService_GetExternalPage(t *testing.T) {
 	}
 }
 
-func TestAIContentService_CreateExternalPage(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_CreateExternalPage(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body CreateExternalPageRequest
+		var body ai.CreateExternalPageRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -404,19 +407,20 @@ func TestAIContentService_CreateExternalPage(t *testing.T) {
 		}`)
 	})
 
+	tr := true
 	ctx := context.Background()
-	page, err := client.AIContent.CreateExternalPage(ctx, &CreateExternalPageRequest{
+	page, err := svc.CreateExternalPage(ctx, &ai.CreateExternalPageRequest{
 		Title:                 "Test",
 		HTML:                  "<html><body><h1>Test</h1></body></html>",
 		URL:                   "https://www.example.com",
-		AIAgentAvailability:   boolPtr(true),
-		AICopilotAvailability: boolPtr(true),
+		AIAgentAvailability:   &tr,
+		AICopilotAvailability: &tr,
 		Locale:                "en",
 		SourceID:              1234,
 		ExternalID:            "abc1234",
 	})
 	if err != nil {
-		t.Fatalf("AIContent.CreateExternalPage returned error: %v", err)
+		t.Fatalf("CreateExternalPage returned error: %v", err)
 	}
 	if page.ID != "30" {
 		t.Errorf("ID = %v, want 30", page.ID)
@@ -429,13 +433,13 @@ func TestAIContentService_CreateExternalPage(t *testing.T) {
 	}
 }
 
-func TestAIContentService_UpdateExternalPage(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_UpdateExternalPage(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages/30", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPut)
-		var body UpdateExternalPageRequest
+		var body ai.UpdateExternalPageRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -461,12 +465,12 @@ func TestAIContentService_UpdateExternalPage(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	page, err := client.AIContent.UpdateExternalPage(ctx, "30", &UpdateExternalPageRequest{
+	page, err := svc.UpdateExternalPage(ctx, "30", &ai.UpdateExternalPageRequest{
 		Title:    "Updated Title",
 		SourceID: 1234,
 	})
 	if err != nil {
-		t.Fatalf("AIContent.UpdateExternalPage returned error: %v", err)
+		t.Fatalf("UpdateExternalPage returned error: %v", err)
 	}
 	if page.ID != "30" {
 		t.Errorf("ID = %v, want 30", page.ID)
@@ -479,8 +483,8 @@ func TestAIContentService_UpdateExternalPage(t *testing.T) {
 	}
 }
 
-func TestAIContentService_DeleteExternalPage(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_DeleteExternalPage(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages/22", func(w http.ResponseWriter, r *http.Request) {
@@ -503,17 +507,17 @@ func TestAIContentService_DeleteExternalPage(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	page, err := client.AIContent.DeleteExternalPage(ctx, "22")
+	page, err := svc.DeleteExternalPage(ctx, "22")
 	if err != nil {
-		t.Fatalf("AIContent.DeleteExternalPage returned error: %v", err)
+		t.Fatalf("DeleteExternalPage returned error: %v", err)
 	}
 	if page.ID != "22" {
 		t.Errorf("ID = %v, want 22", page.ID)
 	}
 }
 
-func TestAIContentService_GetExternalPage_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_GetExternalPage_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages/999", func(w http.ResponseWriter, r *http.Request) {
@@ -526,19 +530,19 @@ func TestAIContentService_GetExternalPage_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.AIContent.GetExternalPage(ctx, "999")
+	_, err := svc.GetExternalPage(ctx, "999")
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("expected not found error, got %v", err)
 	}
 }
 
 // --- Raw Content Import Sources ---
 
-func TestAIContentService_ListContentImportSourcesRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_ListContentImportSourcesRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/content_import_sources", func(w http.ResponseWriter, r *http.Request) {
@@ -548,7 +552,7 @@ func TestAIContentService_ListContentImportSourcesRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.ListContentImportSourcesRaw(ctx)
+	result, err := svc.ListContentImportSourcesRaw(ctx)
 	if err != nil {
 		t.Fatalf("ListContentImportSourcesRaw returned error: %v", err)
 	}
@@ -561,9 +565,9 @@ func TestAIContentService_ListContentImportSourcesRaw_Success(t *testing.T) {
 	if result.Error != nil {
 		t.Errorf("Result.Error = %v, want nil", result.Error)
 	}
-	data, err := ParseAIContentListContentImportSourcesResult(result)
+	data, err := ai.ParseListContentImportSourcesResult(result)
 	if err != nil {
-		t.Fatalf("ParseAIContentListContentImportSourcesResult returned error: %v", err)
+		t.Fatalf("ParseListContentImportSourcesResult returned error: %v", err)
 	}
 	if data.TotalCount != 1 {
 		t.Errorf("TotalCount = %v, want 1", data.TotalCount)
@@ -576,8 +580,8 @@ func TestAIContentService_ListContentImportSourcesRaw_Success(t *testing.T) {
 	}
 }
 
-func TestAIContentService_GetContentImportSourceRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_GetContentImportSourceRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/content_import_sources/5", func(w http.ResponseWriter, r *http.Request) {
@@ -587,7 +591,7 @@ func TestAIContentService_GetContentImportSourceRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.GetContentImportSourceRaw(ctx, "5")
+	result, err := svc.GetContentImportSourceRaw(ctx, "5")
 	if err != nil {
 		t.Fatalf("GetContentImportSourceRaw returned error: %v", err)
 	}
@@ -600,17 +604,17 @@ func TestAIContentService_GetContentImportSourceRaw_Success(t *testing.T) {
 	if result.Error != nil {
 		t.Errorf("Result.Error = %v, want nil", result.Error)
 	}
-	data, err := ParseAIContentGetContentImportSourceResult(result)
+	data, err := ai.ParseGetContentImportSourceResult(result)
 	if err != nil {
-		t.Fatalf("ParseAIContentGetContentImportSourceResult returned error: %v", err)
+		t.Fatalf("ParseGetContentImportSourceResult returned error: %v", err)
 	}
 	if data.ID != 5 {
 		t.Errorf("ID = %v, want 5", data.ID)
 	}
 }
 
-func TestAIContentService_GetContentImportSourceRaw_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_GetContentImportSourceRaw_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/content_import_sources/999", func(w http.ResponseWriter, r *http.Request) {
@@ -619,7 +623,7 @@ func TestAIContentService_GetContentImportSourceRaw_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.GetContentImportSourceRaw(ctx, "999")
+	result, err := svc.GetContentImportSourceRaw(ctx, "999")
 	if err != nil {
 		t.Fatalf("GetContentImportSourceRaw returned Go error: %v", err)
 	}
@@ -634,8 +638,8 @@ func TestAIContentService_GetContentImportSourceRaw_NotFound(t *testing.T) {
 	}
 }
 
-func TestAIContentService_CreateContentImportSourceRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_CreateContentImportSourceRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/content_import_sources", func(w http.ResponseWriter, r *http.Request) {
@@ -645,7 +649,7 @@ func TestAIContentService_CreateContentImportSourceRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.CreateContentImportSourceRaw(ctx, &CreateContentImportSourceRequest{
+	result, err := svc.CreateContentImportSourceRaw(ctx, &ai.CreateContentImportSourceRequest{
 		SyncBehavior: "api",
 		URL:          "https://www.example.com",
 	})
@@ -658,17 +662,17 @@ func TestAIContentService_CreateContentImportSourceRaw_Success(t *testing.T) {
 	if result.Header.Get("X-Request-Id") != "req-create-cis" {
 		t.Errorf("Header X-Request-Id = %q, want req-create-cis", result.Header.Get("X-Request-Id"))
 	}
-	data, err := ParseAIContentCreateContentImportSourceResult(result)
+	data, err := ai.ParseCreateContentImportSourceResult(result)
 	if err != nil {
-		t.Fatalf("ParseAIContentCreateContentImportSourceResult returned error: %v", err)
+		t.Fatalf("ParseCreateContentImportSourceResult returned error: %v", err)
 	}
 	if data.ID != 10 {
 		t.Errorf("ID = %v, want 10", data.ID)
 	}
 }
 
-func TestAIContentService_UpdateContentImportSourceRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_UpdateContentImportSourceRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/content_import_sources/10", func(w http.ResponseWriter, r *http.Request) {
@@ -678,7 +682,7 @@ func TestAIContentService_UpdateContentImportSourceRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.UpdateContentImportSourceRaw(ctx, "10", &UpdateContentImportSourceRequest{
+	result, err := svc.UpdateContentImportSourceRaw(ctx, "10", &ai.UpdateContentImportSourceRequest{
 		SyncBehavior: "api",
 		URL:          "https://www.example.com",
 	})
@@ -691,17 +695,17 @@ func TestAIContentService_UpdateContentImportSourceRaw_Success(t *testing.T) {
 	if result.Header.Get("X-Request-Id") != "req-update-cis" {
 		t.Errorf("Header X-Request-Id = %q, want req-update-cis", result.Header.Get("X-Request-Id"))
 	}
-	data, err := ParseAIContentUpdateContentImportSourceResult(result)
+	data, err := ai.ParseUpdateContentImportSourceResult(result)
 	if err != nil {
-		t.Fatalf("ParseAIContentUpdateContentImportSourceResult returned error: %v", err)
+		t.Fatalf("ParseUpdateContentImportSourceResult returned error: %v", err)
 	}
 	if data.ID != 10 {
 		t.Errorf("ID = %v, want 10", data.ID)
 	}
 }
 
-func TestAIContentService_DeleteContentImportSourceRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_DeleteContentImportSourceRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/content_import_sources/10", func(w http.ResponseWriter, r *http.Request) {
@@ -710,7 +714,7 @@ func TestAIContentService_DeleteContentImportSourceRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.DeleteContentImportSourceRaw(ctx, "10")
+	result, err := svc.DeleteContentImportSourceRaw(ctx, "10")
 	if err != nil {
 		t.Fatalf("DeleteContentImportSourceRaw returned error: %v", err)
 	}
@@ -724,8 +728,8 @@ func TestAIContentService_DeleteContentImportSourceRaw_Success(t *testing.T) {
 
 // --- Raw External Pages ---
 
-func TestAIContentService_ListExternalPagesRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_ListExternalPagesRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages", func(w http.ResponseWriter, r *http.Request) {
@@ -735,7 +739,7 @@ func TestAIContentService_ListExternalPagesRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.ListExternalPagesRaw(ctx)
+	result, err := svc.ListExternalPagesRaw(ctx)
 	if err != nil {
 		t.Fatalf("ListExternalPagesRaw returned error: %v", err)
 	}
@@ -745,9 +749,9 @@ func TestAIContentService_ListExternalPagesRaw_Success(t *testing.T) {
 	if result.Header.Get("X-Request-Id") != "req-list-ep" {
 		t.Errorf("Header X-Request-Id = %q, want req-list-ep", result.Header.Get("X-Request-Id"))
 	}
-	data, err := ParseAIContentListExternalPagesResult(result)
+	data, err := ai.ParseListExternalPagesResult(result)
 	if err != nil {
-		t.Fatalf("ParseAIContentListExternalPagesResult returned error: %v", err)
+		t.Fatalf("ParseListExternalPagesResult returned error: %v", err)
 	}
 	if data.TotalCount != 1 {
 		t.Errorf("TotalCount = %v, want 1", data.TotalCount)
@@ -760,8 +764,8 @@ func TestAIContentService_ListExternalPagesRaw_Success(t *testing.T) {
 	}
 }
 
-func TestAIContentService_GetExternalPageRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_GetExternalPageRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages/22", func(w http.ResponseWriter, r *http.Request) {
@@ -771,7 +775,7 @@ func TestAIContentService_GetExternalPageRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.GetExternalPageRaw(ctx, "22")
+	result, err := svc.GetExternalPageRaw(ctx, "22")
 	if err != nil {
 		t.Fatalf("GetExternalPageRaw returned error: %v", err)
 	}
@@ -781,17 +785,17 @@ func TestAIContentService_GetExternalPageRaw_Success(t *testing.T) {
 	if result.Header.Get("X-Request-Id") != "req-get-ep" {
 		t.Errorf("Header X-Request-Id = %q, want req-get-ep", result.Header.Get("X-Request-Id"))
 	}
-	data, err := ParseAIContentGetExternalPageResult(result)
+	data, err := ai.ParseGetExternalPageResult(result)
 	if err != nil {
-		t.Fatalf("ParseAIContentGetExternalPageResult returned error: %v", err)
+		t.Fatalf("ParseGetExternalPageResult returned error: %v", err)
 	}
 	if data.ID != "22" {
 		t.Errorf("ID = %v, want 22", data.ID)
 	}
 }
 
-func TestAIContentService_GetExternalPageRaw_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_GetExternalPageRaw_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages/999", func(w http.ResponseWriter, r *http.Request) {
@@ -800,7 +804,7 @@ func TestAIContentService_GetExternalPageRaw_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.GetExternalPageRaw(ctx, "999")
+	result, err := svc.GetExternalPageRaw(ctx, "999")
 	if err != nil {
 		t.Fatalf("GetExternalPageRaw returned Go error: %v", err)
 	}
@@ -815,8 +819,8 @@ func TestAIContentService_GetExternalPageRaw_NotFound(t *testing.T) {
 	}
 }
 
-func TestAIContentService_CreateExternalPageRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_CreateExternalPageRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages", func(w http.ResponseWriter, r *http.Request) {
@@ -826,7 +830,7 @@ func TestAIContentService_CreateExternalPageRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.CreateExternalPageRaw(ctx, &CreateExternalPageRequest{
+	result, err := svc.CreateExternalPageRaw(ctx, &ai.CreateExternalPageRequest{
 		Title:      "Test",
 		HTML:       "<h1>Test</h1>",
 		URL:        "https://www.example.com",
@@ -843,17 +847,17 @@ func TestAIContentService_CreateExternalPageRaw_Success(t *testing.T) {
 	if result.Header.Get("X-Request-Id") != "req-create-ep" {
 		t.Errorf("Header X-Request-Id = %q, want req-create-ep", result.Header.Get("X-Request-Id"))
 	}
-	data, err := ParseAIContentCreateExternalPageResult(result)
+	data, err := ai.ParseCreateExternalPageResult(result)
 	if err != nil {
-		t.Fatalf("ParseAIContentCreateExternalPageResult returned error: %v", err)
+		t.Fatalf("ParseCreateExternalPageResult returned error: %v", err)
 	}
 	if data.ID != "30" {
 		t.Errorf("ID = %v, want 30", data.ID)
 	}
 }
 
-func TestAIContentService_UpdateExternalPageRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_UpdateExternalPageRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages/30", func(w http.ResponseWriter, r *http.Request) {
@@ -863,7 +867,7 @@ func TestAIContentService_UpdateExternalPageRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.UpdateExternalPageRaw(ctx, "30", &UpdateExternalPageRequest{
+	result, err := svc.UpdateExternalPageRaw(ctx, "30", &ai.UpdateExternalPageRequest{
 		Title: "Updated",
 	})
 	if err != nil {
@@ -875,17 +879,17 @@ func TestAIContentService_UpdateExternalPageRaw_Success(t *testing.T) {
 	if result.Header.Get("X-Request-Id") != "req-update-ep" {
 		t.Errorf("Header X-Request-Id = %q, want req-update-ep", result.Header.Get("X-Request-Id"))
 	}
-	data, err := ParseAIContentUpdateExternalPageResult(result)
+	data, err := ai.ParseUpdateExternalPageResult(result)
 	if err != nil {
-		t.Fatalf("ParseAIContentUpdateExternalPageResult returned error: %v", err)
+		t.Fatalf("ParseUpdateExternalPageResult returned error: %v", err)
 	}
 	if data.Title != "Updated" {
 		t.Errorf("Title = %v, want Updated", data.Title)
 	}
 }
 
-func TestAIContentService_DeleteExternalPageRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_DeleteExternalPageRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages/22", func(w http.ResponseWriter, r *http.Request) {
@@ -895,7 +899,7 @@ func TestAIContentService_DeleteExternalPageRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.AIContent.DeleteExternalPageRaw(ctx, "22")
+	result, err := svc.DeleteExternalPageRaw(ctx, "22")
 	if err != nil {
 		t.Fatalf("DeleteExternalPageRaw returned error: %v", err)
 	}
@@ -905,17 +909,17 @@ func TestAIContentService_DeleteExternalPageRaw_Success(t *testing.T) {
 	if result.Header.Get("X-Request-Id") != "req-delete-ep" {
 		t.Errorf("Header X-Request-Id = %q, want req-delete-ep", result.Header.Get("X-Request-Id"))
 	}
-	data, err := ParseAIContentDeleteExternalPageResult(result)
+	data, err := ai.ParseDeleteExternalPageResult(result)
 	if err != nil {
-		t.Fatalf("ParseAIContentDeleteExternalPageResult returned error: %v", err)
+		t.Fatalf("ParseDeleteExternalPageResult returned error: %v", err)
 	}
 	if data.ID != "22" {
 		t.Errorf("ID = %v, want 22", data.ID)
 	}
 }
 
-func TestAIContentService_UpdateExternalPage_WithExternalID(t *testing.T) {
-	client, mux, teardown := setup()
+func TestContentService_UpdateExternalPage_WithExternalID(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/ai/external_pages/30", func(w http.ResponseWriter, r *http.Request) {
@@ -945,19 +949,14 @@ func TestAIContentService_UpdateExternalPage_WithExternalID(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	page, err := client.AIContent.UpdateExternalPage(ctx, "30", &UpdateExternalPageRequest{
+	page, err := svc.UpdateExternalPage(ctx, "30", &ai.UpdateExternalPageRequest{
 		Title:      "Title",
 		ExternalID: "new-ext-id",
 	})
 	if err != nil {
-		t.Fatalf("AIContent.UpdateExternalPage returned error: %v", err)
+		t.Fatalf("UpdateExternalPage returned error: %v", err)
 	}
 	if page.ExternalID != "new-ext-id" {
 		t.Errorf("ExternalID = %v, want new-ext-id", page.ExternalID)
 	}
-}
-
-// boolPtr returns a pointer to the given bool value.
-func boolPtr(b bool) *bool {
-	return &b
 }

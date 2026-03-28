@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/rassakhatsky/intercom-go-sdk/admins"
+	aiPkg "github.com/rassakhatsky/intercom-go-sdk/ai"
 	"github.com/rassakhatsky/intercom-go-sdk/articles"
 	"github.com/rassakhatsky/intercom-go-sdk/calls"
 	"github.com/rassakhatsky/intercom-go-sdk/companies"
@@ -44,7 +45,7 @@ type Client struct {
 	common service // reuse a single struct for all services
 
 	admins              *admins.Service
-	AIContent           *AIContentService
+	aiContent           *aiPkg.ContentService
 	articles            *articles.Service
 	awayStatusReasons   *admins.AwayStatusReasonsService
 	brands              *settings.BrandsService
@@ -59,7 +60,7 @@ type Client struct {
 	dataExport          *export.DataService
 	emails              *messaging.EmailsService
 	exportReporting     *export.ReportingService
-	FinVoice            *FinVoiceService
+	finVoice            *aiPkg.VoiceService
 	helpCenter          *helpcenter.Service
 	internalArticles    *articles.InternalService
 	ipAllowlist         *settings.IPAllowlistService
@@ -130,7 +131,7 @@ func NewClient(token string, opts ...ClientOption) *Client {
 // initialize wires all services to share the common client.
 func (c *Client) initialize() {
 	c.admins = admins.NewService(c)
-	c.AIContent = (*AIContentService)(&c.common)
+	c.aiContent = aiPkg.NewContentService(c)
 	c.articles = articles.NewService(c)
 	c.awayStatusReasons = admins.NewAwayStatusReasonsService(c)
 	c.brands = settings.NewBrandsService(c)
@@ -145,7 +146,7 @@ func (c *Client) initialize() {
 	c.dataExport = export.NewDataService(c)
 	c.emails = messaging.NewEmailsService(c)
 	c.exportReporting = export.NewReportingService(c)
-	c.FinVoice = (*FinVoiceService)(&c.common)
+	c.finVoice = aiPkg.NewVoiceService(c)
 	c.helpCenter = helpcenter.NewService(c)
 	c.internalArticles = articles.NewInternalService(c)
 	c.ipAllowlist = settings.NewIPAllowlistService(c)
@@ -163,6 +164,16 @@ func (c *Client) initialize() {
 	c.ticketTypes = tickets.NewTypesService(c)
 	c.visitors = contacts.NewVisitorsService(c)
 	c.Workflows = (*WorkflowsService)(&c.common)
+}
+
+// AIContent returns the AI content service.
+func (c *Client) AIContent() *aiPkg.ContentService {
+	return c.aiContent
+}
+
+// FinVoice returns the Fin Voice service.
+func (c *Client) FinVoice() *aiPkg.VoiceService {
+	return c.finVoice
 }
 
 // Segments returns the segments service.

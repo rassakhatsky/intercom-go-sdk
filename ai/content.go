@@ -1,16 +1,25 @@
-package intercom
+package ai
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// AIContentService handles communication with the AI content related
+// ContentService handles communication with the AI content related
 // methods of the Intercom API, including content import sources and
 // external pages.
-type AIContentService service
+type ContentService struct {
+	client api.Caller
+}
+
+// NewContentService creates a new AI content service.
+func NewContentService(c api.Caller) *ContentService {
+	return &ContentService{client: c}
+}
 
 // ContentImportSource represents an Intercom content import source.
 type ContentImportSource struct {
@@ -81,54 +90,54 @@ type UpdateExternalPageRequest struct {
 
 // --- Parse Functions ---
 
-// ParseAIContentListContentImportSourcesResult decodes a Result into a PagedResult[ContentImportSource].
-func ParseAIContentListContentImportSourcesResult(r *Result) (*PagedResult[ContentImportSource], error) {
-	return Decode[PagedResult[ContentImportSource]](r)
+// ParseListContentImportSourcesResult decodes a Result into a PagedResult[ContentImportSource].
+func ParseListContentImportSourcesResult(r *api.Result) (*api.PagedResult[ContentImportSource], error) {
+	return api.Decode[api.PagedResult[ContentImportSource]](r)
 }
 
-// ParseAIContentGetContentImportSourceResult decodes a Result into a ContentImportSource.
-func ParseAIContentGetContentImportSourceResult(r *Result) (*ContentImportSource, error) {
-	return Decode[ContentImportSource](r)
+// ParseGetContentImportSourceResult decodes a Result into a ContentImportSource.
+func ParseGetContentImportSourceResult(r *api.Result) (*ContentImportSource, error) {
+	return api.Decode[ContentImportSource](r)
 }
 
-// ParseAIContentCreateContentImportSourceResult decodes a Result into a ContentImportSource.
-func ParseAIContentCreateContentImportSourceResult(r *Result) (*ContentImportSource, error) {
-	return Decode[ContentImportSource](r)
+// ParseCreateContentImportSourceResult decodes a Result into a ContentImportSource.
+func ParseCreateContentImportSourceResult(r *api.Result) (*ContentImportSource, error) {
+	return api.Decode[ContentImportSource](r)
 }
 
-// ParseAIContentUpdateContentImportSourceResult decodes a Result into a ContentImportSource.
-func ParseAIContentUpdateContentImportSourceResult(r *Result) (*ContentImportSource, error) {
-	return Decode[ContentImportSource](r)
+// ParseUpdateContentImportSourceResult decodes a Result into a ContentImportSource.
+func ParseUpdateContentImportSourceResult(r *api.Result) (*ContentImportSource, error) {
+	return api.Decode[ContentImportSource](r)
 }
 
-// ParseAIContentDeleteContentImportSourceResult decodes a Result into an Empty.
-func ParseAIContentDeleteContentImportSourceResult(r *Result) (*Empty, error) {
-	return Decode[Empty](r)
+// ParseDeleteContentImportSourceResult decodes a Result into an Empty.
+func ParseDeleteContentImportSourceResult(r *api.Result) (*api.Empty, error) {
+	return api.Decode[api.Empty](r)
 }
 
-// ParseAIContentListExternalPagesResult decodes a Result into a PagedResult[ExternalPage].
-func ParseAIContentListExternalPagesResult(r *Result) (*PagedResult[ExternalPage], error) {
-	return Decode[PagedResult[ExternalPage]](r)
+// ParseListExternalPagesResult decodes a Result into a PagedResult[ExternalPage].
+func ParseListExternalPagesResult(r *api.Result) (*api.PagedResult[ExternalPage], error) {
+	return api.Decode[api.PagedResult[ExternalPage]](r)
 }
 
-// ParseAIContentGetExternalPageResult decodes a Result into an ExternalPage.
-func ParseAIContentGetExternalPageResult(r *Result) (*ExternalPage, error) {
-	return Decode[ExternalPage](r)
+// ParseGetExternalPageResult decodes a Result into an ExternalPage.
+func ParseGetExternalPageResult(r *api.Result) (*ExternalPage, error) {
+	return api.Decode[ExternalPage](r)
 }
 
-// ParseAIContentCreateExternalPageResult decodes a Result into an ExternalPage.
-func ParseAIContentCreateExternalPageResult(r *Result) (*ExternalPage, error) {
-	return Decode[ExternalPage](r)
+// ParseCreateExternalPageResult decodes a Result into an ExternalPage.
+func ParseCreateExternalPageResult(r *api.Result) (*ExternalPage, error) {
+	return api.Decode[ExternalPage](r)
 }
 
-// ParseAIContentUpdateExternalPageResult decodes a Result into an ExternalPage.
-func ParseAIContentUpdateExternalPageResult(r *Result) (*ExternalPage, error) {
-	return Decode[ExternalPage](r)
+// ParseUpdateExternalPageResult decodes a Result into an ExternalPage.
+func ParseUpdateExternalPageResult(r *api.Result) (*ExternalPage, error) {
+	return api.Decode[ExternalPage](r)
 }
 
-// ParseAIContentDeleteExternalPageResult decodes a Result into an ExternalPage.
-func ParseAIContentDeleteExternalPageResult(r *Result) (*ExternalPage, error) {
-	return Decode[ExternalPage](r)
+// ParseDeleteExternalPageResult decodes a Result into an ExternalPage.
+func ParseDeleteExternalPageResult(r *api.Result) (*ExternalPage, error) {
+	return api.Decode[ExternalPage](r)
 }
 
 // --- Content Import Sources ---
@@ -136,57 +145,57 @@ func ParseAIContentDeleteExternalPageResult(r *Result) (*ExternalPage, error) {
 // ListContentImportSources returns all content import sources.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/listcontentimportsources
-func (s *AIContentService) ListContentImportSources(ctx context.Context) (*PagedResult[ContentImportSource], error) {
+func (s *ContentService) ListContentImportSources(ctx context.Context) (*api.PagedResult[ContentImportSource], error) {
 	result, err := s.ListContentImportSourcesRaw(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAIContentListContentImportSourcesResult(result)
+	return ParseListContentImportSourcesResult(result)
 }
 
 // GetContentImportSource retrieves a content import source by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/getcontentimportsource
-func (s *AIContentService) GetContentImportSource(ctx context.Context, id string) (*ContentImportSource, error) {
+func (s *ContentService) GetContentImportSource(ctx context.Context, id string) (*ContentImportSource, error) {
 	result, err := s.GetContentImportSourceRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAIContentGetContentImportSourceResult(result)
+	return ParseGetContentImportSourceResult(result)
 }
 
 // CreateContentImportSource creates a new content import source.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/createcontentimportsource
-func (s *AIContentService) CreateContentImportSource(ctx context.Context, body *CreateContentImportSourceRequest) (*ContentImportSource, error) {
+func (s *ContentService) CreateContentImportSource(ctx context.Context, body *CreateContentImportSourceRequest) (*ContentImportSource, error) {
 	result, err := s.CreateContentImportSourceRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAIContentCreateContentImportSourceResult(result)
+	return ParseCreateContentImportSourceResult(result)
 }
 
 // UpdateContentImportSource updates an existing content import source.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/updatecontentimportsource
-func (s *AIContentService) UpdateContentImportSource(ctx context.Context, id string, body *UpdateContentImportSourceRequest) (*ContentImportSource, error) {
+func (s *ContentService) UpdateContentImportSource(ctx context.Context, id string, body *UpdateContentImportSourceRequest) (*ContentImportSource, error) {
 	result, err := s.UpdateContentImportSourceRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAIContentUpdateContentImportSourceResult(result)
+	return ParseUpdateContentImportSourceResult(result)
 }
 
 // DeleteContentImportSource deletes a content import source by ID.
@@ -194,13 +203,13 @@ func (s *AIContentService) UpdateContentImportSource(ctx context.Context, id str
 // The API returns 204 No Content on success.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/deletecontentimportsource
-func (s *AIContentService) DeleteContentImportSource(ctx context.Context, id string) error {
+func (s *ContentService) DeleteContentImportSource(ctx context.Context, id string) error {
 	result, err := s.DeleteContentImportSourceRaw(ctx, id)
 	if err != nil {
 		return err
 	}
 	if result.Error != nil {
-		return resultError(result)
+		return api.ResultError(result)
 	}
 	return nil
 }
@@ -210,72 +219,72 @@ func (s *AIContentService) DeleteContentImportSource(ctx context.Context, id str
 // ListExternalPages returns all external pages.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/listexternalpages
-func (s *AIContentService) ListExternalPages(ctx context.Context) (*PagedResult[ExternalPage], error) {
+func (s *ContentService) ListExternalPages(ctx context.Context) (*api.PagedResult[ExternalPage], error) {
 	result, err := s.ListExternalPagesRaw(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAIContentListExternalPagesResult(result)
+	return ParseListExternalPagesResult(result)
 }
 
 // GetExternalPage retrieves an external page by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/getexternalpage
-func (s *AIContentService) GetExternalPage(ctx context.Context, id string) (*ExternalPage, error) {
+func (s *ContentService) GetExternalPage(ctx context.Context, id string) (*ExternalPage, error) {
 	result, err := s.GetExternalPageRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAIContentGetExternalPageResult(result)
+	return ParseGetExternalPageResult(result)
 }
 
 // CreateExternalPage creates a new external page.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/createexternalpage
-func (s *AIContentService) CreateExternalPage(ctx context.Context, body *CreateExternalPageRequest) (*ExternalPage, error) {
+func (s *ContentService) CreateExternalPage(ctx context.Context, body *CreateExternalPageRequest) (*ExternalPage, error) {
 	result, err := s.CreateExternalPageRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAIContentCreateExternalPageResult(result)
+	return ParseCreateExternalPageResult(result)
 }
 
 // UpdateExternalPage updates an existing external page.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/updateexternalpage
-func (s *AIContentService) UpdateExternalPage(ctx context.Context, id string, body *UpdateExternalPageRequest) (*ExternalPage, error) {
+func (s *ContentService) UpdateExternalPage(ctx context.Context, id string, body *UpdateExternalPageRequest) (*ExternalPage, error) {
 	result, err := s.UpdateExternalPageRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAIContentUpdateExternalPageResult(result)
+	return ParseUpdateExternalPageResult(result)
 }
 
 // DeleteExternalPage deletes an external page by ID.
 // Returns the deleted external page object.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/deleteexternalpage
-func (s *AIContentService) DeleteExternalPage(ctx context.Context, id string) (*ExternalPage, error) {
+func (s *ContentService) DeleteExternalPage(ctx context.Context, id string) (*ExternalPage, error) {
 	result, err := s.DeleteExternalPageRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAIContentDeleteExternalPageResult(result)
+	return ParseDeleteExternalPageResult(result)
 }
 
 // --- Raw Content Import Sources ---
@@ -283,7 +292,7 @@ func (s *AIContentService) DeleteExternalPage(ctx context.Context, id string) (*
 // ListContentImportSourcesRaw returns all content import sources with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/listcontentimportsources
-func (s *AIContentService) ListContentImportSourcesRaw(ctx context.Context) (*Result, error) {
+func (s *ContentService) ListContentImportSourcesRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "ai/content_import_sources", nil)
 	if err != nil {
 		return nil, err
@@ -294,7 +303,7 @@ func (s *AIContentService) ListContentImportSourcesRaw(ctx context.Context) (*Re
 // GetContentImportSourceRaw retrieves a content import source by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/getcontentimportsource
-func (s *AIContentService) GetContentImportSourceRaw(ctx context.Context, id string) (*Result, error) {
+func (s *ContentService) GetContentImportSourceRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("ai/content_import_sources/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -305,7 +314,7 @@ func (s *AIContentService) GetContentImportSourceRaw(ctx context.Context, id str
 // CreateContentImportSourceRaw creates a new content import source with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/createcontentimportsource
-func (s *AIContentService) CreateContentImportSourceRaw(ctx context.Context, body *CreateContentImportSourceRequest) (*Result, error) {
+func (s *ContentService) CreateContentImportSourceRaw(ctx context.Context, body *CreateContentImportSourceRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "ai/content_import_sources", body)
 	if err != nil {
 		return nil, err
@@ -316,7 +325,7 @@ func (s *AIContentService) CreateContentImportSourceRaw(ctx context.Context, bod
 // UpdateContentImportSourceRaw updates an existing content import source with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/updatecontentimportsource
-func (s *AIContentService) UpdateContentImportSourceRaw(ctx context.Context, id string, body *UpdateContentImportSourceRequest) (*Result, error) {
+func (s *ContentService) UpdateContentImportSourceRaw(ctx context.Context, id string, body *UpdateContentImportSourceRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("ai/content_import_sources/%s", url.PathEscape(id)), body)
 	if err != nil {
 		return nil, err
@@ -327,7 +336,7 @@ func (s *AIContentService) UpdateContentImportSourceRaw(ctx context.Context, id 
 // DeleteContentImportSourceRaw deletes a content import source by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/deletecontentimportsource
-func (s *AIContentService) DeleteContentImportSourceRaw(ctx context.Context, id string) (*Result, error) {
+func (s *ContentService) DeleteContentImportSourceRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("ai/content_import_sources/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -340,7 +349,7 @@ func (s *AIContentService) DeleteContentImportSourceRaw(ctx context.Context, id 
 // ListExternalPagesRaw returns all external pages with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/listexternalpages
-func (s *AIContentService) ListExternalPagesRaw(ctx context.Context) (*Result, error) {
+func (s *ContentService) ListExternalPagesRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "ai/external_pages", nil)
 	if err != nil {
 		return nil, err
@@ -351,7 +360,7 @@ func (s *AIContentService) ListExternalPagesRaw(ctx context.Context) (*Result, e
 // GetExternalPageRaw retrieves an external page by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/getexternalpage
-func (s *AIContentService) GetExternalPageRaw(ctx context.Context, id string) (*Result, error) {
+func (s *ContentService) GetExternalPageRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("ai/external_pages/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -362,7 +371,7 @@ func (s *AIContentService) GetExternalPageRaw(ctx context.Context, id string) (*
 // CreateExternalPageRaw creates a new external page with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/createexternalpage
-func (s *AIContentService) CreateExternalPageRaw(ctx context.Context, body *CreateExternalPageRequest) (*Result, error) {
+func (s *ContentService) CreateExternalPageRaw(ctx context.Context, body *CreateExternalPageRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "ai/external_pages", body)
 	if err != nil {
 		return nil, err
@@ -373,7 +382,7 @@ func (s *AIContentService) CreateExternalPageRaw(ctx context.Context, body *Crea
 // UpdateExternalPageRaw updates an existing external page with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/updateexternalpage
-func (s *AIContentService) UpdateExternalPageRaw(ctx context.Context, id string, body *UpdateExternalPageRequest) (*Result, error) {
+func (s *ContentService) UpdateExternalPageRaw(ctx context.Context, id string, body *UpdateExternalPageRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("ai/external_pages/%s", url.PathEscape(id)), body)
 	if err != nil {
 		return nil, err
@@ -384,7 +393,7 @@ func (s *AIContentService) UpdateExternalPageRaw(ctx context.Context, id string,
 // DeleteExternalPageRaw deletes an external page by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ai-content/deleteexternalpage
-func (s *AIContentService) DeleteExternalPageRaw(ctx context.Context, id string) (*Result, error) {
+func (s *ContentService) DeleteExternalPageRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("ai/external_pages/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err

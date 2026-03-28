@@ -1,18 +1,27 @@
-package intercom
+package ai
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// FinVoiceService handles communication with the Fin Voice related methods
+// VoiceService handles communication with the Fin Voice related methods
 // of the Intercom API.
-type FinVoiceService service
+type VoiceService struct {
+	client api.Caller
+}
 
-// AICallResponse represents the response from Fin Voice endpoints.
-type AICallResponse struct {
+// NewVoiceService creates a new Fin Voice service.
+func NewVoiceService(c api.Caller) *VoiceService {
+	return &VoiceService{client: c}
+}
+
+// CallResponse represents the response from Fin Voice endpoints.
+type CallResponse struct {
 	ID                     int              `json:"id"`
 	AppID                  int              `json:"app_id,omitempty"`
 	UserPhoneNumber        string           `json:"user_phone_number,omitempty"`
@@ -25,8 +34,8 @@ type AICallResponse struct {
 	Intent                 []map[string]any `json:"intent,omitempty"`
 }
 
-// RegisterFinVoiceCallRequest represents a request to register a Fin Voice call.
-type RegisterFinVoiceCallRequest struct {
+// RegisterCallRequest represents a request to register a Fin Voice call.
+type RegisterCallRequest struct {
 	PhoneNumber string         `json:"phone_number"`
 	CallID      string         `json:"call_id"`
 	Source      string         `json:"source,omitempty"`
@@ -35,29 +44,29 @@ type RegisterFinVoiceCallRequest struct {
 
 // --- Parse Functions ---
 
-// ParseFinVoiceRegisterResult decodes a Result into an AICallResponse.
-func ParseFinVoiceRegisterResult(r *Result) (*AICallResponse, error) {
-	return Decode[AICallResponse](r)
+// ParseRegisterResult decodes a Result into a CallResponse.
+func ParseRegisterResult(r *api.Result) (*CallResponse, error) {
+	return api.Decode[CallResponse](r)
 }
 
-// ParseFinVoiceCollectResult decodes a Result into an AICallResponse.
-func ParseFinVoiceCollectResult(r *Result) (*AICallResponse, error) {
-	return Decode[AICallResponse](r)
+// ParseCollectResult decodes a Result into a CallResponse.
+func ParseCollectResult(r *api.Result) (*CallResponse, error) {
+	return api.Decode[CallResponse](r)
 }
 
-// ParseFinVoiceGetByExternalIDResult decodes a Result into an AICallResponse.
-func ParseFinVoiceGetByExternalIDResult(r *Result) (*AICallResponse, error) {
-	return Decode[AICallResponse](r)
+// ParseGetByExternalIDResult decodes a Result into a CallResponse.
+func ParseGetByExternalIDResult(r *api.Result) (*CallResponse, error) {
+	return api.Decode[CallResponse](r)
 }
 
-// ParseFinVoiceGetByConversationResult decodes a Result into a slice of AICallResponse.
-func ParseFinVoiceGetByConversationResult(r *Result) (*[]AICallResponse, error) {
-	return Decode[[]AICallResponse](r)
+// ParseGetByConversationResult decodes a Result into a slice of CallResponse.
+func ParseGetByConversationResult(r *api.Result) (*[]CallResponse, error) {
+	return api.Decode[[]CallResponse](r)
 }
 
-// ParseFinVoiceGetByPhoneNumberResult decodes a Result into an AICallResponse.
-func ParseFinVoiceGetByPhoneNumberResult(r *Result) (*AICallResponse, error) {
-	return Decode[AICallResponse](r)
+// ParseGetByPhoneNumberResult decodes a Result into a CallResponse.
+func ParseGetByPhoneNumberResult(r *api.Result) (*CallResponse, error) {
+	return api.Decode[CallResponse](r)
 }
 
 // --- Regular Methods ---
@@ -65,57 +74,57 @@ func ParseFinVoiceGetByPhoneNumberResult(r *Result) (*AICallResponse, error) {
 // Register registers a new Fin Voice call.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/registerfinvoicecall
-func (s *FinVoiceService) Register(ctx context.Context, req *RegisterFinVoiceCallRequest) (*AICallResponse, error) {
+func (s *VoiceService) Register(ctx context.Context, req *RegisterCallRequest) (*CallResponse, error) {
 	result, err := s.RegisterRaw(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseFinVoiceRegisterResult(result)
+	return ParseRegisterResult(result)
 }
 
 // Collect retrieves a Fin Voice call by its external reference ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyid
-func (s *FinVoiceService) Collect(ctx context.Context, id int) (*AICallResponse, error) {
+func (s *VoiceService) Collect(ctx context.Context, id int) (*CallResponse, error) {
 	result, err := s.CollectRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseFinVoiceCollectResult(result)
+	return ParseCollectResult(result)
 }
 
 // GetByExternalID retrieves a Fin Voice call by its external call ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyexternalid
-func (s *FinVoiceService) GetByExternalID(ctx context.Context, externalID string) (*AICallResponse, error) {
+func (s *VoiceService) GetByExternalID(ctx context.Context, externalID string) (*CallResponse, error) {
 	result, err := s.GetByExternalIDRaw(ctx, externalID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseFinVoiceGetByExternalIDResult(result)
+	return ParseGetByExternalIDResult(result)
 }
 
 // GetByConversation retrieves all Fin Voice calls for a conversation.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallsbyconversationid
-func (s *FinVoiceService) GetByConversation(ctx context.Context, conversationID string) ([]AICallResponse, error) {
+func (s *VoiceService) GetByConversation(ctx context.Context, conversationID string) ([]CallResponse, error) {
 	result, err := s.GetByConversationRaw(ctx, conversationID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	data, err := ParseFinVoiceGetByConversationResult(result)
+	data, err := ParseGetByConversationResult(result)
 	if err != nil {
 		return nil, err
 	}
@@ -125,15 +134,15 @@ func (s *FinVoiceService) GetByConversation(ctx context.Context, conversationID 
 // GetByPhoneNumber retrieves the most recent Fin Voice call for a phone number.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyphonenumber
-func (s *FinVoiceService) GetByPhoneNumber(ctx context.Context, phoneNumber string) (*AICallResponse, error) {
+func (s *VoiceService) GetByPhoneNumber(ctx context.Context, phoneNumber string) (*CallResponse, error) {
 	result, err := s.GetByPhoneNumberRaw(ctx, phoneNumber)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseFinVoiceGetByPhoneNumberResult(result)
+	return ParseGetByPhoneNumberResult(result)
 }
 
 // --- Raw Methods ---
@@ -141,7 +150,7 @@ func (s *FinVoiceService) GetByPhoneNumber(ctx context.Context, phoneNumber stri
 // RegisterRaw registers a new Fin Voice call with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/registerfinvoicecall
-func (s *FinVoiceService) RegisterRaw(ctx context.Context, req *RegisterFinVoiceCallRequest) (*Result, error) {
+func (s *VoiceService) RegisterRaw(ctx context.Context, req *RegisterCallRequest) (*api.Result, error) {
 	httpReq, err := s.client.NewRequest(http.MethodPost, "fin_voice/register", req)
 	if err != nil {
 		return nil, err
@@ -152,7 +161,7 @@ func (s *FinVoiceService) RegisterRaw(ctx context.Context, req *RegisterFinVoice
 // CollectRaw retrieves a Fin Voice call by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyid
-func (s *FinVoiceService) CollectRaw(ctx context.Context, id int) (*Result, error) {
+func (s *VoiceService) CollectRaw(ctx context.Context, id int) (*api.Result, error) {
 	httpReq, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("fin_voice/collect/%d", id), nil)
 	if err != nil {
 		return nil, err
@@ -163,7 +172,7 @@ func (s *FinVoiceService) CollectRaw(ctx context.Context, id int) (*Result, erro
 // GetByExternalIDRaw retrieves a Fin Voice call by external ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyexternalid
-func (s *FinVoiceService) GetByExternalIDRaw(ctx context.Context, externalID string) (*Result, error) {
+func (s *VoiceService) GetByExternalIDRaw(ctx context.Context, externalID string) (*api.Result, error) {
 	httpReq, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("fin_voice/external_id/%s", url.PathEscape(externalID)), nil)
 	if err != nil {
 		return nil, err
@@ -174,7 +183,7 @@ func (s *FinVoiceService) GetByExternalIDRaw(ctx context.Context, externalID str
 // GetByConversationRaw retrieves all Fin Voice calls for a conversation with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallsbyconversationid
-func (s *FinVoiceService) GetByConversationRaw(ctx context.Context, conversationID string) (*Result, error) {
+func (s *VoiceService) GetByConversationRaw(ctx context.Context, conversationID string) (*api.Result, error) {
 	httpReq, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("fin_voice/conversation/%s", url.PathEscape(conversationID)), nil)
 	if err != nil {
 		return nil, err
@@ -185,7 +194,7 @@ func (s *FinVoiceService) GetByConversationRaw(ctx context.Context, conversation
 // GetByPhoneNumberRaw retrieves the most recent Fin Voice call for a phone number with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyphonenumber
-func (s *FinVoiceService) GetByPhoneNumberRaw(ctx context.Context, phoneNumber string) (*Result, error) {
+func (s *VoiceService) GetByPhoneNumberRaw(ctx context.Context, phoneNumber string) (*api.Result, error) {
 	httpReq, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("fin_voice/phone_number/%s", url.PathEscape(phoneNumber)), nil)
 	if err != nil {
 		return nil, err

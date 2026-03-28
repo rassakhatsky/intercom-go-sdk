@@ -1,4 +1,4 @@
-package intercom
+package ai_test
 
 import (
 	"context"
@@ -6,11 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/ai"
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-func TestFinVoiceService_Register(t *testing.T) {
-	client, mux, teardown := setup()
+func TestVoiceService_Register(t *testing.T) {
+	_, mux, teardown := setup()
 	defer teardown()
+	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/register", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
@@ -40,13 +44,13 @@ func TestFinVoiceService_Register(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	resp, err := client.FinVoice.Register(ctx, &RegisterFinVoiceCallRequest{
+	resp, err := svc.Register(ctx, &ai.RegisterCallRequest{
 		PhoneNumber: "+15551234567",
 		CallID:      "ext_call_1",
 		Source:      "aws_connect",
 	})
 	if err != nil {
-		t.Fatalf("FinVoice.Register returned error: %v", err)
+		t.Fatalf("Register returned error: %v", err)
 	}
 	if resp.ID != 42 {
 		t.Errorf("ID = %v, want 42", resp.ID)
@@ -59,9 +63,10 @@ func TestFinVoiceService_Register(t *testing.T) {
 	}
 }
 
-func TestFinVoiceService_Collect(t *testing.T) {
-	client, mux, teardown := setup()
+func TestVoiceService_Collect(t *testing.T) {
+	_, mux, teardown := setup()
 	defer teardown()
+	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/collect/42", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -80,9 +85,9 @@ func TestFinVoiceService_Collect(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	resp, err := client.FinVoice.Collect(ctx, 42)
+	resp, err := svc.Collect(ctx, 42)
 	if err != nil {
-		t.Fatalf("FinVoice.Collect returned error: %v", err)
+		t.Fatalf("Collect returned error: %v", err)
 	}
 	if resp.Status != "completed" {
 		t.Errorf("Status = %v, want completed", resp.Status)
@@ -95,9 +100,10 @@ func TestFinVoiceService_Collect(t *testing.T) {
 	}
 }
 
-func TestFinVoiceService_Collect_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestVoiceService_Collect_NotFound(t *testing.T) {
+	_, mux, teardown := setup()
 	defer teardown()
+	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/collect/999", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -105,18 +111,19 @@ func TestFinVoiceService_Collect_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.FinVoice.Collect(ctx, 999)
+	_, err := svc.Collect(ctx, 999)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("Expected IsNotFound, got: %v", err)
 	}
 }
 
-func TestFinVoiceService_GetByExternalID(t *testing.T) {
-	client, mux, teardown := setup()
+func TestVoiceService_GetByExternalID(t *testing.T) {
+	_, mux, teardown := setup()
 	defer teardown()
+	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/external_id/ext_call_1", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -130,18 +137,19 @@ func TestFinVoiceService_GetByExternalID(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	resp, err := client.FinVoice.GetByExternalID(ctx, "ext_call_1")
+	resp, err := svc.GetByExternalID(ctx, "ext_call_1")
 	if err != nil {
-		t.Fatalf("FinVoice.GetByExternalID returned error: %v", err)
+		t.Fatalf("GetByExternalID returned error: %v", err)
 	}
 	if resp.ExternalCallID != "ext_call_1" {
 		t.Errorf("ExternalCallID = %v, want ext_call_1", resp.ExternalCallID)
 	}
 }
 
-func TestFinVoiceService_GetByConversation(t *testing.T) {
-	client, mux, teardown := setup()
+func TestVoiceService_GetByConversation(t *testing.T) {
+	_, mux, teardown := setup()
 	defer teardown()
+	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/conversation/conv_456", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -152,9 +160,9 @@ func TestFinVoiceService_GetByConversation(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	calls, err := client.FinVoice.GetByConversation(ctx, "conv_456")
+	calls, err := svc.GetByConversation(ctx, "conv_456")
 	if err != nil {
-		t.Fatalf("FinVoice.GetByConversation returned error: %v", err)
+		t.Fatalf("GetByConversation returned error: %v", err)
 	}
 	if len(calls) != 2 {
 		t.Fatalf("length = %d, want 2", len(calls))
@@ -164,9 +172,36 @@ func TestFinVoiceService_GetByConversation(t *testing.T) {
 	}
 }
 
-func TestFinVoiceService_RegisterRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestVoiceService_GetByPhoneNumber(t *testing.T) {
+	_, mux, teardown := setup()
 	defer teardown()
+	svc := setupVoice()
+
+	mux.HandleFunc("/fin_voice/phone_number/+15551234567", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodGet)
+		fmt.Fprint(w, `{
+			"id":42,
+			"user_phone_number":"+15551234567",
+			"status":"completed"
+		}`)
+	})
+
+	ctx := context.Background()
+	resp, err := svc.GetByPhoneNumber(ctx, "+15551234567")
+	if err != nil {
+		t.Fatalf("GetByPhoneNumber returned error: %v", err)
+	}
+	if resp.UserPhoneNumber != "+15551234567" {
+		t.Errorf("UserPhoneNumber = %v, want +15551234567", resp.UserPhoneNumber)
+	}
+}
+
+// --- Raw Methods ---
+
+func TestVoiceService_RegisterRaw_Success(t *testing.T) {
+	_, mux, teardown := setup()
+	defer teardown()
+	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/register", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
@@ -175,16 +210,16 @@ func TestFinVoiceService_RegisterRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.FinVoice.RegisterRaw(ctx, &RegisterFinVoiceCallRequest{
+	result, err := svc.RegisterRaw(ctx, &ai.RegisterCallRequest{
 		PhoneNumber: "+15551234567",
 		CallID:      "ext_call_1",
 	})
 	if err != nil {
 		t.Fatalf("RegisterRaw returned error: %v", err)
 	}
-	data, err := ParseFinVoiceRegisterResult(result)
+	data, err := ai.ParseRegisterResult(result)
 	if err != nil {
-		t.Fatalf("ParseFinVoiceRegisterResult returned error: %v", err)
+		t.Fatalf("ParseRegisterResult returned error: %v", err)
 	}
 	if data.ID != 42 {
 		t.Errorf("Data.ID = %v, want 42", data.ID)
@@ -203,9 +238,10 @@ func TestFinVoiceService_RegisterRaw_Success(t *testing.T) {
 	}
 }
 
-func TestFinVoiceService_CollectRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestVoiceService_CollectRaw_Success(t *testing.T) {
+	_, mux, teardown := setup()
 	defer teardown()
+	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/collect/42", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -214,13 +250,13 @@ func TestFinVoiceService_CollectRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.FinVoice.CollectRaw(ctx, 42)
+	result, err := svc.CollectRaw(ctx, 42)
 	if err != nil {
 		t.Fatalf("CollectRaw returned error: %v", err)
 	}
-	data, err := ParseFinVoiceCollectResult(result)
+	data, err := ai.ParseCollectResult(result)
 	if err != nil {
-		t.Fatalf("ParseFinVoiceCollectResult returned error: %v", err)
+		t.Fatalf("ParseCollectResult returned error: %v", err)
 	}
 	if data.Status != "completed" {
 		t.Errorf("Data.Status = %v, want completed", data.Status)
@@ -230,9 +266,10 @@ func TestFinVoiceService_CollectRaw_Success(t *testing.T) {
 	}
 }
 
-func TestFinVoiceService_CollectRaw_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestVoiceService_CollectRaw_NotFound(t *testing.T) {
+	_, mux, teardown := setup()
 	defer teardown()
+	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/collect/999", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -240,7 +277,7 @@ func TestFinVoiceService_CollectRaw_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.FinVoice.CollectRaw(ctx, 999)
+	result, err := svc.CollectRaw(ctx, 999)
 	if err != nil {
 		t.Fatalf("CollectRaw returned Go error: %v", err)
 	}
@@ -255,9 +292,10 @@ func TestFinVoiceService_CollectRaw_NotFound(t *testing.T) {
 	}
 }
 
-func TestFinVoiceService_GetByExternalIDRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestVoiceService_GetByExternalIDRaw_Success(t *testing.T) {
+	_, mux, teardown := setup()
 	defer teardown()
+	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/external_id/ext_call_1", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -266,13 +304,13 @@ func TestFinVoiceService_GetByExternalIDRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.FinVoice.GetByExternalIDRaw(ctx, "ext_call_1")
+	result, err := svc.GetByExternalIDRaw(ctx, "ext_call_1")
 	if err != nil {
 		t.Fatalf("GetByExternalIDRaw returned error: %v", err)
 	}
-	data, err := ParseFinVoiceGetByExternalIDResult(result)
+	data, err := ai.ParseGetByExternalIDResult(result)
 	if err != nil {
-		t.Fatalf("ParseFinVoiceGetByExternalIDResult returned error: %v", err)
+		t.Fatalf("ParseGetByExternalIDResult returned error: %v", err)
 	}
 	if data.ExternalCallID != "ext_call_1" {
 		t.Errorf("Data.ExternalCallID = %v, want ext_call_1", data.ExternalCallID)
@@ -282,9 +320,10 @@ func TestFinVoiceService_GetByExternalIDRaw_Success(t *testing.T) {
 	}
 }
 
-func TestFinVoiceService_GetByConversationRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestVoiceService_GetByConversationRaw_Success(t *testing.T) {
+	_, mux, teardown := setup()
 	defer teardown()
+	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/conversation/conv_456", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -293,13 +332,13 @@ func TestFinVoiceService_GetByConversationRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.FinVoice.GetByConversationRaw(ctx, "conv_456")
+	result, err := svc.GetByConversationRaw(ctx, "conv_456")
 	if err != nil {
 		t.Fatalf("GetByConversationRaw returned error: %v", err)
 	}
-	data, err := ParseFinVoiceGetByConversationResult(result)
+	data, err := ai.ParseGetByConversationResult(result)
 	if err != nil {
-		t.Fatalf("ParseFinVoiceGetByConversationResult returned error: %v", err)
+		t.Fatalf("ParseGetByConversationResult returned error: %v", err)
 	}
 	calls := *data
 	if len(calls) != 2 {
@@ -319,9 +358,10 @@ func TestFinVoiceService_GetByConversationRaw_Success(t *testing.T) {
 	}
 }
 
-func TestFinVoiceService_GetByPhoneNumberRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestVoiceService_GetByPhoneNumberRaw_Success(t *testing.T) {
+	_, mux, teardown := setup()
 	defer teardown()
+	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/phone_number/+15551234567", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -330,13 +370,13 @@ func TestFinVoiceService_GetByPhoneNumberRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.FinVoice.GetByPhoneNumberRaw(ctx, "+15551234567")
+	result, err := svc.GetByPhoneNumberRaw(ctx, "+15551234567")
 	if err != nil {
 		t.Fatalf("GetByPhoneNumberRaw returned error: %v", err)
 	}
-	data, err := ParseFinVoiceGetByPhoneNumberResult(result)
+	data, err := ai.ParseGetByPhoneNumberResult(result)
 	if err != nil {
-		t.Fatalf("ParseFinVoiceGetByPhoneNumberResult returned error: %v", err)
+		t.Fatalf("ParseGetByPhoneNumberResult returned error: %v", err)
 	}
 	if data.UserPhoneNumber != "+15551234567" {
 		t.Errorf("Data.UserPhoneNumber = %v, want +15551234567", data.UserPhoneNumber)
@@ -346,28 +386,5 @@ func TestFinVoiceService_GetByPhoneNumberRaw_Success(t *testing.T) {
 	}
 	if result.Header.Get("X-Request-Id") != "req-fv-phone" {
 		t.Errorf("Header X-Request-Id = %q, want req-fv-phone", result.Header.Get("X-Request-Id"))
-	}
-}
-
-func TestFinVoiceService_GetByPhoneNumber(t *testing.T) {
-	client, mux, teardown := setup()
-	defer teardown()
-
-	mux.HandleFunc("/fin_voice/phone_number/+15551234567", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, http.MethodGet)
-		fmt.Fprint(w, `{
-			"id":42,
-			"user_phone_number":"+15551234567",
-			"status":"completed"
-		}`)
-	})
-
-	ctx := context.Background()
-	resp, err := client.FinVoice.GetByPhoneNumber(ctx, "+15551234567")
-	if err != nil {
-		t.Fatalf("FinVoice.GetByPhoneNumber returned error: %v", err)
-	}
-	if resp.UserPhoneNumber != "+15551234567" {
-		t.Errorf("UserPhoneNumber = %v, want +15551234567", resp.UserPhoneNumber)
 	}
 }

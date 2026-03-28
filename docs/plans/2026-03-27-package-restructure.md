@@ -205,12 +205,12 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 23: Migrate `ai` sub-package
-- [ ] create `ai/content.go` — move from root `ai_content.go`
-- [ ] create `ai/voice.go` — move from root `fin_voice.go`
-- [ ] add `AIContent()`, `FinVoice()` accessors to `Client`
-- [ ] migrate tests to `ai/`
-- [ ] remove root `ai_content.go`, `fin_voice.go`
-- [ ] run tests: `go test ./...`
+- [x] create `ai/content.go` — move from root `ai_content.go`
+- [x] create `ai/voice.go` — move from root `fin_voice.go`
+- [x] add `AIContent()`, `FinVoice()` accessors to `Client`
+- [x] migrate tests to `ai/`
+- [x] remove root `ai_content.go`, `fin_voice.go`
+- [x] run tests: `go test ./...`
 
 ### Task 24: Clean up root package
 - [ ] verify no old service files remain in root (only `intercom.go`, `aliases.go`, `doc.go`)
