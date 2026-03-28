@@ -226,6 +226,8 @@ func ParseTicketEnqueueResult(r *Result) (*EnqueuedJob, error) {
 // --- Regular Methods ---
 
 // Get retrieves a ticket by ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/getticket
 func (s *TicketsService) Get(ctx context.Context, id string) (*Ticket, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
@@ -238,6 +240,8 @@ func (s *TicketsService) Get(ctx context.Context, id string) (*Ticket, error) {
 }
 
 // Create creates a new ticket.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/createticket
 func (s *TicketsService) Create(ctx context.Context, body *CreateTicketRequest) (*Ticket, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
@@ -250,6 +254,8 @@ func (s *TicketsService) Create(ctx context.Context, body *CreateTicketRequest) 
 }
 
 // Update updates an existing ticket.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/updateticket
 func (s *TicketsService) Update(ctx context.Context, id string, body *UpdateTicketRequest) (*Ticket, error) {
 	result, err := s.UpdateRaw(ctx, id, body)
 	if err != nil {
@@ -262,6 +268,8 @@ func (s *TicketsService) Update(ctx context.Context, id string, body *UpdateTick
 }
 
 // Delete permanently deletes a ticket.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/deleteticket
 func (s *TicketsService) Delete(ctx context.Context, id string) (*TicketDeleted, error) {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
@@ -274,6 +282,8 @@ func (s *TicketsService) Delete(ctx context.Context, id string) (*TicketDeleted,
 }
 
 // Search searches for tickets using the provided query filters.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/searchtickets
 func (s *TicketsService) Search(ctx context.Context, body *SearchRequest) (*PagedResult[Ticket], error) {
 	result, err := s.SearchRaw(ctx, body)
 	if err != nil {
@@ -286,6 +296,8 @@ func (s *TicketsService) Search(ctx context.Context, body *SearchRequest) (*Page
 }
 
 // Reply adds a reply to a ticket.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/replyticket
 func (s *TicketsService) Reply(ctx context.Context, id string, body *ReplyTicketRequest) (*TicketPart, error) {
 	result, err := s.ReplyRaw(ctx, id, body)
 	if err != nil {
@@ -298,6 +310,8 @@ func (s *TicketsService) Reply(ctx context.Context, id string, body *ReplyTicket
 }
 
 // AddTag adds a tag to a ticket. Requires both the tag ID and admin ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/attachtagtoticket
 func (s *TicketsService) AddTag(ctx context.Context, ticketID, tagID, adminID string) (*TagRef, error) {
 	result, err := s.AddTagRaw(ctx, ticketID, tagID, adminID)
 	if err != nil {
@@ -310,6 +324,8 @@ func (s *TicketsService) AddTag(ctx context.Context, ticketID, tagID, adminID st
 }
 
 // RemoveTag removes a tag from a ticket. Requires the admin ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/detachtagfromticket
 func (s *TicketsService) RemoveTag(ctx context.Context, ticketID, tagID, adminID string) (*TagRef, error) {
 	result, err := s.RemoveTagRaw(ctx, ticketID, tagID, adminID)
 	if err != nil {
@@ -322,6 +338,8 @@ func (s *TicketsService) RemoveTag(ctx context.Context, ticketID, tagID, adminID
 }
 
 // Enqueue asynchronously creates a ticket, returning a job reference.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/enqueuecreateticket
 func (s *TicketsService) Enqueue(ctx context.Context, body *CreateTicketRequest) (*EnqueuedJob, error) {
 	result, err := s.EnqueueRaw(ctx, body)
 	if err != nil {
@@ -336,6 +354,8 @@ func (s *TicketsService) Enqueue(ctx context.Context, body *CreateTicketRequest)
 // --- Raw Methods ---
 
 // GetRaw retrieves a ticket by ID and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/getticket
 func (s *TicketsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("tickets/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -345,6 +365,8 @@ func (s *TicketsService) GetRaw(ctx context.Context, id string) (*Result, error)
 }
 
 // CreateRaw creates a new ticket and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/createticket
 func (s *TicketsService) CreateRaw(ctx context.Context, body *CreateTicketRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "tickets", body)
 	if err != nil {
@@ -354,6 +376,8 @@ func (s *TicketsService) CreateRaw(ctx context.Context, body *CreateTicketReques
 }
 
 // UpdateRaw updates an existing ticket and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/updateticket
 func (s *TicketsService) UpdateRaw(ctx context.Context, id string, body *UpdateTicketRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("tickets/%s", url.PathEscape(id)), body)
 	if err != nil {
@@ -363,6 +387,8 @@ func (s *TicketsService) UpdateRaw(ctx context.Context, id string, body *UpdateT
 }
 
 // DeleteRaw permanently deletes a ticket and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/deleteticket
 func (s *TicketsService) DeleteRaw(ctx context.Context, id string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("tickets/%s", url.PathEscape(id)), nil)
 	if err != nil {
@@ -372,6 +398,8 @@ func (s *TicketsService) DeleteRaw(ctx context.Context, id string) (*Result, err
 }
 
 // SearchRaw searches for tickets and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/searchtickets
 func (s *TicketsService) SearchRaw(ctx context.Context, body *SearchRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "tickets/search", body)
 	if err != nil {
@@ -381,6 +409,8 @@ func (s *TicketsService) SearchRaw(ctx context.Context, body *SearchRequest) (*R
 }
 
 // ReplyRaw adds a reply to a ticket and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/replyticket
 func (s *TicketsService) ReplyRaw(ctx context.Context, id string, body *ReplyTicketRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("tickets/%s/reply", url.PathEscape(id)), body)
 	if err != nil {
@@ -390,6 +420,8 @@ func (s *TicketsService) ReplyRaw(ctx context.Context, id string, body *ReplyTic
 }
 
 // AddTagRaw adds a tag to a ticket and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/attachtagtoticket
 func (s *TicketsService) AddTagRaw(ctx context.Context, ticketID, tagID, adminID string) (*Result, error) {
 	body := struct {
 		ID      string `json:"id"`
@@ -403,6 +435,8 @@ func (s *TicketsService) AddTagRaw(ctx context.Context, ticketID, tagID, adminID
 }
 
 // RemoveTagRaw removes a tag from a ticket and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/detachtagfromticket
 func (s *TicketsService) RemoveTagRaw(ctx context.Context, ticketID, tagID, adminID string) (*Result, error) {
 	body := struct {
 		AdminID string `json:"admin_id"`
@@ -415,6 +449,8 @@ func (s *TicketsService) RemoveTagRaw(ctx context.Context, ticketID, tagID, admi
 }
 
 // EnqueueRaw asynchronously creates a ticket and returns the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/enqueuecreateticket
 func (s *TicketsService) EnqueueRaw(ctx context.Context, body *CreateTicketRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "tickets/enqueue", body)
 	if err != nil {

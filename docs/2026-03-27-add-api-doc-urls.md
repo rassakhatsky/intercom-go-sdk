@@ -253,15 +253,15 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] UpdateAttribute/UpdateAttributeRaw → `ticket-type-attributes/updatetickettypeattribute`
 
 ### Task 33: Add doc URLs to tickets.go
-- [ ] Get/GetRaw → `tickets/getticket`
-- [ ] Create/CreateRaw → `tickets/createticket`
-- [ ] Update/UpdateRaw → `tickets/updateticket`
-- [ ] Delete/DeleteRaw → `tickets/deleteticket`
-- [ ] Search/SearchRaw → `tickets/searchtickets`
-- [ ] Reply/ReplyRaw → `tickets/replyticket`
-- [ ] AddTag/AddTagRaw → `tags/attachtagtoticket`
-- [ ] RemoveTag/RemoveTagRaw → `tags/detachtagfromticket`
-- [ ] Enqueue/EnqueueRaw → `tickets/enqueuecreateticket`
+- [x] Get/GetRaw → `tickets/getticket`
+- [x] Create/CreateRaw → `tickets/createticket`
+- [x] Update/UpdateRaw → `tickets/updateticket`
+- [x] Delete/DeleteRaw → `tickets/deleteticket`
+- [x] Search/SearchRaw → `tickets/searchtickets`
+- [x] Reply/ReplyRaw → `tickets/replyticket`
+- [x] AddTag/AddTagRaw → `tags/attachtagtoticket`
+- [x] RemoveTag/RemoveTagRaw → `tags/detachtagfromticket`
+- [x] Enqueue/EnqueueRaw → `tickets/enqueuecreateticket`
 
 ### Task 34: Add doc URLs to visitors.go
 - [ ] Get/GetRaw → `visitors/retrievevisitorwithuserid`
