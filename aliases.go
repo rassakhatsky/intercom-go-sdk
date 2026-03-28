@@ -19,6 +19,9 @@ type Empty = api.Empty
 // Error types
 type ErrorResponse = api.ErrorResponse
 
+// Shared domain types
+type TagRef = api.TagRef
+
 // Response wraps a Result to provide additional API-specific data.
 type Response = api.Response
 

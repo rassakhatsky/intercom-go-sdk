@@ -247,12 +247,6 @@ type AddSubscriptionRequest struct {
 	ConsentType string `json:"consent_type"`
 }
 
-// TagRef represents a tag in sub-resource responses.
-type TagRef struct {
-	Type string `json:"type"`
-	ID   string `json:"id"`
-	Name string `json:"name,omitempty"`
-}
 
 // ParseContactGetResult decodes a Result into a Contact.
 func ParseContactGetResult(r *Result) (*Contact, error) { return Decode[Contact](r) }

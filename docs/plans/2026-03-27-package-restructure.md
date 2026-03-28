@@ -77,9 +77,9 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] verify all existing tests still pass: `go test ./...`
 
 ### Task 7: Create shared types in `internal/api`
-- [ ] create `internal/api/types.go` — extract `TagRef` and any other types used by 3+ services
-- [ ] identify all cross-package types by grepping for types referenced in multiple service files
-- [ ] run tests: `go test ./...`
+- [x] create `internal/api/types.go` — extract `TagRef` and any other types used by 3+ services
+- [x] identify all cross-package types by grepping for types referenced in multiple service files
+- [x] run tests: `go test ./...`
 
 ### Task 8: Proof of concept — `tags` sub-package
 - [ ] create `tags/tags.go` — `Service` struct, `NewService(api.Caller)`, move all tag types and methods from root `tags.go`
