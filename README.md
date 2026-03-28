@@ -3,7 +3,7 @@
 Go SDK for the [Intercom REST API](https://developers.intercom.com/docs/references/rest-api/api.intercom.io/) v2.15.
 
 - Minimal dependencies (stdlib + [`google/go-querystring`](https://github.com/google/go-querystring))
-- 165 endpoints across 33 services
+- 167 endpoints across 34 services
 - Generic auto-pagination iterator
 - Search filter builder
 
@@ -154,6 +154,7 @@ contact, err := intercom.ParseContactGetResult(result)
 | `TicketStates` | Ticket states |
 | `TicketTypes` | Ticket types and attributes |
 | `Visitors` | Visitors |
+| `Workflows` | Workflow export |
 
 All services are accessed via `client.<Service>` (e.g., `client.Contacts`, `client.Tickets`).
 

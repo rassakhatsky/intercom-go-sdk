@@ -124,7 +124,7 @@ type UpdateTicketRequest struct {
 	Open              *bool          `json:"open,omitempty"`
 	IsShared          *bool          `json:"is_shared,omitempty"`
 	SnoozedUntil      *int64         `json:"snoozed_until,omitempty"`
-	AdminID           *int           `json:"admin_id,omitempty"`
+	AdminID           string         `json:"admin_id,omitempty"`
 	AssigneeID        string         `json:"assignee_id,omitempty"`
 	SkipNotifications *bool          `json:"skip_notifications,omitempty"`
 }
