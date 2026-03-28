@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
 
+	"github.com/rassakhatsky/intercom-go-sdk/export"
 	"github.com/rassakhatsky/intercom-go-sdk/segments"
 	"github.com/rassakhatsky/intercom-go-sdk/tags"
 )
@@ -42,9 +44,9 @@ type Client struct {
 	CustomObjects       *CustomObjectsService
 	DataAttributes      *DataAttributesService
 	DataEvents          *DataEventsService
-	DataExport          *DataExportService
+	dataExport          *export.DataService
 	Emails              *EmailsService
-	ExportReporting     *ExportReportingService
+	exportReporting     *export.ReportingService
 	FinVoice            *FinVoiceService
 	HelpCenter          *HelpCenterService
 	InternalArticles    *InternalArticlesService
@@ -128,9 +130,9 @@ func (c *Client) initialize() {
 	c.CustomObjects = (*CustomObjectsService)(&c.common)
 	c.DataAttributes = (*DataAttributesService)(&c.common)
 	c.DataEvents = (*DataEventsService)(&c.common)
-	c.DataExport = (*DataExportService)(&c.common)
+	c.dataExport = export.NewDataService(c)
 	c.Emails = (*EmailsService)(&c.common)
-	c.ExportReporting = (*ExportReportingService)(&c.common)
+	c.exportReporting = export.NewReportingService(c)
 	c.FinVoice = (*FinVoiceService)(&c.common)
 	c.HelpCenter = (*HelpCenterService)(&c.common)
 	c.InternalArticles = (*InternalArticlesService)(&c.common)
@@ -159,6 +161,16 @@ func (c *Client) Segments() *segments.Service {
 // Tags returns the tags service.
 func (c *Client) Tags() *tags.Service {
 	return c.tags
+}
+
+// ExportReporting returns the export reporting service.
+func (c *Client) ExportReporting() *export.ReportingService {
+	return c.exportReporting
+}
+
+// DataExport returns the data export service.
+func (c *Client) DataExport() *export.DataService {
+	return c.dataExport
 }
 
 // NewRequest creates an API request. A relative URL path can be provided in
@@ -214,6 +226,32 @@ func (c *Client) DoRaw(ctx context.Context, req *http.Request) (*Result, error) 
 	}
 
 	return buildResult(resp, body), nil
+}
+
+// DoDownload executes an HTTP request and streams the response body to w.
+// It is intended for binary downloads (e.g., CSV/gzip exports). On 4xx/5xx
+// responses, it reads the error body and returns an *ErrorResponse.
+func (c *Client) DoDownload(ctx context.Context, req *http.Request, w io.Writer) error {
+	req = req.WithContext(ctx)
+	c.logger.Debug("http request", "method", req.Method, "url", req.URL)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		body, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return fmt.Errorf("HTTP %d: failed to read error body: %w", resp.StatusCode, readErr)
+		}
+		result := buildResult(resp, body)
+		return resultError(result)
+	}
+
+	_, err = io.Copy(w, resp.Body)
+	return err
 }
 
 // Do sends an API request and returns the API response. The JSON response

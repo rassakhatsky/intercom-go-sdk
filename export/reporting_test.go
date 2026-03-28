@@ -1,22 +1,126 @@
-package intercom
+package export_test
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/export"
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-func TestExportReportingService_Enqueue(t *testing.T) {
-	client, mux, teardown := setup()
+// testCaller implements api.Caller for testing, backed by an httptest.Server.
+type testCaller struct {
+	baseURL string
+	client  *http.Client
+}
+
+func (tc *testCaller) NewRequest(method, urlStr string, body any) (*http.Request, error) {
+	var buf io.Reader
+	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+		buf = bytes.NewBuffer(jsonBody)
+	}
+	req, err := http.NewRequest(method, tc.baseURL+"/"+urlStr, buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer test-token")
+	req.Header.Set("Accept", "application/json")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	return req, nil
+}
+
+func (tc *testCaller) DoRaw(ctx context.Context, req *http.Request) (*api.Result, error) {
+	req = req.WithContext(ctx)
+	resp, err := tc.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return api.BuildResult(resp, b), nil
+}
+
+func (tc *testCaller) Do(ctx context.Context, req *http.Request, v any) (*api.Response, error) {
+	result, err := tc.DoRaw(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	response := &api.Response{Result: result}
+	if result.Error != nil {
+		return response, api.ResultError(result)
+	}
+	if v != nil && result.StatusCode != http.StatusNoContent && len(result.Body) > 0 {
+		if err := json.Unmarshal(result.Body, v); err != nil {
+			return response, err
+		}
+	}
+	return response, nil
+}
+
+func (tc *testCaller) DoDownload(ctx context.Context, req *http.Request, w io.Writer) error {
+	req = req.WithContext(ctx)
+	resp, err := tc.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		b, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return fmt.Errorf("HTTP %d: failed to read error body: %w", resp.StatusCode, readErr)
+		}
+		result := api.BuildResult(resp, b)
+		return api.ResultError(result)
+	}
+	_, err = io.Copy(w, resp.Body)
+	return err
+}
+
+func setupReporting() (svc *export.ReportingService, mux *http.ServeMux, teardown func()) {
+	mux = http.NewServeMux()
+	server := httptest.NewServer(mux)
+	caller := &testCaller{baseURL: server.URL, client: server.Client()}
+	svc = export.NewReportingService(caller)
+	return svc, mux, server.Close
+}
+
+func testMethod(t *testing.T, r *http.Request, want string) {
+	t.Helper()
+	if got := r.Method; got != want {
+		t.Errorf("Request method = %v, want %v", got, want)
+	}
+}
+
+func testHeader(t *testing.T, r *http.Request, header, want string) {
+	t.Helper()
+	if got := r.Header.Get(header); got != want {
+		t.Errorf("Header %v = %q, want %q", header, got, want)
+	}
+}
+
+func TestReportingService_Enqueue(t *testing.T) {
+	svc, mux, teardown := setupReporting()
 	defer teardown()
 
 	mux.HandleFunc("/export/reporting_data/enqueue", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
 		testHeader(t, r, "Authorization", "Bearer test-token")
-		var body EnqueueExportReportingRequest
+		var body export.EnqueueRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -41,14 +145,14 @@ func TestExportReportingService_Enqueue(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	job, err := client.ExportReporting.Enqueue(ctx, &EnqueueExportReportingRequest{
+	job, err := svc.Enqueue(ctx, &export.EnqueueRequest{
 		DatasetID:    "conversation",
 		AttributeIDs: []string{"conversation_id", "conversation_started_at"},
 		StartTime:    1717490000,
 		EndTime:      1717510000,
 	})
 	if err != nil {
-		t.Fatalf("ExportReporting.Enqueue returned error: %v", err)
+		t.Fatalf("Enqueue returned error: %v", err)
 	}
 	if job.JobIdentifier != "job1" {
 		t.Errorf("JobIdentifier = %v, want job1", job.JobIdentifier)
@@ -58,8 +162,8 @@ func TestExportReportingService_Enqueue(t *testing.T) {
 	}
 }
 
-func TestExportReportingService_Enqueue_BadRequest(t *testing.T) {
-	client, mux, teardown := setup()
+func TestReportingService_Enqueue_BadRequest(t *testing.T) {
+	svc, mux, teardown := setupReporting()
 	defer teardown()
 
 	mux.HandleFunc("/export/reporting_data/enqueue", func(w http.ResponseWriter, r *http.Request) {
@@ -72,14 +176,14 @@ func TestExportReportingService_Enqueue_BadRequest(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.ExportReporting.Enqueue(ctx, &EnqueueExportReportingRequest{})
+	_, err := svc.Enqueue(ctx, &export.EnqueueRequest{})
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
 }
 
-func TestExportReportingService_Enqueue_RateLimited(t *testing.T) {
-	client, mux, teardown := setup()
+func TestReportingService_Enqueue_RateLimited(t *testing.T) {
+	svc, mux, teardown := setupReporting()
 	defer teardown()
 
 	mux.HandleFunc("/export/reporting_data/enqueue", func(w http.ResponseWriter, r *http.Request) {
@@ -92,7 +196,7 @@ func TestExportReportingService_Enqueue_RateLimited(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.ExportReporting.Enqueue(ctx, &EnqueueExportReportingRequest{
+	_, err := svc.Enqueue(ctx, &export.EnqueueRequest{
 		DatasetID:    "conversation",
 		AttributeIDs: []string{"conversation_id"},
 		StartTime:    1717490000,
@@ -101,13 +205,13 @@ func TestExportReportingService_Enqueue_RateLimited(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsRateLimited(err) {
+	if !api.IsRateLimited(err) {
 		t.Errorf("Expected IsRateLimited, got: %v", err)
 	}
 }
 
-func TestExportReportingService_GetStatus(t *testing.T) {
-	client, mux, teardown := setup()
+func TestReportingService_GetStatus(t *testing.T) {
+	svc, mux, teardown := setupReporting()
 	defer teardown()
 
 	mux.HandleFunc("/export/reporting_data/job1", func(w http.ResponseWriter, r *http.Request) {
@@ -122,9 +226,9 @@ func TestExportReportingService_GetStatus(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	job, err := client.ExportReporting.GetStatus(ctx, "job1")
+	job, err := svc.GetStatus(ctx, "job1")
 	if err != nil {
-		t.Fatalf("ExportReporting.GetStatus returned error: %v", err)
+		t.Fatalf("GetStatus returned error: %v", err)
 	}
 	if job.JobIdentifier != "job1" {
 		t.Errorf("JobIdentifier = %v, want job1", job.JobIdentifier)
@@ -137,8 +241,8 @@ func TestExportReportingService_GetStatus(t *testing.T) {
 	}
 }
 
-func TestExportReportingService_GetStatus_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestReportingService_GetStatus_NotFound(t *testing.T) {
+	svc, mux, teardown := setupReporting()
 	defer teardown()
 
 	mux.HandleFunc("/export/reporting_data/nonexistent", func(w http.ResponseWriter, r *http.Request) {
@@ -151,17 +255,17 @@ func TestExportReportingService_GetStatus_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.ExportReporting.GetStatus(ctx, "nonexistent")
+	_, err := svc.GetStatus(ctx, "nonexistent")
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("Expected IsNotFound, got: %v", err)
 	}
 }
 
-func TestExportReportingService_GetDatasets(t *testing.T) {
-	client, mux, teardown := setup()
+func TestReportingService_GetDatasets(t *testing.T) {
+	svc, mux, teardown := setupReporting()
 	defer teardown()
 
 	mux.HandleFunc("/export/reporting_data/get_datasets", func(w http.ResponseWriter, r *http.Request) {
@@ -190,9 +294,9 @@ func TestExportReportingService_GetDatasets(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	datasets, err := client.ExportReporting.GetDatasets(ctx)
+	datasets, err := svc.GetDatasets(ctx)
 	if err != nil {
-		t.Fatalf("ExportReporting.GetDatasets returned error: %v", err)
+		t.Fatalf("GetDatasets returned error: %v", err)
 	}
 	if len(datasets) != 2 {
 		t.Fatalf("len(datasets) = %v, want 2", len(datasets))
@@ -211,8 +315,8 @@ func TestExportReportingService_GetDatasets(t *testing.T) {
 	}
 }
 
-func TestExportReportingService_Download(t *testing.T) {
-	client, mux, teardown := setup()
+func TestReportingService_Download(t *testing.T) {
+	svc, mux, teardown := setupReporting()
 	defer teardown()
 
 	expectedData := []byte("conversation_id,started_at\n123,2024-01-01\n")
@@ -229,17 +333,17 @@ func TestExportReportingService_Download(t *testing.T) {
 
 	ctx := context.Background()
 	var buf bytes.Buffer
-	err := client.ExportReporting.Download(ctx, "job1", &buf)
+	err := svc.Download(ctx, "job1", &buf)
 	if err != nil {
-		t.Fatalf("ExportReporting.Download returned error: %v", err)
+		t.Fatalf("Download returned error: %v", err)
 	}
 	if !bytes.Equal(buf.Bytes(), expectedData) {
 		t.Errorf("Download data = %q, want %q", buf.String(), string(expectedData))
 	}
 }
 
-func TestExportReportingService_Download_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestReportingService_Download_NotFound(t *testing.T) {
+	svc, mux, teardown := setupReporting()
 	defer teardown()
 
 	mux.HandleFunc("/download/reporting_data/nonexistent", func(w http.ResponseWriter, r *http.Request) {
@@ -253,17 +357,17 @@ func TestExportReportingService_Download_NotFound(t *testing.T) {
 
 	ctx := context.Background()
 	var buf bytes.Buffer
-	err := client.ExportReporting.Download(ctx, "nonexistent", &buf)
+	err := svc.Download(ctx, "nonexistent", &buf)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("Expected IsNotFound, got: %v", err)
 	}
 }
 
-func TestExportReportingService_EnqueueRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestReportingService_EnqueueRaw(t *testing.T) {
+	svc, mux, teardown := setupReporting()
 	defer teardown()
 
 	mux.HandleFunc("/export/reporting_data/enqueue", func(w http.ResponseWriter, r *http.Request) {
@@ -277,29 +381,29 @@ func TestExportReportingService_EnqueueRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.ExportReporting.EnqueueRaw(ctx, &EnqueueExportReportingRequest{
+	result, err := svc.EnqueueRaw(ctx, &export.EnqueueRequest{
 		DatasetID:    "conversation",
 		AttributeIDs: []string{"conversation_id", "conversation_started_at"},
 		StartTime:    1717490000,
 		EndTime:      1717510000,
 	})
 	if err != nil {
-		t.Fatalf("ExportReporting.EnqueueRaw returned error: %v", err)
+		t.Fatalf("EnqueueRaw returned error: %v", err)
 	}
 	if result.StatusCode != http.StatusOK {
 		t.Errorf("StatusCode = %d, want %d", result.StatusCode, http.StatusOK)
 	}
-	job, err := ParseExportReportingEnqueueResult(result)
+	job, err := export.ParseEnqueueResult(result)
 	if err != nil {
-		t.Fatalf("ParseExportReportingEnqueueResult returned error: %v", err)
+		t.Fatalf("ParseEnqueueResult returned error: %v", err)
 	}
 	if job.JobIdentifier != "job1" {
 		t.Errorf("JobIdentifier = %v, want job1", job.JobIdentifier)
 	}
 }
 
-func TestExportReportingService_GetStatusRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestReportingService_GetStatusRaw(t *testing.T) {
+	svc, mux, teardown := setupReporting()
 	defer teardown()
 
 	mux.HandleFunc("/export/reporting_data/job1", func(w http.ResponseWriter, r *http.Request) {
@@ -313,24 +417,24 @@ func TestExportReportingService_GetStatusRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.ExportReporting.GetStatusRaw(ctx, "job1")
+	result, err := svc.GetStatusRaw(ctx, "job1")
 	if err != nil {
-		t.Fatalf("ExportReporting.GetStatusRaw returned error: %v", err)
+		t.Fatalf("GetStatusRaw returned error: %v", err)
 	}
 	if result.StatusCode != http.StatusOK {
 		t.Errorf("StatusCode = %d, want %d", result.StatusCode, http.StatusOK)
 	}
-	job, err := ParseExportReportingGetStatusResult(result)
+	job, err := export.ParseGetStatusResult(result)
 	if err != nil {
-		t.Fatalf("ParseExportReportingGetStatusResult returned error: %v", err)
+		t.Fatalf("ParseGetStatusResult returned error: %v", err)
 	}
 	if job.Status != "complete" {
 		t.Errorf("Status = %v, want complete", job.Status)
 	}
 }
 
-func TestExportReportingService_GetStatusRaw_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestReportingService_GetStatusRaw_NotFound(t *testing.T) {
+	svc, mux, teardown := setupReporting()
 	defer teardown()
 
 	mux.HandleFunc("/export/reporting_data/nonexistent", func(w http.ResponseWriter, r *http.Request) {
@@ -343,9 +447,9 @@ func TestExportReportingService_GetStatusRaw_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.ExportReporting.GetStatusRaw(ctx, "nonexistent")
+	result, err := svc.GetStatusRaw(ctx, "nonexistent")
 	if err != nil {
-		t.Fatalf("ExportReporting.GetStatusRaw returned error: %v", err)
+		t.Fatalf("GetStatusRaw returned error: %v", err)
 	}
 	if result.Error == nil {
 		t.Fatal("Expected Error to be populated")
@@ -355,8 +459,8 @@ func TestExportReportingService_GetStatusRaw_NotFound(t *testing.T) {
 	}
 }
 
-func TestExportReportingService_GetDatasetsRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestReportingService_GetDatasetsRaw(t *testing.T) {
+	svc, mux, teardown := setupReporting()
 	defer teardown()
 
 	mux.HandleFunc("/export/reporting_data/get_datasets", func(w http.ResponseWriter, r *http.Request) {
@@ -376,16 +480,16 @@ func TestExportReportingService_GetDatasetsRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.ExportReporting.GetDatasetsRaw(ctx)
+	result, err := svc.GetDatasetsRaw(ctx)
 	if err != nil {
-		t.Fatalf("ExportReporting.GetDatasetsRaw returned error: %v", err)
+		t.Fatalf("GetDatasetsRaw returned error: %v", err)
 	}
 	if result.StatusCode != http.StatusOK {
 		t.Errorf("StatusCode = %d, want %d", result.StatusCode, http.StatusOK)
 	}
-	resp, err := ParseExportReportingGetDatasetsResult(result)
+	resp, err := export.ParseGetDatasetsResult(result)
 	if err != nil {
-		t.Fatalf("ParseExportReportingGetDatasetsResult returned error: %v", err)
+		t.Fatalf("ParseGetDatasetsResult returned error: %v", err)
 	}
 	if len(resp.Data) != 1 {
 		t.Fatalf("len(Data) = %d, want 1", len(resp.Data))

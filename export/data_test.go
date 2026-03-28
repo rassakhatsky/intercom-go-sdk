@@ -1,4 +1,4 @@
-package intercom
+package export_test
 
 import (
 	"bytes"
@@ -6,17 +6,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/export"
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-func TestDataExportService_Create(t *testing.T) {
-	client, mux, teardown := setup()
+func setupData() (svc *export.DataService, mux *http.ServeMux, teardown func()) {
+	mux = http.NewServeMux()
+	server := httptest.NewServer(mux)
+	caller := &testCaller{baseURL: server.URL, client: server.Client()}
+	svc = export.NewDataService(caller)
+	return svc, mux, server.Close
+}
+
+func TestDataService_Create(t *testing.T) {
+	svc, mux, teardown := setupData()
 	defer teardown()
 
 	mux.HandleFunc("/export/content/data", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
 		testHeader(t, r, "Authorization", "Bearer test-token")
-		var body CreateDataExportRequest
+		var body export.CreateRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -35,23 +47,23 @@ func TestDataExportService_Create(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	export, err := client.DataExport.Create(ctx, &CreateDataExportRequest{
+	de, err := svc.Create(ctx, &export.CreateRequest{
 		CreatedAtAfter:  1527811200,
 		CreatedAtBefore: 1530403200,
 	})
 	if err != nil {
-		t.Fatalf("DataExport.Create returned error: %v", err)
+		t.Fatalf("Create returned error: %v", err)
 	}
-	if export.JobIdentifier != "orzzsbd7hk67xyu" {
-		t.Errorf("JobIdentifier = %v, want orzzsbd7hk67xyu", export.JobIdentifier)
+	if de.JobIdentifier != "orzzsbd7hk67xyu" {
+		t.Errorf("JobIdentifier = %v, want orzzsbd7hk67xyu", de.JobIdentifier)
 	}
-	if export.Status != "pending" {
-		t.Errorf("Status = %v, want pending", export.Status)
+	if de.Status != "pending" {
+		t.Errorf("Status = %v, want pending", de.Status)
 	}
 }
 
-func TestDataExportService_GetStatus(t *testing.T) {
-	client, mux, teardown := setup()
+func TestDataService_GetStatus(t *testing.T) {
+	svc, mux, teardown := setupData()
 	defer teardown()
 
 	mux.HandleFunc("/export/content/data/orzzsbd7hk67xyu", func(w http.ResponseWriter, r *http.Request) {
@@ -66,26 +78,26 @@ func TestDataExportService_GetStatus(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	export, err := client.DataExport.GetStatus(ctx, "orzzsbd7hk67xyu")
+	de, err := svc.GetStatus(ctx, "orzzsbd7hk67xyu")
 	if err != nil {
-		t.Fatalf("DataExport.GetStatus returned error: %v", err)
+		t.Fatalf("GetStatus returned error: %v", err)
 	}
-	if export.JobIdentifier != "orzzsbd7hk67xyu" {
-		t.Errorf("JobIdentifier = %v, want orzzsbd7hk67xyu", export.JobIdentifier)
+	if de.JobIdentifier != "orzzsbd7hk67xyu" {
+		t.Errorf("JobIdentifier = %v, want orzzsbd7hk67xyu", de.JobIdentifier)
 	}
-	if export.Status != "completed" {
-		t.Errorf("Status = %v, want completed", export.Status)
+	if de.Status != "completed" {
+		t.Errorf("Status = %v, want completed", de.Status)
 	}
-	if export.DownloadURL != "https://api.intercom.test/download/content/data/orzzsbd7hk67xyu" {
-		t.Errorf("DownloadURL = %v, want https://api.intercom.test/download/content/data/orzzsbd7hk67xyu", export.DownloadURL)
+	if de.DownloadURL != "https://api.intercom.test/download/content/data/orzzsbd7hk67xyu" {
+		t.Errorf("DownloadURL = %v, want https://api.intercom.test/download/content/data/orzzsbd7hk67xyu", de.DownloadURL)
 	}
-	if export.DownloadExpiresAt != "1674917488" {
-		t.Errorf("DownloadExpiresAt = %v, want 1674917488", export.DownloadExpiresAt)
+	if de.DownloadExpiresAt != "1674917488" {
+		t.Errorf("DownloadExpiresAt = %v, want 1674917488", de.DownloadExpiresAt)
 	}
 }
 
-func TestDataExportService_GetStatus_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestDataService_GetStatus_NotFound(t *testing.T) {
+	svc, mux, teardown := setupData()
 	defer teardown()
 
 	mux.HandleFunc("/export/content/data/nonexistent", func(w http.ResponseWriter, r *http.Request) {
@@ -98,17 +110,17 @@ func TestDataExportService_GetStatus_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.DataExport.GetStatus(ctx, "nonexistent")
+	_, err := svc.GetStatus(ctx, "nonexistent")
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("Expected IsNotFound, got: %v", err)
 	}
 }
 
-func TestDataExportService_Cancel(t *testing.T) {
-	client, mux, teardown := setup()
+func TestDataService_Cancel(t *testing.T) {
+	svc, mux, teardown := setupData()
 	defer teardown()
 
 	mux.HandleFunc("/export/cancel/orzzsbd7hk67xyu", func(w http.ResponseWriter, r *http.Request) {
@@ -123,20 +135,20 @@ func TestDataExportService_Cancel(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	export, err := client.DataExport.Cancel(ctx, "orzzsbd7hk67xyu")
+	de, err := svc.Cancel(ctx, "orzzsbd7hk67xyu")
 	if err != nil {
-		t.Fatalf("DataExport.Cancel returned error: %v", err)
+		t.Fatalf("Cancel returned error: %v", err)
 	}
-	if export.JobIdentifier != "orzzsbd7hk67xyu" {
-		t.Errorf("JobIdentifier = %v, want orzzsbd7hk67xyu", export.JobIdentifier)
+	if de.JobIdentifier != "orzzsbd7hk67xyu" {
+		t.Errorf("JobIdentifier = %v, want orzzsbd7hk67xyu", de.JobIdentifier)
 	}
-	if export.Status != "canceled" {
-		t.Errorf("Status = %v, want canceled", export.Status)
+	if de.Status != "canceled" {
+		t.Errorf("Status = %v, want canceled", de.Status)
 	}
 }
 
-func TestDataExportService_Download(t *testing.T) {
-	client, mux, teardown := setup()
+func TestDataService_Download(t *testing.T) {
+	svc, mux, teardown := setupData()
 	defer teardown()
 
 	expectedData := []byte("user_id,email,name\n123,test@example.com,Test User\n")
@@ -150,17 +162,17 @@ func TestDataExportService_Download(t *testing.T) {
 
 	ctx := context.Background()
 	var buf bytes.Buffer
-	err := client.DataExport.Download(ctx, "orzzsbd7hk67xyu", &buf)
+	err := svc.Download(ctx, "orzzsbd7hk67xyu", &buf)
 	if err != nil {
-		t.Fatalf("DataExport.Download returned error: %v", err)
+		t.Fatalf("Download returned error: %v", err)
 	}
 	if !bytes.Equal(buf.Bytes(), expectedData) {
 		t.Errorf("Download data = %q, want %q", buf.String(), string(expectedData))
 	}
 }
 
-func TestDataExportService_Download_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestDataService_Download_NotFound(t *testing.T) {
+	svc, mux, teardown := setupData()
 	defer teardown()
 
 	mux.HandleFunc("/download/content/data/nonexistent", func(w http.ResponseWriter, r *http.Request) {
@@ -174,17 +186,17 @@ func TestDataExportService_Download_NotFound(t *testing.T) {
 
 	ctx := context.Background()
 	var buf bytes.Buffer
-	err := client.DataExport.Download(ctx, "nonexistent", &buf)
+	err := svc.Download(ctx, "nonexistent", &buf)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("Expected IsNotFound, got: %v", err)
 	}
 }
 
-func TestDataExportService_Create_RateLimited(t *testing.T) {
-	client, mux, teardown := setup()
+func TestDataService_Create_RateLimited(t *testing.T) {
+	svc, mux, teardown := setupData()
 	defer teardown()
 
 	mux.HandleFunc("/export/content/data", func(w http.ResponseWriter, r *http.Request) {
@@ -197,20 +209,20 @@ func TestDataExportService_Create_RateLimited(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.DataExport.Create(ctx, &CreateDataExportRequest{
+	_, err := svc.Create(ctx, &export.CreateRequest{
 		CreatedAtAfter:  1527811200,
 		CreatedAtBefore: 1530403200,
 	})
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsRateLimited(err) {
+	if !api.IsRateLimited(err) {
 		t.Errorf("Expected IsRateLimited, got: %v", err)
 	}
 }
 
-func TestDataExportService_CreateRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestDataService_CreateRaw(t *testing.T) {
+	svc, mux, teardown := setupData()
 	defer teardown()
 
 	mux.HandleFunc("/export/content/data", func(w http.ResponseWriter, r *http.Request) {
@@ -224,30 +236,30 @@ func TestDataExportService_CreateRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.DataExport.CreateRaw(ctx, &CreateDataExportRequest{
+	result, err := svc.CreateRaw(ctx, &export.CreateRequest{
 		CreatedAtAfter:  1527811200,
 		CreatedAtBefore: 1530403200,
 	})
 	if err != nil {
-		t.Fatalf("DataExport.CreateRaw returned error: %v", err)
+		t.Fatalf("CreateRaw returned error: %v", err)
 	}
 	if result.StatusCode != http.StatusOK {
 		t.Errorf("StatusCode = %d, want %d", result.StatusCode, http.StatusOK)
 	}
-	export, err := ParseDataExportCreateResult(result)
+	de, err := export.ParseCreateResult(result)
 	if err != nil {
-		t.Fatalf("ParseDataExportCreateResult returned error: %v", err)
+		t.Fatalf("ParseCreateResult returned error: %v", err)
 	}
-	if export.JobIdentifier != "orzzsbd7hk67xyu" {
-		t.Errorf("JobIdentifier = %v, want orzzsbd7hk67xyu", export.JobIdentifier)
+	if de.JobIdentifier != "orzzsbd7hk67xyu" {
+		t.Errorf("JobIdentifier = %v, want orzzsbd7hk67xyu", de.JobIdentifier)
 	}
-	if export.Status != "pending" {
-		t.Errorf("Status = %v, want pending", export.Status)
+	if de.Status != "pending" {
+		t.Errorf("Status = %v, want pending", de.Status)
 	}
 }
 
-func TestDataExportService_GetStatusRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestDataService_GetStatusRaw(t *testing.T) {
+	svc, mux, teardown := setupData()
 	defer teardown()
 
 	mux.HandleFunc("/export/content/data/orzzsbd7hk67xyu", func(w http.ResponseWriter, r *http.Request) {
@@ -261,27 +273,27 @@ func TestDataExportService_GetStatusRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.DataExport.GetStatusRaw(ctx, "orzzsbd7hk67xyu")
+	result, err := svc.GetStatusRaw(ctx, "orzzsbd7hk67xyu")
 	if err != nil {
-		t.Fatalf("DataExport.GetStatusRaw returned error: %v", err)
+		t.Fatalf("GetStatusRaw returned error: %v", err)
 	}
 	if result.StatusCode != http.StatusOK {
 		t.Errorf("StatusCode = %d, want %d", result.StatusCode, http.StatusOK)
 	}
-	export, err := ParseDataExportGetStatusResult(result)
+	de, err := export.ParseDataGetStatusResult(result)
 	if err != nil {
-		t.Fatalf("ParseDataExportGetStatusResult returned error: %v", err)
+		t.Fatalf("ParseDataGetStatusResult returned error: %v", err)
 	}
-	if export.JobIdentifier != "orzzsbd7hk67xyu" {
-		t.Errorf("JobIdentifier = %v, want orzzsbd7hk67xyu", export.JobIdentifier)
+	if de.JobIdentifier != "orzzsbd7hk67xyu" {
+		t.Errorf("JobIdentifier = %v, want orzzsbd7hk67xyu", de.JobIdentifier)
 	}
-	if export.Status != "completed" {
-		t.Errorf("Status = %v, want completed", export.Status)
+	if de.Status != "completed" {
+		t.Errorf("Status = %v, want completed", de.Status)
 	}
 }
 
-func TestDataExportService_GetStatusRaw_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestDataService_GetStatusRaw_NotFound(t *testing.T) {
+	svc, mux, teardown := setupData()
 	defer teardown()
 
 	mux.HandleFunc("/export/content/data/nonexistent", func(w http.ResponseWriter, r *http.Request) {
@@ -294,9 +306,9 @@ func TestDataExportService_GetStatusRaw_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.DataExport.GetStatusRaw(ctx, "nonexistent")
+	result, err := svc.GetStatusRaw(ctx, "nonexistent")
 	if err != nil {
-		t.Fatalf("DataExport.GetStatusRaw returned error: %v", err)
+		t.Fatalf("GetStatusRaw returned error: %v", err)
 	}
 	if result.Error == nil {
 		t.Fatal("Expected Error to be populated")
@@ -309,8 +321,8 @@ func TestDataExportService_GetStatusRaw_NotFound(t *testing.T) {
 	}
 }
 
-func TestDataExportService_CancelRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestDataService_CancelRaw(t *testing.T) {
+	svc, mux, teardown := setupData()
 	defer teardown()
 
 	mux.HandleFunc("/export/cancel/orzzsbd7hk67xyu", func(w http.ResponseWriter, r *http.Request) {
@@ -324,18 +336,18 @@ func TestDataExportService_CancelRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.DataExport.CancelRaw(ctx, "orzzsbd7hk67xyu")
+	result, err := svc.CancelRaw(ctx, "orzzsbd7hk67xyu")
 	if err != nil {
-		t.Fatalf("DataExport.CancelRaw returned error: %v", err)
+		t.Fatalf("CancelRaw returned error: %v", err)
 	}
 	if result.StatusCode != http.StatusOK {
 		t.Errorf("StatusCode = %d, want %d", result.StatusCode, http.StatusOK)
 	}
-	export, err := ParseDataExportCancelResult(result)
+	de, err := export.ParseCancelResult(result)
 	if err != nil {
-		t.Fatalf("ParseDataExportCancelResult returned error: %v", err)
+		t.Fatalf("ParseCancelResult returned error: %v", err)
 	}
-	if export.Status != "canceled" {
-		t.Errorf("Status = %v, want canceled", export.Status)
+	if de.Status != "canceled" {
+		t.Errorf("Status = %v, want canceled", de.Status)
 	}
 }

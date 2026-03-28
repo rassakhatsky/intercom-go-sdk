@@ -98,12 +98,12 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 10: Migrate `export` sub-package
-- [ ] create `export/reporting.go` — move from root `export_reporting.go`
-- [ ] create `export/data.go` — move from root `data_export.go`
-- [ ] add `ExportReporting()` and `DataExport()` accessors to `Client`
-- [ ] migrate tests to `export/`
-- [ ] remove root `export_reporting.go`, `data_export.go`
-- [ ] run tests: `go test ./...`
+- [x] create `export/reporting.go` — move from root `export_reporting.go`
+- [x] create `export/data.go` — move from root `data_export.go`
+- [x] add `ExportReporting()` and `DataExport()` accessors to `Client`
+- [x] migrate tests to `export/`
+- [x] remove root `export_reporting.go`, `data_export.go`
+- [x] run tests: `go test ./...`
 
 ### Task 11: Migrate `news` sub-package
 - [ ] create `news/news.go` — move types and methods from root `news.go`

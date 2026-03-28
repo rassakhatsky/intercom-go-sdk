@@ -72,6 +72,25 @@ func (tc *testCaller) Do(ctx context.Context, req *http.Request, v any) (*api.Re
 	return response, nil
 }
 
+func (tc *testCaller) DoDownload(ctx context.Context, req *http.Request, w io.Writer) error {
+	req = req.WithContext(ctx)
+	resp, err := tc.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		b, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return fmt.Errorf("HTTP %d: failed to read error body: %w", resp.StatusCode, readErr)
+		}
+		result := api.BuildResult(resp, b)
+		return api.ResultError(result)
+	}
+	_, err = io.Copy(w, resp.Body)
+	return err
+}
+
 func setup() (svc *tags.Service, mux *http.ServeMux, teardown func()) {
 	mux = http.NewServeMux()
 	server := httptest.NewServer(mux)
