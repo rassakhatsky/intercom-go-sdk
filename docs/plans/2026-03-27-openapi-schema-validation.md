@@ -54,11 +54,11 @@ Extend the script to:
 - Compare: flag missing fields, extra fields, type mismatches
 - Same for response schemas where possible
 
-- [ ] Add request body schema resolution (follow `$ref` chains)
-- [ ] Add Go struct field extraction (parse JSON tags from request/response structs)
-- [ ] Add field-level comparison (schema properties vs struct fields)
-- [ ] Run extended validation and save full report to `docs/reports/openapi-full-validation.md`
-- [ ] No tests needed (tooling script)
+- [x] Add request body schema resolution (follow `$ref` chains)
+- [x] Add Go struct field extraction (parse JSON tags from request/response structs)
+- [x] Add field-level comparison (schema properties vs struct fields)
+- [x] Run extended validation and save full report to `docs/reports/openapi-full-validation.md`
+- [x] No tests needed (tooling script)
 
 ### Task 3: Fix gap — add `ContactsService.ListTags`
 Add the missing `GET /contacts/{contact_id}/tags` operation.
