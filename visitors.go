@@ -141,6 +141,8 @@ func ParseVisitorConvertResult(r *Result) (*Contact, error) {
 // --- Regular Methods ---
 
 // Get retrieves a visitor by their user_id.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/visitors/retrievevisitorwithuserid
 func (s *VisitorsService) Get(ctx context.Context, userID string) (*Visitor, error) {
 	result, err := s.GetRaw(ctx, userID)
 	if err != nil {
@@ -153,6 +155,8 @@ func (s *VisitorsService) Get(ctx context.Context, userID string) (*Visitor, err
 }
 
 // Update updates a visitor. The request must include either ID or UserID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/visitors/updatevisitor
 func (s *VisitorsService) Update(ctx context.Context, input *UpdateVisitorRequest) (*Visitor, error) {
 	result, err := s.UpdateRaw(ctx, input)
 	if err != nil {
@@ -166,6 +170,8 @@ func (s *VisitorsService) Update(ctx context.Context, input *UpdateVisitorReques
 
 // Convert converts a visitor to a contact (user or lead).
 // The returned Contact is the newly created or merged contact.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/visitors/convertvisitor
 func (s *VisitorsService) Convert(ctx context.Context, input *ConvertVisitorRequest) (*Contact, error) {
 	result, err := s.ConvertRaw(ctx, input)
 	if err != nil {
@@ -180,6 +186,8 @@ func (s *VisitorsService) Convert(ctx context.Context, input *ConvertVisitorRequ
 // --- Raw Methods ---
 
 // GetRaw retrieves a visitor by user_id with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/visitors/retrievevisitorwithuserid
 func (s *VisitorsService) GetRaw(ctx context.Context, userID string) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("visitors?user_id=%s", url.QueryEscape(userID)), nil)
 	if err != nil {
@@ -189,6 +197,8 @@ func (s *VisitorsService) GetRaw(ctx context.Context, userID string) (*Result, e
 }
 
 // UpdateRaw updates a visitor with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/visitors/updatevisitor
 func (s *VisitorsService) UpdateRaw(ctx context.Context, input *UpdateVisitorRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, "visitors", input)
 	if err != nil {
@@ -198,6 +208,8 @@ func (s *VisitorsService) UpdateRaw(ctx context.Context, input *UpdateVisitorReq
 }
 
 // ConvertRaw converts a visitor to a contact with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/visitors/convertvisitor
 func (s *VisitorsService) ConvertRaw(ctx context.Context, input *ConvertVisitorRequest) (*Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "visitors/convert", input)
 	if err != nil {

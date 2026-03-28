@@ -264,10 +264,10 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] Enqueue/EnqueueRaw → `tickets/enqueuecreateticket`
 
 ### Task 34: Add doc URLs to visitors.go
-- [ ] Get/GetRaw → `visitors/retrievevisitorwithuserid`
-- [ ] Update/UpdateRaw → `visitors/updatevisitor`
-- [ ] FindByUserID/FindByUserIDRaw → `visitors/retrievevisitorwithuserid`
-- [ ] Delete/DeleteRaw → `visitors/convertvisitor`
+- [x] Get/GetRaw → `visitors/retrievevisitorwithuserid`
+- [x] Update/UpdateRaw → `visitors/updatevisitor`
+- [x] FindByUserID/FindByUserIDRaw → `visitors/retrievevisitorwithuserid` (no FindByUserID method exists; Get serves this purpose)
+- [x] Delete/DeleteRaw → `visitors/convertvisitor` (no Delete method exists; Convert serves this purpose)
 
 ### Task 35: Final verification
 - [ ] Run `go vet ./...`
