@@ -72,6 +72,27 @@ func (tc *testCaller) Do(ctx context.Context, req *http.Request, v any) (*api.Re
 	return response, nil
 }
 
+func (tc *testCaller) DoRawNoRedirect(ctx context.Context, req *http.Request) (*api.Result, error) {
+	noRedirectClient := &http.Client{
+		Transport: tc.client.Transport,
+		Timeout:   tc.client.Timeout,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	req = req.WithContext(ctx)
+	resp, err := noRedirectClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return api.BuildResult(resp, b), nil
+}
+
 func (tc *testCaller) DoDownload(ctx context.Context, req *http.Request, w io.Writer) error {
 	req = req.WithContext(ctx)
 	resp, err := tc.client.Do(req)

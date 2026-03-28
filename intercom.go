@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/rassakhatsky/intercom-go-sdk/admins"
+	"github.com/rassakhatsky/intercom-go-sdk/calls"
 	"github.com/rassakhatsky/intercom-go-sdk/data"
 	"github.com/rassakhatsky/intercom-go-sdk/export"
 	"github.com/rassakhatsky/intercom-go-sdk/messaging"
@@ -41,7 +42,7 @@ type Client struct {
 	Articles            *ArticlesService
 	awayStatusReasons   *admins.AwayStatusReasonsService
 	brands              *settings.BrandsService
-	Calls               *CallsService
+	calls               *calls.Service
 	Contacts            *ContactsService
 	Companies           *CompaniesService
 	Conversations       *ConversationsService
@@ -60,7 +61,7 @@ type Client struct {
 	messages            *messaging.MessagesService
 	news                *news.Service
 	notes               *settings.NotesService
-	PhoneCallRedirects  *PhoneCallRedirectsService
+	phoneCallRedirects  *calls.RedirectsService
 	segments            *segments.Service
 	subscriptionTypes   *messaging.SubscriptionsService
 	tags                *tags.Service
@@ -127,7 +128,7 @@ func (c *Client) initialize() {
 	c.Articles = (*ArticlesService)(&c.common)
 	c.awayStatusReasons = admins.NewAwayStatusReasonsService(c)
 	c.brands = settings.NewBrandsService(c)
-	c.Calls = (*CallsService)(&c.common)
+	c.calls = calls.NewService(c)
 	c.Contacts = (*ContactsService)(&c.common)
 	c.Companies = (*CompaniesService)(&c.common)
 	c.Conversations = (*ConversationsService)(&c.common)
@@ -146,7 +147,7 @@ func (c *Client) initialize() {
 	c.messages = messaging.NewMessagesService(c)
 	c.news = news.NewService(c)
 	c.notes = settings.NewNotesService(c)
-	c.PhoneCallRedirects = (*PhoneCallRedirectsService)(&c.common)
+	c.phoneCallRedirects = calls.NewRedirectsService(c)
 	c.segments = segments.NewService(c)
 	c.subscriptionTypes = messaging.NewSubscriptionsService(c)
 	c.tags = tags.NewService(c)
@@ -253,6 +254,16 @@ func (c *Client) AwayStatusReasons() *admins.AwayStatusReasonsService {
 	return c.awayStatusReasons
 }
 
+// Calls returns the calls service.
+func (c *Client) Calls() *calls.Service {
+	return c.calls
+}
+
+// PhoneCallRedirects returns the phone call redirects service.
+func (c *Client) PhoneCallRedirects() *calls.RedirectsService {
+	return c.phoneCallRedirects
+}
+
 // NewRequest creates an API request. A relative URL path can be provided in
 // urlStr, in which case it is resolved relative to the BaseURL of the Client.
 // If body is non-nil, it is JSON-encoded and included as the request body.
@@ -295,6 +306,35 @@ func (c *Client) DoRaw(ctx context.Context, req *http.Request) (*Result, error) 
 	c.logger.Debug("http request", "method", req.Method, "url", req.URL)
 
 	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return buildResult(resp, body), nil
+}
+
+// DoRawNoRedirect executes an HTTP request like DoRaw, but does not follow
+// HTTP redirects. This is used when the API returns a redirect (e.g., 302)
+// and the caller needs the Location header rather than the redirect target.
+func (c *Client) DoRawNoRedirect(ctx context.Context, req *http.Request) (*Result, error) {
+	noRedirectClient := &http.Client{
+		Transport: c.httpClient.Transport,
+		Timeout:   c.httpClient.Timeout,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	req = req.WithContext(ctx)
+	c.logger.Debug("http request", "method", req.Method, "url", req.URL)
+
+	resp, err := noRedirectClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

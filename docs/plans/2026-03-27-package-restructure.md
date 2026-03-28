@@ -151,12 +151,12 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 16: Migrate `calls` sub-package
-- [ ] create `calls/calls.go` — move from root `calls.go`
-- [ ] create `calls/redirects.go` — move from root `phone_call_redirects.go`
-- [ ] add `Calls()`, `PhoneCallRedirects()` accessors to `Client`
-- [ ] migrate tests to `calls/`
-- [ ] remove root `calls.go`, `phone_call_redirects.go`
-- [ ] run tests: `go test ./...`
+- [x] create `calls/calls.go` — move from root `calls.go`
+- [x] create `calls/redirects.go` — move from root `phone_call_redirects.go`
+- [x] add `Calls()`, `PhoneCallRedirects()` accessors to `Client`
+- [x] migrate tests to `calls/`
+- [x] remove root `calls.go`, `phone_call_redirects.go`
+- [x] run tests: `go test ./...`
 
 ### Task 17: Migrate `helpcenter` sub-package
 - [ ] create `helpcenter/helpcenter.go` — move from root `help_center.go`
