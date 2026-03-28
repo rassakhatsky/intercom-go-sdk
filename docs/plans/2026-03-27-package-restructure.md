@@ -70,11 +70,11 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./internal/api/...`
 
 ### Task 6: Create root type aliases and refactor Client
-- [ ] create `aliases.go` in root — type aliases for all `internal/api` public types (`Result`, `ErrorResponse`, `PagedResult`, `Iter`, `Filter`, `ListOptions`, etc.)
-- [ ] refactor `intercom.go` — import `internal/api`, ensure `Client` implements `api.Caller`
-- [ ] remove old root files (`result.go`, `errors.go`, `pagination.go`, `search.go`, `logger.go`) — their code now lives in `internal/api`
-- [ ] update `doc.go` if needed
-- [ ] verify all existing tests still pass: `go test ./...`
+- [x] create `aliases.go` in root — type aliases for all `internal/api` public types (`Result`, `ErrorResponse`, `PagedResult`, `Iter`, `Filter`, `ListOptions`, etc.)
+- [x] refactor `intercom.go` — import `internal/api`, ensure `Client` implements `api.Caller`
+- [x] remove old root files (`result.go`, `errors.go`, `pagination.go`, `search.go`, `logger.go`) — their code now lives in `internal/api`
+- [x] update `doc.go` if needed
+- [x] verify all existing tests still pass: `go test ./...`
 
 ### Task 7: Create shared types in `internal/api`
 - [ ] create `internal/api/types.go` — extract `TagRef` and any other types used by 3+ services
