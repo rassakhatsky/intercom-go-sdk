@@ -15,6 +15,7 @@ import (
 	"github.com/rassakhatsky/intercom-go-sdk/articles"
 	"github.com/rassakhatsky/intercom-go-sdk/calls"
 	"github.com/rassakhatsky/intercom-go-sdk/companies"
+	"github.com/rassakhatsky/intercom-go-sdk/contacts"
 	"github.com/rassakhatsky/intercom-go-sdk/conversations"
 	"github.com/rassakhatsky/intercom-go-sdk/data"
 	"github.com/rassakhatsky/intercom-go-sdk/export"
@@ -49,7 +50,7 @@ type Client struct {
 	brands              *settings.BrandsService
 	calls               *calls.Service
 	companies           *companies.Service
-	Contacts            *ContactsService
+	contacts            *contacts.Service
 	conversations       *conversations.Service
 	customChannelEvents *settings.ChannelEventsService
 	customObjects       *data.ObjectsService
@@ -74,7 +75,7 @@ type Client struct {
 	tickets             *tickets.Service
 	ticketStates        *tickets.StatesService
 	ticketTypes         *tickets.TypesService
-	Visitors            *VisitorsService
+	visitors            *contacts.VisitorsService
 	Workflows           *WorkflowsService
 }
 
@@ -134,7 +135,7 @@ func (c *Client) initialize() {
 	c.awayStatusReasons = admins.NewAwayStatusReasonsService(c)
 	c.brands = settings.NewBrandsService(c)
 	c.calls = calls.NewService(c)
-	c.Contacts = (*ContactsService)(&c.common)
+	c.contacts = contacts.NewService(c)
 	c.companies = companies.NewService(c)
 	c.conversations = conversations.NewService(c)
 	c.customChannelEvents = settings.NewChannelEventsService(c)
@@ -160,7 +161,7 @@ func (c *Client) initialize() {
 	c.tickets = tickets.NewService(c)
 	c.ticketStates = tickets.NewStatesService(c)
 	c.ticketTypes = tickets.NewTypesService(c)
-	c.Visitors = (*VisitorsService)(&c.common)
+	c.visitors = contacts.NewVisitorsService(c)
 	c.Workflows = (*WorkflowsService)(&c.common)
 }
 
@@ -287,6 +288,16 @@ func (c *Client) Articles() *articles.Service {
 // InternalArticles returns the internal articles service.
 func (c *Client) InternalArticles() *articles.InternalService {
 	return c.internalArticles
+}
+
+// Contacts returns the contacts service.
+func (c *Client) Contacts() *contacts.Service {
+	return c.contacts
+}
+
+// Visitors returns the visitors service.
+func (c *Client) Visitors() *contacts.VisitorsService {
+	return c.visitors
 }
 
 // Conversations returns the conversations service.

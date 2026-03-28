@@ -1,52 +1,61 @@
-package intercom
+package contacts
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
 // VisitorsService handles communication with the visitor related
 // methods of the Intercom API.
-type VisitorsService service
+type VisitorsService struct {
+	client api.Caller
+}
+
+// NewVisitorsService creates a new VisitorsService.
+func NewVisitorsService(c api.Caller) *VisitorsService {
+	return &VisitorsService{client: c}
+}
 
 // Visitor represents a visitor in Intercom. Visitors are anonymous people
 // that have not yet been identified.
 type Visitor struct {
-	Type                   string            `json:"type"`
-	ID                     string            `json:"id"`
-	UserID                 string            `json:"user_id,omitempty"`
-	Anonymous              bool              `json:"anonymous,omitempty"`
-	Email                  string            `json:"email,omitempty"`
-	Phone                  string            `json:"phone,omitempty"`
-	Name                   string            `json:"name,omitempty"`
-	Pseudonym              string            `json:"pseudonym,omitempty"`
-	Avatar                 *VisitorAvatar    `json:"avatar,omitempty"`
-	AppID                  string            `json:"app_id,omitempty"`
-	Companies              *VisitorCompanies `json:"companies,omitempty"`
-	LocationData           *VisitorLocation  `json:"location_data,omitempty"`
-	LastRequestAt          int64             `json:"last_request_at,omitempty"`
-	CreatedAt              int64             `json:"created_at,omitempty"`
-	RemoteCreatedAt        int64             `json:"remote_created_at,omitempty"`
-	SignedUpAt             int64             `json:"signed_up_at,omitempty"`
-	UpdatedAt              int64             `json:"updated_at,omitempty"`
-	SessionCount           int               `json:"session_count,omitempty"`
-	SocialProfiles         *SocialProfiles   `json:"social_profiles,omitempty"`
-	OwnerID                *string           `json:"owner_id,omitempty"`
-	UnsubscribedFromEmails bool              `json:"unsubscribed_from_emails,omitempty"`
-	MarkedEmailAsSpam      bool              `json:"marked_email_as_spam,omitempty"`
-	HasHardBounced         bool              `json:"has_hard_bounced,omitempty"`
-	Tags                   *VisitorTags      `json:"tags,omitempty"`
-	Segments               *VisitorSegments  `json:"segments,omitempty"`
-	CustomAttributes       map[string]any    `json:"custom_attributes,omitempty"`
-	Referrer               string            `json:"referrer,omitempty"`
-	UTMCampaign            string            `json:"utm_campaign,omitempty"`
-	UTMContent             string            `json:"utm_content,omitempty"`
-	UTMMedium              string            `json:"utm_medium,omitempty"`
-	UTMSource              string            `json:"utm_source,omitempty"`
-	UTMTerm                string            `json:"utm_term,omitempty"`
-	DoNotTrack             *bool             `json:"do_not_track,omitempty"`
+	Type                   string                 `json:"type"`
+	ID                     string                 `json:"id"`
+	UserID                 string                 `json:"user_id,omitempty"`
+	Anonymous              bool                   `json:"anonymous,omitempty"`
+	Email                  string                 `json:"email,omitempty"`
+	Phone                  string                 `json:"phone,omitempty"`
+	Name                   string                 `json:"name,omitempty"`
+	Pseudonym              string                 `json:"pseudonym,omitempty"`
+	Avatar                 *VisitorAvatar         `json:"avatar,omitempty"`
+	AppID                  string                 `json:"app_id,omitempty"`
+	Companies              *VisitorCompanies      `json:"companies,omitempty"`
+	LocationData           *VisitorLocation       `json:"location_data,omitempty"`
+	LastRequestAt          int64                  `json:"last_request_at,omitempty"`
+	CreatedAt              int64                  `json:"created_at,omitempty"`
+	RemoteCreatedAt        int64                  `json:"remote_created_at,omitempty"`
+	SignedUpAt             int64                  `json:"signed_up_at,omitempty"`
+	UpdatedAt              int64                  `json:"updated_at,omitempty"`
+	SessionCount           int                    `json:"session_count,omitempty"`
+	SocialProfiles         *VisitorSocialProfiles `json:"social_profiles,omitempty"`
+	OwnerID                *string                `json:"owner_id,omitempty"`
+	UnsubscribedFromEmails bool                   `json:"unsubscribed_from_emails,omitempty"`
+	MarkedEmailAsSpam      bool                   `json:"marked_email_as_spam,omitempty"`
+	HasHardBounced         bool                   `json:"has_hard_bounced,omitempty"`
+	Tags                   *VisitorTags           `json:"tags,omitempty"`
+	Segments               *VisitorSegments       `json:"segments,omitempty"`
+	CustomAttributes       map[string]any         `json:"custom_attributes,omitempty"`
+	Referrer               string                 `json:"referrer,omitempty"`
+	UTMCampaign            string                 `json:"utm_campaign,omitempty"`
+	UTMContent             string                 `json:"utm_content,omitempty"`
+	UTMMedium              string                 `json:"utm_medium,omitempty"`
+	UTMSource              string                 `json:"utm_source,omitempty"`
+	UTMTerm                string                 `json:"utm_term,omitempty"`
+	DoNotTrack             *bool                  `json:"do_not_track,omitempty"`
 }
 
 // VisitorAvatar represents a visitor's avatar.
@@ -73,8 +82,8 @@ type VisitorLocation struct {
 	Timezone      string `json:"timezone,omitempty"`
 }
 
-// SocialProfiles represents a visitor's social profiles.
-type SocialProfiles struct {
+// VisitorSocialProfiles represents a visitor's social profiles.
+type VisitorSocialProfiles struct {
 	Type           string `json:"type"`
 	SocialProfiles []any  `json:"social_profiles,omitempty"`
 }
@@ -124,18 +133,18 @@ type ConvertVisitorUser struct {
 // --- Parse Functions ---
 
 // ParseVisitorGetResult decodes a Result into a Visitor.
-func ParseVisitorGetResult(r *Result) (*Visitor, error) {
-	return Decode[Visitor](r)
+func ParseVisitorGetResult(r *api.Result) (*Visitor, error) {
+	return api.Decode[Visitor](r)
 }
 
 // ParseVisitorUpdateResult decodes a Result into a Visitor.
-func ParseVisitorUpdateResult(r *Result) (*Visitor, error) {
-	return Decode[Visitor](r)
+func ParseVisitorUpdateResult(r *api.Result) (*Visitor, error) {
+	return api.Decode[Visitor](r)
 }
 
 // ParseVisitorConvertResult decodes a Result into a Contact.
-func ParseVisitorConvertResult(r *Result) (*Contact, error) {
-	return Decode[Contact](r)
+func ParseVisitorConvertResult(r *api.Result) (*Contact, error) {
+	return api.Decode[Contact](r)
 }
 
 // --- Regular Methods ---
@@ -149,7 +158,7 @@ func (s *VisitorsService) Get(ctx context.Context, userID string) (*Visitor, err
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
 	return ParseVisitorGetResult(result)
 }
@@ -163,7 +172,7 @@ func (s *VisitorsService) Update(ctx context.Context, input *UpdateVisitorReques
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
 	return ParseVisitorUpdateResult(result)
 }
@@ -178,7 +187,7 @@ func (s *VisitorsService) Convert(ctx context.Context, input *ConvertVisitorRequ
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
 	return ParseVisitorConvertResult(result)
 }
@@ -188,7 +197,7 @@ func (s *VisitorsService) Convert(ctx context.Context, input *ConvertVisitorRequ
 // GetRaw retrieves a visitor by user_id with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/visitors/retrievevisitorwithuserid
-func (s *VisitorsService) GetRaw(ctx context.Context, userID string) (*Result, error) {
+func (s *VisitorsService) GetRaw(ctx context.Context, userID string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("visitors?user_id=%s", url.QueryEscape(userID)), nil)
 	if err != nil {
 		return nil, err
@@ -199,7 +208,7 @@ func (s *VisitorsService) GetRaw(ctx context.Context, userID string) (*Result, e
 // UpdateRaw updates a visitor with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/visitors/updatevisitor
-func (s *VisitorsService) UpdateRaw(ctx context.Context, input *UpdateVisitorRequest) (*Result, error) {
+func (s *VisitorsService) UpdateRaw(ctx context.Context, input *UpdateVisitorRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, "visitors", input)
 	if err != nil {
 		return nil, err
@@ -210,7 +219,7 @@ func (s *VisitorsService) UpdateRaw(ctx context.Context, input *UpdateVisitorReq
 // ConvertRaw converts a visitor to a contact with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/visitors/convertvisitor
-func (s *VisitorsService) ConvertRaw(ctx context.Context, input *ConvertVisitorRequest) (*Result, error) {
+func (s *VisitorsService) ConvertRaw(ctx context.Context, input *ConvertVisitorRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "visitors/convert", input)
 	if err != nil {
 		return nil, err

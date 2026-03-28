@@ -3,6 +3,7 @@ package intercom
 import (
 	"context"
 
+	"github.com/rassakhatsky/intercom-go-sdk/contacts"
 	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 	"github.com/rassakhatsky/intercom-go-sdk/messaging"
 	"github.com/rassakhatsky/intercom-go-sdk/tags"
@@ -41,6 +42,68 @@ type TagCompanyItem = tags.TagCompanyItem
 type TagCompanyRequest = tags.TagCompanyRequest
 type UntagCompanyItem = tags.UntagCompanyItem
 type UntagCompanyRequest = tags.UntagCompanyRequest
+
+// Contacts sub-package aliases
+type Contact = contacts.Contact
+type ContactLocation = contacts.Location
+type ContactListRef = contacts.ListRef
+type ContactDeleted = contacts.Deleted
+type ContactArchived = contacts.Archived
+type ContactUnarchived = contacts.Unarchived
+type ContactBlocked = contacts.Blocked
+type CreateContactRequest = contacts.CreateRequest
+type UpdateContactRequest = contacts.UpdateRequest
+type MergeContactsRequest = contacts.MergeRequest
+type CompanyRef = contacts.CompanyRef
+type CompanyListResult = contacts.CompanyListResult
+type CreateNoteRequest = contacts.CreateNoteRequest
+type SubscriptionListResult = contacts.SubscriptionListResult
+type AddSubscriptionRequest = contacts.AddSubscriptionRequest
+type SocialProfileList = contacts.SocialProfileList
+type SocialProfile = contacts.SocialProfile
+type ContactsService = contacts.Service
+type VisitorsService = contacts.VisitorsService
+type Visitor = contacts.Visitor
+type VisitorAvatar = contacts.VisitorAvatar
+type VisitorCompanies = contacts.VisitorCompanies
+type VisitorLocation = contacts.VisitorLocation
+type VisitorTags = contacts.VisitorTags
+type VisitorSegments = contacts.VisitorSegments
+type UpdateVisitorRequest = contacts.UpdateVisitorRequest
+type ConvertVisitorRequest = contacts.ConvertVisitorRequest
+type ConvertVisitorIdentifier = contacts.ConvertVisitorIdentifier
+type ConvertVisitorUser = contacts.ConvertVisitorUser
+type VisitorSocialProfiles = contacts.VisitorSocialProfiles
+
+// Contacts Parse function aliases
+var (
+	ParseContactGetResult                = contacts.ParseGetResult
+	ParseContactListResult               = contacts.ParseListResult
+	ParseContactCreateResult             = contacts.ParseCreateResult
+	ParseContactUpdateResult             = contacts.ParseUpdateResult
+	ParseContactDeleteResult             = contacts.ParseDeleteResult
+	ParseContactSearchResult             = contacts.ParseSearchResult
+	ParseContactMergeResult              = contacts.ParseMergeResult
+	ParseContactArchiveResult            = contacts.ParseArchiveResult
+	ParseContactUnarchiveResult          = contacts.ParseUnarchiveResult
+	ParseContactBlockResult              = contacts.ParseBlockResult
+	ParseContactFindByExternalIDResult   = contacts.ParseFindByExternalIDResult
+	ParseContactListCompaniesResult      = contacts.ParseListCompaniesResult
+	ParseContactAddCompanyResult         = contacts.ParseAddCompanyResult
+	ParseContactRemoveCompanyResult      = contacts.ParseRemoveCompanyResult
+	ParseContactListNotesResult          = contacts.ParseListNotesResult
+	ParseContactCreateNoteResult         = contacts.ParseCreateNoteResult
+	ParseContactListSegmentsResult       = contacts.ParseListSegmentsResult
+	ParseContactListSubscriptionsResult  = contacts.ParseListSubscriptionsResult
+	ParseContactAddSubscriptionResult    = contacts.ParseAddSubscriptionResult
+	ParseContactRemoveSubscriptionResult = contacts.ParseRemoveSubscriptionResult
+	ParseContactAddTagResult             = contacts.ParseAddTagResult
+	ParseContactRemoveTagResult          = contacts.ParseRemoveTagResult
+	ParseContactListTagsResult           = contacts.ParseListTagsResult
+	ParseVisitorGetResult                = contacts.ParseVisitorGetResult
+	ParseVisitorUpdateResult             = contacts.ParseVisitorUpdateResult
+	ParseVisitorConvertResult            = contacts.ParseVisitorConvertResult
+)
 
 // Messaging sub-package aliases (for root services that reference these types)
 type SubscriptionType = messaging.SubscriptionType

@@ -1,15 +1,26 @@
-package intercom
+package contacts
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/messaging"
+	"github.com/rassakhatsky/intercom-go-sdk/tags"
 )
 
-// ContactsService handles communication with the contact related methods
+// Service handles communication with the contact related methods
 // of the Intercom API.
-type ContactsService service
+type Service struct {
+	client api.Caller
+}
+
+// NewService creates a new contacts Service.
+func NewService(c api.Caller) *Service {
+	return &Service{client: c}
+}
 
 // Contact represents an Intercom contact (user or lead).
 type Contact struct {
@@ -39,7 +50,7 @@ type Contact struct {
 	BrowserVersion         string             `json:"browser_version,omitempty"`
 	BrowserLanguage        string             `json:"browser_language,omitempty"`
 	OS                     string             `json:"os,omitempty"`
-	Location               *ContactLocation   `json:"location,omitempty"`
+	Location               *Location          `json:"location,omitempty"`
 	AndroidAppName         string             `json:"android_app_name,omitempty"`
 	AndroidAppVersion      string             `json:"android_app_version,omitempty"`
 	AndroidDevice          string             `json:"android_device,omitempty"`
@@ -53,9 +64,9 @@ type Contact struct {
 	IOSSDKVersion          string             `json:"ios_sdk_version,omitempty"`
 	IOSLastSeenAt          *int64             `json:"ios_last_seen_at,omitempty"`
 	CustomAttributes       map[string]any     `json:"custom_attributes,omitempty"`
-	Tags                   *ContactListRef    `json:"tags,omitempty"`
-	Notes                  *ContactListRef    `json:"notes,omitempty"`
-	Companies              *ContactListRef    `json:"companies,omitempty"`
+	Tags                   *ListRef           `json:"tags,omitempty"`
+	Notes                  *ListRef           `json:"notes,omitempty"`
+	Companies              *ListRef           `json:"companies,omitempty"`
 	SocialProfiles         *SocialProfileList `json:"social_profiles,omitempty"`
 	UTMCampaign            string             `json:"utm_campaign,omitempty"`
 	UTMContent             string             `json:"utm_content,omitempty"`
@@ -65,8 +76,8 @@ type Contact struct {
 	Referrer               string             `json:"referrer,omitempty"`
 }
 
-// ContactLocation represents a contact's geographic location.
-type ContactLocation struct {
+// Location represents a contact's geographic location.
+type Location struct {
 	Type          string `json:"type,omitempty"`
 	Country       string `json:"country,omitempty"`
 	Region        string `json:"region,omitempty"`
@@ -75,8 +86,8 @@ type ContactLocation struct {
 	ContinentCode string `json:"continent_code,omitempty"`
 }
 
-// ContactListRef is a reference to a sub-resource list on a contact.
-type ContactListRef struct {
+// ListRef is a reference to a sub-resource list on a contact.
+type ListRef struct {
 	Type       string `json:"type,omitempty"`
 	Data       []any  `json:"data,omitempty"`
 	URL        string `json:"url,omitempty"`
@@ -97,40 +108,40 @@ type SocialProfile struct {
 	URL  string `json:"url,omitempty"`
 }
 
-// ContactDeleted represents the response from deleting a contact.
-type ContactDeleted struct {
+// Deleted represents the response from deleting a contact.
+type Deleted struct {
 	Type       string `json:"type"`
 	ID         string `json:"id"`
 	ExternalID string `json:"external_id,omitempty"`
 	Deleted    bool   `json:"deleted"`
 }
 
-// ContactArchived represents the response from archiving a contact.
-type ContactArchived struct {
+// Archived represents the response from archiving a contact.
+type Archived struct {
 	Type       string `json:"type"`
 	ID         string `json:"id"`
 	ExternalID string `json:"external_id,omitempty"`
 	Archived   bool   `json:"archived"`
 }
 
-// ContactUnarchived represents the response from unarchiving a contact.
-type ContactUnarchived struct {
+// Unarchived represents the response from unarchiving a contact.
+type Unarchived struct {
 	Type       string `json:"type"`
 	ID         string `json:"id"`
 	ExternalID string `json:"external_id,omitempty"`
 	Archived   bool   `json:"archived"`
 }
 
-// ContactBlocked represents the response from blocking a contact.
-type ContactBlocked struct {
+// Blocked represents the response from blocking a contact.
+type Blocked struct {
 	Type       string `json:"type"`
 	ID         string `json:"id"`
 	ExternalID string `json:"external_id,omitempty"`
 	Blocked    bool   `json:"blocked"`
 }
 
-// CreateContactRequest represents the body for creating a contact.
-type CreateContactRequest struct {
+// CreateRequest represents the body for creating a contact.
+type CreateRequest struct {
 	Role                   string         `json:"role,omitempty"`
 	ExternalID             string         `json:"external_id,omitempty"`
 	Email                  string         `json:"email,omitempty"`
@@ -144,8 +155,8 @@ type CreateContactRequest struct {
 	CustomAttributes       map[string]any `json:"custom_attributes,omitempty"`
 }
 
-// UpdateContactRequest represents the body for updating a contact.
-type UpdateContactRequest struct {
+// UpdateRequest represents the body for updating a contact.
+type UpdateRequest struct {
 	Role                   string         `json:"role,omitempty"`
 	ExternalID             string         `json:"external_id,omitempty"`
 	Email                  string         `json:"email,omitempty"`
@@ -159,8 +170,8 @@ type UpdateContactRequest struct {
 	CustomAttributes       map[string]any `json:"custom_attributes,omitempty"`
 }
 
-// MergeContactsRequest represents the body for merging a lead into a user.
-type MergeContactsRequest struct {
+// MergeRequest represents the body for merging a lead into a user.
+type MergeRequest struct {
 	From string `json:"from"`
 	Into string `json:"into"`
 }
@@ -175,15 +186,11 @@ type CompanyRef struct {
 
 // CompanyListResult is the response for listing companies attached to a contact.
 type CompanyListResult struct {
-	Type       string       `json:"type"`
-	Data       []CompanyRef `json:"data"`
-	TotalCount int          `json:"total_count"`
-	Pages      CursorPages  `json:"pages"`
+	Type       string          `json:"type"`
+	Data       []CompanyRef    `json:"data"`
+	TotalCount int             `json:"total_count"`
+	Pages      api.CursorPages `json:"pages"`
 }
-
-// Note represents an Intercom note on a contact.
-// Note, ContactRef, NoteAuthor, and NoteListResult are now in internal/api/types.go
-// and re-exported via aliases.go.
 
 // CreateNoteRequest represents the body for creating a note on a contact.
 type CreateNoteRequest struct {
@@ -193,8 +200,8 @@ type CreateNoteRequest struct {
 
 // SubscriptionListResult is the response for listing subscriptions for a contact.
 type SubscriptionListResult struct {
-	Type string             `json:"type"`
-	Data []SubscriptionType `json:"data"`
+	Type string                       `json:"type"`
+	Data []messaging.SubscriptionType `json:"data"`
 }
 
 // AddSubscriptionRequest represents the body for adding a subscription to a contact.
@@ -203,431 +210,437 @@ type AddSubscriptionRequest struct {
 	ConsentType string `json:"consent_type"`
 }
 
-// ParseContactGetResult decodes a Result into a Contact.
-func ParseContactGetResult(r *Result) (*Contact, error) { return Decode[Contact](r) }
+// --- Parse Functions ---
 
-// ParseContactListResult decodes a Result into a PagedResult[Contact].
-func ParseContactListResult(r *Result) (*PagedResult[Contact], error) {
-	return Decode[PagedResult[Contact]](r)
+// ParseGetResult decodes a Result into a Contact.
+func ParseGetResult(r *api.Result) (*Contact, error) { return api.Decode[Contact](r) }
+
+// ParseListResult decodes a Result into a PagedResult[Contact].
+func ParseListResult(r *api.Result) (*api.PagedResult[Contact], error) {
+	return api.Decode[api.PagedResult[Contact]](r)
 }
 
-// ParseContactCreateResult decodes a Result into a Contact.
-func ParseContactCreateResult(r *Result) (*Contact, error) { return Decode[Contact](r) }
+// ParseCreateResult decodes a Result into a Contact.
+func ParseCreateResult(r *api.Result) (*Contact, error) { return api.Decode[Contact](r) }
 
-// ParseContactUpdateResult decodes a Result into a Contact.
-func ParseContactUpdateResult(r *Result) (*Contact, error) { return Decode[Contact](r) }
+// ParseUpdateResult decodes a Result into a Contact.
+func ParseUpdateResult(r *api.Result) (*Contact, error) { return api.Decode[Contact](r) }
 
-// ParseContactDeleteResult decodes a Result into a ContactDeleted.
-func ParseContactDeleteResult(r *Result) (*ContactDeleted, error) { return Decode[ContactDeleted](r) }
+// ParseDeleteResult decodes a Result into a Deleted.
+func ParseDeleteResult(r *api.Result) (*Deleted, error) { return api.Decode[Deleted](r) }
 
-// ParseContactSearchResult decodes a Result into a PagedResult[Contact].
-func ParseContactSearchResult(r *Result) (*PagedResult[Contact], error) {
-	return Decode[PagedResult[Contact]](r)
+// ParseSearchResult decodes a Result into a PagedResult[Contact].
+func ParseSearchResult(r *api.Result) (*api.PagedResult[Contact], error) {
+	return api.Decode[api.PagedResult[Contact]](r)
 }
 
-// ParseContactMergeResult decodes a Result into a Contact.
-func ParseContactMergeResult(r *Result) (*Contact, error) { return Decode[Contact](r) }
+// ParseMergeResult decodes a Result into a Contact.
+func ParseMergeResult(r *api.Result) (*Contact, error) { return api.Decode[Contact](r) }
 
-// ParseContactArchiveResult decodes a Result into a ContactArchived.
-func ParseContactArchiveResult(r *Result) (*ContactArchived, error) {
-	return Decode[ContactArchived](r)
+// ParseArchiveResult decodes a Result into an Archived.
+func ParseArchiveResult(r *api.Result) (*Archived, error) {
+	return api.Decode[Archived](r)
 }
 
-// ParseContactUnarchiveResult decodes a Result into a ContactUnarchived.
-func ParseContactUnarchiveResult(r *Result) (*ContactUnarchived, error) {
-	return Decode[ContactUnarchived](r)
+// ParseUnarchiveResult decodes a Result into an Unarchived.
+func ParseUnarchiveResult(r *api.Result) (*Unarchived, error) {
+	return api.Decode[Unarchived](r)
 }
 
-// ParseContactBlockResult decodes a Result into a ContactBlocked.
-func ParseContactBlockResult(r *Result) (*ContactBlocked, error) {
-	return Decode[ContactBlocked](r)
+// ParseBlockResult decodes a Result into a Blocked.
+func ParseBlockResult(r *api.Result) (*Blocked, error) {
+	return api.Decode[Blocked](r)
 }
 
-// ParseContactFindByExternalIDResult decodes a Result into a Contact.
-func ParseContactFindByExternalIDResult(r *Result) (*Contact, error) { return Decode[Contact](r) }
+// ParseFindByExternalIDResult decodes a Result into a Contact.
+func ParseFindByExternalIDResult(r *api.Result) (*Contact, error) { return api.Decode[Contact](r) }
 
-// ParseContactListCompaniesResult decodes a Result into a CompanyListResult.
-func ParseContactListCompaniesResult(r *Result) (*CompanyListResult, error) {
-	return Decode[CompanyListResult](r)
+// ParseListCompaniesResult decodes a Result into a CompanyListResult.
+func ParseListCompaniesResult(r *api.Result) (*CompanyListResult, error) {
+	return api.Decode[CompanyListResult](r)
 }
 
-// ParseContactAddCompanyResult decodes a Result into a CompanyRef.
-func ParseContactAddCompanyResult(r *Result) (*CompanyRef, error) { return Decode[CompanyRef](r) }
+// ParseAddCompanyResult decodes a Result into a CompanyRef.
+func ParseAddCompanyResult(r *api.Result) (*CompanyRef, error) { return api.Decode[CompanyRef](r) }
 
-// ParseContactRemoveCompanyResult decodes a Result into a CompanyRef.
-func ParseContactRemoveCompanyResult(r *Result) (*CompanyRef, error) { return Decode[CompanyRef](r) }
+// ParseRemoveCompanyResult decodes a Result into a CompanyRef.
+func ParseRemoveCompanyResult(r *api.Result) (*CompanyRef, error) { return api.Decode[CompanyRef](r) }
 
-// ParseContactListNotesResult decodes a Result into a NoteListResult.
-func ParseContactListNotesResult(r *Result) (*NoteListResult, error) {
-	return Decode[NoteListResult](r)
+// ParseListNotesResult decodes a Result into a NoteListResult.
+func ParseListNotesResult(r *api.Result) (*api.NoteListResult, error) {
+	return api.Decode[api.NoteListResult](r)
 }
 
-// ParseContactCreateNoteResult decodes a Result into a Note.
-func ParseContactCreateNoteResult(r *Result) (*Note, error) { return Decode[Note](r) }
+// ParseCreateNoteResult decodes a Result into a Note.
+func ParseCreateNoteResult(r *api.Result) (*api.Note, error) { return api.Decode[api.Note](r) }
 
-// ParseContactListSegmentsResult decodes a Result into a SegmentListResult.
-func ParseContactListSegmentsResult(r *Result) (*SegmentListResult, error) {
-	return Decode[SegmentListResult](r)
+// ParseListSegmentsResult decodes a Result into a SegmentListResult.
+func ParseListSegmentsResult(r *api.Result) (*api.SegmentListResult, error) {
+	return api.Decode[api.SegmentListResult](r)
 }
 
-// ParseContactListSubscriptionsResult decodes a Result into a SubscriptionListResult.
-func ParseContactListSubscriptionsResult(r *Result) (*SubscriptionListResult, error) {
-	return Decode[SubscriptionListResult](r)
+// ParseListSubscriptionsResult decodes a Result into a SubscriptionListResult.
+func ParseListSubscriptionsResult(r *api.Result) (*SubscriptionListResult, error) {
+	return api.Decode[SubscriptionListResult](r)
 }
 
-// ParseContactAddSubscriptionResult decodes a Result into a SubscriptionType.
-func ParseContactAddSubscriptionResult(r *Result) (*SubscriptionType, error) {
-	return Decode[SubscriptionType](r)
+// ParseAddSubscriptionResult decodes a Result into a SubscriptionType.
+func ParseAddSubscriptionResult(r *api.Result) (*messaging.SubscriptionType, error) {
+	return api.Decode[messaging.SubscriptionType](r)
 }
 
-// ParseContactRemoveSubscriptionResult decodes a Result into a SubscriptionType.
-func ParseContactRemoveSubscriptionResult(r *Result) (*SubscriptionType, error) {
-	return Decode[SubscriptionType](r)
+// ParseRemoveSubscriptionResult decodes a Result into a SubscriptionType.
+func ParseRemoveSubscriptionResult(r *api.Result) (*messaging.SubscriptionType, error) {
+	return api.Decode[messaging.SubscriptionType](r)
 }
 
-// ParseContactAddTagResult decodes a Result into a TagRef.
-func ParseContactAddTagResult(r *Result) (*TagRef, error) { return Decode[TagRef](r) }
+// ParseAddTagResult decodes a Result into a TagRef.
+func ParseAddTagResult(r *api.Result) (*api.TagRef, error) { return api.Decode[api.TagRef](r) }
 
-// ParseContactRemoveTagResult decodes a Result into a TagRef.
-func ParseContactRemoveTagResult(r *Result) (*TagRef, error) { return Decode[TagRef](r) }
+// ParseRemoveTagResult decodes a Result into a TagRef.
+func ParseRemoveTagResult(r *api.Result) (*api.TagRef, error) { return api.Decode[api.TagRef](r) }
 
-// ParseContactListTagsResult decodes a Result into a TagList.
-func ParseContactListTagsResult(r *Result) (*TagList, error) {
-	return Decode[TagList](r)
+// ParseListTagsResult decodes a Result into a tags.List.
+func ParseListTagsResult(r *api.Result) (*tags.List, error) {
+	return api.Decode[tags.List](r)
 }
+
+// --- Regular Methods ---
 
 // Get retrieves a contact by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/showcontact
-func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) {
+func (s *Service) Get(ctx context.Context, id string) (*Contact, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactGetResult(result)
+	return ParseGetResult(result)
 }
 
 // List returns a single page of contacts.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listcontacts
-func (s *ContactsService) List(ctx context.Context, opts *ListOptions) (*PagedResult[Contact], error) {
+func (s *Service) List(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[Contact], error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactListResult(result)
+	return ParseListResult(result)
 }
 
 // ListAll returns an iterator over all contacts, handling pagination automatically.
-func (s *ContactsService) ListAll(ctx context.Context, opts *ListOptions) *Iter[Contact] {
-	return NewIter[Contact](ctx, opts, s.List)
+func (s *Service) ListAll(ctx context.Context, opts *api.ListOptions) *api.Iter[Contact] {
+	return api.NewIter[Contact](ctx, opts, s.List)
 }
 
 // Create creates a new contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/createcontact
-func (s *ContactsService) Create(ctx context.Context, body *CreateContactRequest) (*Contact, error) {
+func (s *Service) Create(ctx context.Context, body *CreateRequest) (*Contact, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactCreateResult(result)
+	return ParseCreateResult(result)
 }
 
 // Update updates an existing contact by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/updatecontact
-func (s *ContactsService) Update(ctx context.Context, id string, body *UpdateContactRequest) (*Contact, error) {
+func (s *Service) Update(ctx context.Context, id string, body *UpdateRequest) (*Contact, error) {
 	result, err := s.UpdateRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactUpdateResult(result)
+	return ParseUpdateResult(result)
 }
 
 // Delete deletes a contact by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/deletecontact
-func (s *ContactsService) Delete(ctx context.Context, id string) (*ContactDeleted, error) {
+func (s *Service) Delete(ctx context.Context, id string) (*Deleted, error) {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactDeleteResult(result)
+	return ParseDeleteResult(result)
 }
 
 // Search searches for contacts using the provided query filters.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/searchcontacts
-func (s *ContactsService) Search(ctx context.Context, body *SearchRequest) (*PagedResult[Contact], error) {
+func (s *Service) Search(ctx context.Context, body *api.SearchRequest) (*api.PagedResult[Contact], error) {
 	result, err := s.SearchRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactSearchResult(result)
+	return ParseSearchResult(result)
 }
 
 // Merge merges a lead into a user. The From field must be a lead, and
 // the Into field must be a user.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/mergecontact
-func (s *ContactsService) Merge(ctx context.Context, body *MergeContactsRequest) (*Contact, error) {
+func (s *Service) Merge(ctx context.Context, body *MergeRequest) (*Contact, error) {
 	result, err := s.MergeRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactMergeResult(result)
+	return ParseMergeResult(result)
 }
 
 // Archive archives a contact by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/archivecontact
-func (s *ContactsService) Archive(ctx context.Context, id string) (*ContactArchived, error) {
+func (s *Service) Archive(ctx context.Context, id string) (*Archived, error) {
 	result, err := s.ArchiveRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactArchiveResult(result)
+	return ParseArchiveResult(result)
 }
 
 // Unarchive unarchives a contact by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/unarchivecontact
-func (s *ContactsService) Unarchive(ctx context.Context, id string) (*ContactUnarchived, error) {
+func (s *Service) Unarchive(ctx context.Context, id string) (*Unarchived, error) {
 	result, err := s.UnarchiveRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactUnarchiveResult(result)
+	return ParseUnarchiveResult(result)
 }
 
 // Block blocks a contact by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/blockcontact
-func (s *ContactsService) Block(ctx context.Context, id string) (*ContactBlocked, error) {
+func (s *Service) Block(ctx context.Context, id string) (*Blocked, error) {
 	result, err := s.BlockRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactBlockResult(result)
+	return ParseBlockResult(result)
 }
 
 // FindByExternalID retrieves a contact by its external ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/showcontactbyexternalid
-func (s *ContactsService) FindByExternalID(ctx context.Context, externalID string) (*Contact, error) {
+func (s *Service) FindByExternalID(ctx context.Context, externalID string) (*Contact, error) {
 	result, err := s.FindByExternalIDRaw(ctx, externalID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactFindByExternalIDResult(result)
+	return ParseFindByExternalIDResult(result)
 }
 
 // ListCompanies returns the companies attached to a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listcompaniesforacontact
-func (s *ContactsService) ListCompanies(ctx context.Context, contactID string) (*CompanyListResult, error) {
+func (s *Service) ListCompanies(ctx context.Context, contactID string) (*CompanyListResult, error) {
 	result, err := s.ListCompaniesRaw(ctx, contactID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactListCompaniesResult(result)
+	return ParseListCompaniesResult(result)
 }
 
 // AddCompany attaches a company to a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/attachcontacttoacompany
-func (s *ContactsService) AddCompany(ctx context.Context, contactID, companyID string) (*CompanyRef, error) {
+func (s *Service) AddCompany(ctx context.Context, contactID, companyID string) (*CompanyRef, error) {
 	result, err := s.AddCompanyRaw(ctx, contactID, companyID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactAddCompanyResult(result)
+	return ParseAddCompanyResult(result)
 }
 
 // RemoveCompany detaches a company from a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/detachcontactfromacompany
-func (s *ContactsService) RemoveCompany(ctx context.Context, contactID, companyID string) (*CompanyRef, error) {
+func (s *Service) RemoveCompany(ctx context.Context, contactID, companyID string) (*CompanyRef, error) {
 	result, err := s.RemoveCompanyRaw(ctx, contactID, companyID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactRemoveCompanyResult(result)
+	return ParseRemoveCompanyResult(result)
 }
 
 // ListNotes returns the notes for a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listnotes
-func (s *ContactsService) ListNotes(ctx context.Context, contactID string) (*NoteListResult, error) {
+func (s *Service) ListNotes(ctx context.Context, contactID string) (*api.NoteListResult, error) {
 	result, err := s.ListNotesRaw(ctx, contactID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactListNotesResult(result)
+	return ParseListNotesResult(result)
 }
 
 // CreateNote creates a note on a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/createnote
-func (s *ContactsService) CreateNote(ctx context.Context, contactID string, body *CreateNoteRequest) (*Note, error) {
+func (s *Service) CreateNote(ctx context.Context, contactID string, body *CreateNoteRequest) (*api.Note, error) {
 	result, err := s.CreateNoteRaw(ctx, contactID, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactCreateNoteResult(result)
+	return ParseCreateNoteResult(result)
 }
 
 // ListSegments returns the segments for a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listsegmentsforacontact
-func (s *ContactsService) ListSegments(ctx context.Context, contactID string) (*SegmentListResult, error) {
+func (s *Service) ListSegments(ctx context.Context, contactID string) (*api.SegmentListResult, error) {
 	result, err := s.ListSegmentsRaw(ctx, contactID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactListSegmentsResult(result)
+	return ParseListSegmentsResult(result)
 }
 
 // ListSubscriptions returns the subscriptions for a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/listsubscriptionsforacontact
-func (s *ContactsService) ListSubscriptions(ctx context.Context, contactID string) (*SubscriptionListResult, error) {
+func (s *Service) ListSubscriptions(ctx context.Context, contactID string) (*SubscriptionListResult, error) {
 	result, err := s.ListSubscriptionsRaw(ctx, contactID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactListSubscriptionsResult(result)
+	return ParseListSubscriptionsResult(result)
 }
 
 // AddSubscription adds a subscription to a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/attachsubscriptiontypetocontact
-func (s *ContactsService) AddSubscription(ctx context.Context, contactID string, body *AddSubscriptionRequest) (*SubscriptionType, error) {
+func (s *Service) AddSubscription(ctx context.Context, contactID string, body *AddSubscriptionRequest) (*messaging.SubscriptionType, error) {
 	result, err := s.AddSubscriptionRaw(ctx, contactID, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactAddSubscriptionResult(result)
+	return ParseAddSubscriptionResult(result)
 }
 
 // RemoveSubscription removes a subscription from a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/detachsubscriptiontypetocontact
-func (s *ContactsService) RemoveSubscription(ctx context.Context, contactID, subscriptionID string) (*SubscriptionType, error) {
+func (s *Service) RemoveSubscription(ctx context.Context, contactID, subscriptionID string) (*messaging.SubscriptionType, error) {
 	result, err := s.RemoveSubscriptionRaw(ctx, contactID, subscriptionID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactRemoveSubscriptionResult(result)
+	return ParseRemoveSubscriptionResult(result)
 }
 
 // AddTag adds a tag to a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/attachtagtocontact
-func (s *ContactsService) AddTag(ctx context.Context, contactID, tagID string) (*TagRef, error) {
+func (s *Service) AddTag(ctx context.Context, contactID, tagID string) (*api.TagRef, error) {
 	result, err := s.AddTagRaw(ctx, contactID, tagID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactAddTagResult(result)
+	return ParseAddTagResult(result)
 }
 
 // RemoveTag removes a tag from a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/detachtagfromcontact
-func (s *ContactsService) RemoveTag(ctx context.Context, contactID, tagID string) (*TagRef, error) {
+func (s *Service) RemoveTag(ctx context.Context, contactID, tagID string) (*api.TagRef, error) {
 	result, err := s.RemoveTagRaw(ctx, contactID, tagID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactRemoveTagResult(result)
+	return ParseRemoveTagResult(result)
 }
 
 // ListTags returns the tags attached to a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listtagsforacontact
-func (s *ContactsService) ListTags(ctx context.Context, contactID string) (*TagList, error) {
+func (s *Service) ListTags(ctx context.Context, contactID string) (*tags.List, error) {
 	result, err := s.ListTagsRaw(ctx, contactID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseContactListTagsResult(result)
+	return ParseListTagsResult(result)
 }
+
+// --- Raw Methods ---
 
 // GetRaw retrieves a contact by ID and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/showcontact
-func (s *ContactsService) GetRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) GetRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -638,8 +651,8 @@ func (s *ContactsService) GetRaw(ctx context.Context, id string) (*Result, error
 // ListRaw returns a single page of contacts with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listcontacts
-func (s *ContactsService) ListRaw(ctx context.Context, opts *ListOptions) (*Result, error) {
-	path, err := addQueryOptions("contacts", opts)
+func (s *Service) ListRaw(ctx context.Context, opts *api.ListOptions) (*api.Result, error) {
+	path, err := api.AddQueryOptions("contacts", opts)
 	if err != nil {
 		return nil, err
 	}
@@ -653,7 +666,7 @@ func (s *ContactsService) ListRaw(ctx context.Context, opts *ListOptions) (*Resu
 // CreateRaw creates a new contact and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/createcontact
-func (s *ContactsService) CreateRaw(ctx context.Context, body *CreateContactRequest) (*Result, error) {
+func (s *Service) CreateRaw(ctx context.Context, body *CreateRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "contacts", body)
 	if err != nil {
 		return nil, err
@@ -664,7 +677,7 @@ func (s *ContactsService) CreateRaw(ctx context.Context, body *CreateContactRequ
 // UpdateRaw updates an existing contact by ID and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/updatecontact
-func (s *ContactsService) UpdateRaw(ctx context.Context, id string, body *UpdateContactRequest) (*Result, error) {
+func (s *Service) UpdateRaw(ctx context.Context, id string, body *UpdateRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("contacts/%s", url.PathEscape(id)), body)
 	if err != nil {
 		return nil, err
@@ -675,7 +688,7 @@ func (s *ContactsService) UpdateRaw(ctx context.Context, id string, body *Update
 // DeleteRaw deletes a contact by ID and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/deletecontact
-func (s *ContactsService) DeleteRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) DeleteRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("contacts/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -686,7 +699,7 @@ func (s *ContactsService) DeleteRaw(ctx context.Context, id string) (*Result, er
 // SearchRaw searches for contacts and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/searchcontacts
-func (s *ContactsService) SearchRaw(ctx context.Context, body *SearchRequest) (*Result, error) {
+func (s *Service) SearchRaw(ctx context.Context, body *api.SearchRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "contacts/search", body)
 	if err != nil {
 		return nil, err
@@ -697,7 +710,7 @@ func (s *ContactsService) SearchRaw(ctx context.Context, body *SearchRequest) (*
 // MergeRaw merges a lead into a user and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/mergecontact
-func (s *ContactsService) MergeRaw(ctx context.Context, body *MergeContactsRequest) (*Result, error) {
+func (s *Service) MergeRaw(ctx context.Context, body *MergeRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "contacts/merge", body)
 	if err != nil {
 		return nil, err
@@ -708,7 +721,7 @@ func (s *ContactsService) MergeRaw(ctx context.Context, body *MergeContactsReque
 // ArchiveRaw archives a contact by ID and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/archivecontact
-func (s *ContactsService) ArchiveRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) ArchiveRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("contacts/%s/archive", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -719,7 +732,7 @@ func (s *ContactsService) ArchiveRaw(ctx context.Context, id string) (*Result, e
 // UnarchiveRaw unarchives a contact by ID and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/unarchivecontact
-func (s *ContactsService) UnarchiveRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) UnarchiveRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("contacts/%s/unarchive", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -730,7 +743,7 @@ func (s *ContactsService) UnarchiveRaw(ctx context.Context, id string) (*Result,
 // BlockRaw blocks a contact by ID and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/blockcontact
-func (s *ContactsService) BlockRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) BlockRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("contacts/%s/block", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -741,7 +754,7 @@ func (s *ContactsService) BlockRaw(ctx context.Context, id string) (*Result, err
 // FindByExternalIDRaw retrieves a contact by external ID and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/showcontactbyexternalid
-func (s *ContactsService) FindByExternalIDRaw(ctx context.Context, externalID string) (*Result, error) {
+func (s *Service) FindByExternalIDRaw(ctx context.Context, externalID string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/find_by_external_id/%s", url.PathEscape(externalID)), nil)
 	if err != nil {
 		return nil, err
@@ -752,7 +765,7 @@ func (s *ContactsService) FindByExternalIDRaw(ctx context.Context, externalID st
 // ListCompaniesRaw returns the companies attached to a contact with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listcompaniesforacontact
-func (s *ContactsService) ListCompaniesRaw(ctx context.Context, contactID string) (*Result, error) {
+func (s *Service) ListCompaniesRaw(ctx context.Context, contactID string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/%s/companies", url.PathEscape(contactID)), nil)
 	if err != nil {
 		return nil, err
@@ -763,7 +776,7 @@ func (s *ContactsService) ListCompaniesRaw(ctx context.Context, contactID string
 // AddCompanyRaw attaches a company to a contact and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/attachcontacttoacompany
-func (s *ContactsService) AddCompanyRaw(ctx context.Context, contactID, companyID string) (*Result, error) {
+func (s *Service) AddCompanyRaw(ctx context.Context, contactID, companyID string) (*api.Result, error) {
 	body := struct {
 		ID string `json:"id"`
 	}{ID: companyID}
@@ -777,7 +790,7 @@ func (s *ContactsService) AddCompanyRaw(ctx context.Context, contactID, companyI
 // RemoveCompanyRaw detaches a company from a contact and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/detachcontactfromacompany
-func (s *ContactsService) RemoveCompanyRaw(ctx context.Context, contactID, companyID string) (*Result, error) {
+func (s *Service) RemoveCompanyRaw(ctx context.Context, contactID, companyID string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("contacts/%s/companies/%s", url.PathEscape(contactID), url.PathEscape(companyID)), nil)
 	if err != nil {
 		return nil, err
@@ -788,7 +801,7 @@ func (s *ContactsService) RemoveCompanyRaw(ctx context.Context, contactID, compa
 // ListNotesRaw returns the notes for a contact with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listnotes
-func (s *ContactsService) ListNotesRaw(ctx context.Context, contactID string) (*Result, error) {
+func (s *Service) ListNotesRaw(ctx context.Context, contactID string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/%s/notes", url.PathEscape(contactID)), nil)
 	if err != nil {
 		return nil, err
@@ -799,7 +812,7 @@ func (s *ContactsService) ListNotesRaw(ctx context.Context, contactID string) (*
 // CreateNoteRaw creates a note on a contact and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/createnote
-func (s *ContactsService) CreateNoteRaw(ctx context.Context, contactID string, body *CreateNoteRequest) (*Result, error) {
+func (s *Service) CreateNoteRaw(ctx context.Context, contactID string, body *CreateNoteRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("contacts/%s/notes", url.PathEscape(contactID)), body)
 	if err != nil {
 		return nil, err
@@ -810,7 +823,7 @@ func (s *ContactsService) CreateNoteRaw(ctx context.Context, contactID string, b
 // ListSegmentsRaw returns the segments for a contact with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listsegmentsforacontact
-func (s *ContactsService) ListSegmentsRaw(ctx context.Context, contactID string) (*Result, error) {
+func (s *Service) ListSegmentsRaw(ctx context.Context, contactID string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/%s/segments", url.PathEscape(contactID)), nil)
 	if err != nil {
 		return nil, err
@@ -821,7 +834,7 @@ func (s *ContactsService) ListSegmentsRaw(ctx context.Context, contactID string)
 // ListSubscriptionsRaw returns the subscriptions for a contact with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/listsubscriptionsforacontact
-func (s *ContactsService) ListSubscriptionsRaw(ctx context.Context, contactID string) (*Result, error) {
+func (s *Service) ListSubscriptionsRaw(ctx context.Context, contactID string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/%s/subscriptions", url.PathEscape(contactID)), nil)
 	if err != nil {
 		return nil, err
@@ -832,7 +845,7 @@ func (s *ContactsService) ListSubscriptionsRaw(ctx context.Context, contactID st
 // AddSubscriptionRaw adds a subscription to a contact and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/attachsubscriptiontypetocontact
-func (s *ContactsService) AddSubscriptionRaw(ctx context.Context, contactID string, body *AddSubscriptionRequest) (*Result, error) {
+func (s *Service) AddSubscriptionRaw(ctx context.Context, contactID string, body *AddSubscriptionRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("contacts/%s/subscriptions", url.PathEscape(contactID)), body)
 	if err != nil {
 		return nil, err
@@ -843,7 +856,7 @@ func (s *ContactsService) AddSubscriptionRaw(ctx context.Context, contactID stri
 // RemoveSubscriptionRaw removes a subscription from a contact and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/detachsubscriptiontypetocontact
-func (s *ContactsService) RemoveSubscriptionRaw(ctx context.Context, contactID, subscriptionID string) (*Result, error) {
+func (s *Service) RemoveSubscriptionRaw(ctx context.Context, contactID, subscriptionID string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("contacts/%s/subscriptions/%s", url.PathEscape(contactID), url.PathEscape(subscriptionID)), nil)
 	if err != nil {
 		return nil, err
@@ -854,7 +867,7 @@ func (s *ContactsService) RemoveSubscriptionRaw(ctx context.Context, contactID, 
 // AddTagRaw adds a tag to a contact and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/attachtagtocontact
-func (s *ContactsService) AddTagRaw(ctx context.Context, contactID, tagID string) (*Result, error) {
+func (s *Service) AddTagRaw(ctx context.Context, contactID, tagID string) (*api.Result, error) {
 	body := struct {
 		ID string `json:"id"`
 	}{ID: tagID}
@@ -868,7 +881,7 @@ func (s *ContactsService) AddTagRaw(ctx context.Context, contactID, tagID string
 // RemoveTagRaw removes a tag from a contact and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/detachtagfromcontact
-func (s *ContactsService) RemoveTagRaw(ctx context.Context, contactID, tagID string) (*Result, error) {
+func (s *Service) RemoveTagRaw(ctx context.Context, contactID, tagID string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("contacts/%s/tags/%s", url.PathEscape(contactID), url.PathEscape(tagID)), nil)
 	if err != nil {
 		return nil, err
@@ -879,7 +892,7 @@ func (s *ContactsService) RemoveTagRaw(ctx context.Context, contactID, tagID str
 // ListTagsRaw returns the tags attached to a contact with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listtagsforacontact
-func (s *ContactsService) ListTagsRaw(ctx context.Context, contactID string) (*Result, error) {
+func (s *Service) ListTagsRaw(ctx context.Context, contactID string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("contacts/%s/tags", url.PathEscape(contactID)), nil)
 	if err != nil {
 		return nil, err

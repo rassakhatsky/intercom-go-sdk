@@ -197,12 +197,12 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 22: Migrate `contacts` sub-package
-- [ ] create `contacts/contacts.go` — move from root `contacts.go` (largest service, ~909 lines)
-- [ ] create `contacts/visitors.go` — move from root `visitors.go`
-- [ ] add `Contacts()`, `Visitors()` accessors to `Client`
-- [ ] migrate tests to `contacts/`
-- [ ] remove root `contacts.go`, `visitors.go`
-- [ ] run tests: `go test ./...`
+- [x] create `contacts/contacts.go` — move from root `contacts.go` (largest service, ~909 lines)
+- [x] create `contacts/visitors.go` — move from root `visitors.go`
+- [x] add `Contacts()`, `Visitors()` accessors to `Client`
+- [x] migrate tests to `contacts/`
+- [x] remove root `contacts.go`, `visitors.go`
+- [x] run tests: `go test ./...`
 
 ### Task 23: Migrate `ai` sub-package
 - [ ] create `ai/content.go` — move from root `ai_content.go`

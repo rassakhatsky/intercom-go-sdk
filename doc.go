@@ -5,10 +5,10 @@
 //	client := intercom.NewClient("your-bearer-token")
 //
 //	// Get a contact
-//	contact, err := client.Contacts.Get(ctx, "contact-id")
+//	contact, err := client.Contacts().Get(ctx, "contact-id")
 //
 //	// List all contacts with auto-pagination
-//	iter := client.Contacts.ListAll(ctx, nil)
+//	iter := client.Contacts().ListAll(ctx, nil)
 //	for iter.Next() {
 //	    fmt.Println(iter.Current().Name)
 //	}
@@ -17,16 +17,16 @@
 //	}
 //
 //	// Or collect all pages into a slice in one call
-//	contacts, err := client.Contacts.ListAll(ctx, nil).Collect()
+//	contacts, err := client.Contacts().ListAll(ctx, nil).Collect()
 //
 //	// Iterate with a callback using ForEach
-//	err = client.Contacts.ListAll(ctx, nil).ForEach(func(c intercom.Contact) error {
+//	err = client.Contacts().ListAll(ctx, nil).ForEach(func(c intercom.Contact) error {
 //	    fmt.Println(c.Name)
 //	    return nil
 //	})
 //
 //	// Search contacts with filters
-//	result, err := client.Contacts.Search(ctx, &intercom.SearchRequest{
+//	result, err := client.Contacts().Search(ctx, &intercom.SearchRequest{
 //	    Query: intercom.SingleFilterOf("email", "=", "alice@example.com"),
 //	})
 //
@@ -34,7 +34,7 @@
 // HTTP metadata (status code, headers, raw body bytes).
 // API errors (4xx/5xx) populate Result.Error instead of returning a Go error:
 //
-//	result, err := client.Contacts.GetRaw(ctx, "contact-id")
+//	result, err := client.Contacts().GetRaw(ctx, "contact-id")
 //	if err != nil {
 //	    log.Fatal(err) // transport error only
 //	}

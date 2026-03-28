@@ -14,7 +14,7 @@ func ExampleContactsService_GetRaw() {
 	client := intercom.NewClient("your-bearer-token")
 	ctx := context.Background()
 
-	result, err := client.Contacts.GetRaw(ctx, "contact-id")
+	result, err := client.Contacts().GetRaw(ctx, "contact-id")
 	if err != nil {
 		log.Fatal(err) // only returned for transport/network errors
 	}
@@ -46,7 +46,7 @@ func ExampleContactsService_SearchRaw() {
 	client := intercom.NewClient("your-bearer-token")
 	ctx := context.Background()
 
-	result, err := client.Contacts.SearchRaw(ctx, &intercom.SearchRequest{
+	result, err := client.Contacts().SearchRaw(ctx, &intercom.SearchRequest{
 		Query: intercom.SingleFilterOf("email", "=", "alice@example.com"),
 	})
 	if err != nil {
