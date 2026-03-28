@@ -190,11 +190,11 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 21: Migrate `conversations` sub-package
-- [ ] create `conversations/conversations.go` — move from root `conversations.go`
-- [ ] add `Conversations()` accessor to `Client`
-- [ ] migrate tests to `conversations/conversations_test.go`
-- [ ] remove root `conversations.go`
-- [ ] run tests: `go test ./...`
+- [x] create `conversations/conversations.go` — move from root `conversations.go`
+- [x] add `Conversations()` accessor to `Client`
+- [x] migrate tests to `conversations/conversations_test.go`
+- [x] remove root `conversations.go`
+- [x] run tests: `go test ./...`
 
 ### Task 22: Migrate `contacts` sub-package
 - [ ] create `contacts/contacts.go` — move from root `contacts.go` (largest service, ~909 lines)

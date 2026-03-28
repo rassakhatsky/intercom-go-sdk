@@ -1,15 +1,124 @@
-package intercom
+package conversations_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/conversations"
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-func TestConversationsService_Get(t *testing.T) {
-	client, mux, teardown := setup()
+// testCaller implements api.Caller for testing, backed by an httptest.Server.
+type testCaller struct {
+	baseURL string
+	client  *http.Client
+}
+
+func (tc *testCaller) NewRequest(method, urlStr string, body any) (*http.Request, error) {
+	var buf io.Reader
+	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+		buf = bytes.NewBuffer(jsonBody)
+	}
+	req, err := http.NewRequest(method, tc.baseURL+"/"+urlStr, buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer test-token")
+	req.Header.Set("Accept", "application/json")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	return req, nil
+}
+
+func (tc *testCaller) DoRaw(ctx context.Context, req *http.Request) (*api.Result, error) {
+	req = req.WithContext(ctx)
+	resp, err := tc.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return api.BuildResult(resp, b), nil
+}
+
+func (tc *testCaller) Do(ctx context.Context, req *http.Request, v any) (*api.Response, error) {
+	result, err := tc.DoRaw(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	response := &api.Response{Result: result}
+	if result.Error != nil {
+		return response, api.ResultError(result)
+	}
+	if v != nil && result.StatusCode != http.StatusNoContent && len(result.Body) > 0 {
+		if err := json.Unmarshal(result.Body, v); err != nil {
+			return response, err
+		}
+	}
+	return response, nil
+}
+
+func (tc *testCaller) DoRawNoRedirect(ctx context.Context, req *http.Request) (*api.Result, error) {
+	return tc.DoRaw(ctx, req)
+}
+
+func (tc *testCaller) DoDownload(ctx context.Context, req *http.Request, w io.Writer) error {
+	req = req.WithContext(ctx)
+	resp, err := tc.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		b, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return fmt.Errorf("HTTP %d: failed to read error body: %w", resp.StatusCode, readErr)
+		}
+		result := api.BuildResult(resp, b)
+		return api.ResultError(result)
+	}
+	_, err = io.Copy(w, resp.Body)
+	return err
+}
+
+func setup() (svc *conversations.Service, mux *http.ServeMux, teardown func()) {
+	mux = http.NewServeMux()
+	server := httptest.NewServer(mux)
+	caller := &testCaller{baseURL: server.URL, client: server.Client()}
+	svc = conversations.NewService(caller)
+	return svc, mux, server.Close
+}
+
+func testMethod(t *testing.T, r *http.Request, want string) {
+	t.Helper()
+	if got := r.Method; got != want {
+		t.Errorf("Request method = %v, want %v", got, want)
+	}
+}
+
+func testHeader(t *testing.T, r *http.Request, header, want string) {
+	t.Helper()
+	if got := r.Header.Get(header); got != want {
+		t.Errorf("Header %v = %v, want %v", header, got, want)
+	}
+}
+
+func TestService_Get(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123", func(w http.ResponseWriter, r *http.Request) {
@@ -60,9 +169,9 @@ func TestConversationsService_Get(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := client.Conversations.Get(ctx, "123")
+	conv, err := svc.Get(ctx, "123")
 	if err != nil {
-		t.Fatalf("Conversations.Get returned error: %v", err)
+		t.Fatalf("Get returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("Conversation.ID = %v, want 123", conv.ID)
@@ -93,13 +202,13 @@ func TestConversationsService_Get(t *testing.T) {
 	}
 }
 
-func TestConversationsService_Create(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Create(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body CreateConversationRequest
+		var body conversations.CreateRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -116,25 +225,25 @@ func TestConversationsService_Create(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	msg, err := client.Conversations.Create(ctx, &CreateConversationRequest{
-		From: ConversationFrom{Type: "user", ID: "abc123"},
+	msg, err := svc.Create(ctx, &conversations.CreateRequest{
+		From: conversations.From{Type: "user", ID: "abc123"},
 		Body: "Hello there",
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Create returned error: %v", err)
+		t.Fatalf("Create returned error: %v", err)
 	}
 	if msg.ConversationID != "499" {
 		t.Errorf("Message.ConversationID = %v, want 499", msg.ConversationID)
 	}
 }
 
-func TestConversationsService_Update(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Update(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPut)
-		var body UpdateConversationRequest
+		var body conversations.UpdateRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -146,7 +255,7 @@ func TestConversationsService_Update(t *testing.T) {
 
 	ctx := context.Background()
 	read := true
-	conv, err := client.Conversations.Update(ctx, "123", &UpdateConversationRequest{
+	conv, err := svc.Update(ctx, "123", &conversations.UpdateRequest{
 		Read:  &read,
 		Title: "new title",
 		CustomAttributes: map[string]any{
@@ -154,15 +263,15 @@ func TestConversationsService_Update(t *testing.T) {
 		},
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Update returned error: %v", err)
+		t.Fatalf("Update returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("Conversation.ID = %v, want 123", conv.ID)
 	}
 }
 
-func TestConversationsService_Delete(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Delete(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123", func(w http.ResponseWriter, r *http.Request) {
@@ -171,20 +280,20 @@ func TestConversationsService_Delete(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	deleted, err := client.Conversations.Delete(ctx, "123")
+	deleted, err := svc.Delete(ctx, "123")
 	if err != nil {
-		t.Fatalf("Conversations.Delete returned error: %v", err)
+		t.Fatalf("Delete returned error: %v", err)
 	}
 	if !deleted.Deleted {
-		t.Error("ConversationDeleted.Deleted = false, want true")
+		t.Error("Deleted.Deleted = false, want true")
 	}
 	if deleted.ID != "123" {
-		t.Errorf("ConversationDeleted.ID = %v, want 123", deleted.ID)
+		t.Errorf("Deleted.ID = %v, want 123", deleted.ID)
 	}
 }
 
-func TestConversationsService_List(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_List(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations", func(w http.ResponseWriter, r *http.Request) {
@@ -201,9 +310,9 @@ func TestConversationsService_List(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.List(ctx, nil)
+	result, err := svc.List(ctx, nil)
 	if err != nil {
-		t.Fatalf("Conversations.List returned error: %v", err)
+		t.Fatalf("List returned error: %v", err)
 	}
 	if len(result.Data) != 2 {
 		t.Errorf("List returned %d conversations, want 2", len(result.Data))
@@ -213,8 +322,8 @@ func TestConversationsService_List(t *testing.T) {
 	}
 }
 
-func TestConversationsService_ListAll(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListAll(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	callCount := 0
@@ -239,7 +348,7 @@ func TestConversationsService_ListAll(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	iter := client.Conversations.ListAll(ctx, &ListOptions{PerPage: 1})
+	iter := svc.ListAll(ctx, &api.ListOptions{PerPage: 1})
 	var ids []string
 	for iter.Next() {
 		ids = append(ids, iter.Current().ID)
@@ -255,13 +364,13 @@ func TestConversationsService_ListAll(t *testing.T) {
 	}
 }
 
-func TestConversationsService_Search(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Search(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/search", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body SearchRequest
+		var body api.SearchRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -277,25 +386,25 @@ func TestConversationsService_Search(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.Search(ctx, &SearchRequest{
-		Query:      And(SingleFilterOf("created_at", ">", "1306054154")),
-		Pagination: &SearchPagination{PerPage: 5},
+	result, err := svc.Search(ctx, &api.SearchRequest{
+		Query:      api.And(api.SingleFilterOf("created_at", ">", "1306054154")),
+		Pagination: &api.SearchPagination{PerPage: 5},
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Search returned error: %v", err)
+		t.Fatalf("Search returned error: %v", err)
 	}
 	if len(result.Data) != 1 {
 		t.Errorf("Search returned %d conversations, want 1", len(result.Data))
 	}
 }
 
-func TestConversationsService_Reply(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Reply(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/reply", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body ReplyConversationRequest
+		var body conversations.ReplyRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -309,27 +418,27 @@ func TestConversationsService_Reply(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := client.Conversations.Reply(ctx, "123", &ReplyConversationRequest{
+	conv, err := svc.Reply(ctx, "123", &conversations.ReplyRequest{
 		MessageType:    "comment",
 		Type:           "user",
 		IntercomUserID: "abc123",
 		Body:           "Thanks again :)",
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Reply returned error: %v", err)
+		t.Fatalf("Reply returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("Conversation.ID = %v, want 123", conv.ID)
 	}
 }
 
-func TestConversationsService_Reply_AdminNote(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Reply_AdminNote(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/reply", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body ReplyConversationRequest
+		var body conversations.ReplyRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -343,27 +452,27 @@ func TestConversationsService_Reply_AdminNote(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := client.Conversations.Reply(ctx, "123", &ReplyConversationRequest{
+	conv, err := svc.Reply(ctx, "123", &conversations.ReplyRequest{
 		MessageType: "note",
 		Type:        "admin",
 		AdminID:     "admin-1",
 		Body:        "<p>Internal note</p>",
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Reply returned error: %v", err)
+		t.Fatalf("Reply returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("Conversation.ID = %v, want 123", conv.ID)
 	}
 }
 
-func TestConversationsService_Close(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Close(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/parts", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body ManageConversationRequest
+		var body conversations.ManageRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -377,27 +486,27 @@ func TestConversationsService_Close(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := client.Conversations.Close(ctx, "123", &ManageConversationRequest{
+	conv, err := svc.Close(ctx, "123", &conversations.ManageRequest{
 		MessageType: "close",
 		Type:        "admin",
 		AdminID:     "admin-1",
 		Body:        "Goodbye :)",
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Close returned error: %v", err)
+		t.Fatalf("Close returned error: %v", err)
 	}
 	if conv.State != "closed" {
 		t.Errorf("Conversation.State = %v, want closed", conv.State)
 	}
 }
 
-func TestConversationsService_Open(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Open(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/parts", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body ManageConversationRequest
+		var body conversations.ManageRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -408,25 +517,25 @@ func TestConversationsService_Open(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := client.Conversations.Open(ctx, "123", &ManageConversationRequest{
+	conv, err := svc.Open(ctx, "123", &conversations.ManageRequest{
 		MessageType: "open",
 		AdminID:     "admin-1",
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Open returned error: %v", err)
+		t.Fatalf("Open returned error: %v", err)
 	}
 	if conv.State != "open" {
 		t.Errorf("Conversation.State = %v, want open", conv.State)
 	}
 }
 
-func TestConversationsService_Snooze(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Snooze(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/parts", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body ManageConversationRequest
+		var body conversations.ManageRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -440,26 +549,26 @@ func TestConversationsService_Snooze(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := client.Conversations.Snooze(ctx, "123", &ManageConversationRequest{
+	conv, err := svc.Snooze(ctx, "123", &conversations.ManageRequest{
 		MessageType:  "snoozed",
 		AdminID:      "admin-1",
 		SnoozedUntil: 1734541187,
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Snooze returned error: %v", err)
+		t.Fatalf("Snooze returned error: %v", err)
 	}
 	if conv.State != "snoozed" {
 		t.Errorf("Conversation.State = %v, want snoozed", conv.State)
 	}
 }
 
-func TestConversationsService_Assign(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Assign(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/parts", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body ManageConversationRequest
+		var body conversations.ManageRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -473,27 +582,27 @@ func TestConversationsService_Assign(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := client.Conversations.Assign(ctx, "123", &ManageConversationRequest{
+	conv, err := svc.Assign(ctx, "123", &conversations.ManageRequest{
 		MessageType: "assignment",
 		Type:        "admin",
 		AdminID:     "admin-1",
 		AssigneeID:  "admin-2",
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Assign returned error: %v", err)
+		t.Fatalf("Assign returned error: %v", err)
 	}
 	if conv.AdminAssigneeID != "admin-2" {
 		t.Errorf("Conversation.AdminAssigneeID = %v, want admin-2", conv.AdminAssigneeID)
 	}
 }
 
-func TestConversationsService_Convert(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Convert(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/convert", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body ConvertConversationRequest
+		var body conversations.ConvertRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -504,11 +613,11 @@ func TestConversationsService_Convert(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	ticket, err := client.Conversations.Convert(ctx, "123", &ConvertConversationRequest{
+	ticket, err := svc.Convert(ctx, "123", &conversations.ConvertRequest{
 		TicketTypeID: "53",
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Convert returned error: %v", err)
+		t.Fatalf("Convert returned error: %v", err)
 	}
 	if ticket.ID != "611" {
 		t.Errorf("Ticket.ID = %v, want 611", ticket.ID)
@@ -518,13 +627,13 @@ func TestConversationsService_Convert(t *testing.T) {
 	}
 }
 
-func TestConversationsService_Redact(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Redact(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/redact", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body RedactConversationRequest
+		var body conversations.RedactRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -541,26 +650,26 @@ func TestConversationsService_Redact(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := client.Conversations.Redact(ctx, &RedactConversationRequest{
+	conv, err := svc.Redact(ctx, &conversations.RedactRequest{
 		Type:               "conversation_part",
 		ConversationID:     "608",
 		ConversationPartID: "149",
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Redact returned error: %v", err)
+		t.Fatalf("Redact returned error: %v", err)
 	}
 	if conv.ID != "608" {
 		t.Errorf("Conversation.ID = %v, want 608", conv.ID)
 	}
 }
 
-func TestConversationsService_AddCustomer(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_AddCustomer(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/customers", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body AttachContactToConversationRequest
+		var body conversations.AttachContactRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -574,27 +683,27 @@ func TestConversationsService_AddCustomer(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := client.Conversations.AddCustomer(ctx, "123", &AttachContactToConversationRequest{
+	conv, err := svc.AddCustomer(ctx, "123", &conversations.AttachContactRequest{
 		AdminID: "admin-1",
-		Customer: ConversationCustomer{
+		Customer: conversations.Customer{
 			IntercomUserID: "contact-1",
 		},
 	})
 	if err != nil {
-		t.Fatalf("Conversations.AddCustomer returned error: %v", err)
+		t.Fatalf("AddCustomer returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("Conversation.ID = %v, want 123", conv.ID)
 	}
 }
 
-func TestConversationsService_RemoveCustomer(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_RemoveCustomer(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/customers/contact-1", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodDelete)
-		var body DetachContactFromConversationRequest
+		var body conversations.DetachContactRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -605,19 +714,19 @@ func TestConversationsService_RemoveCustomer(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := client.Conversations.RemoveCustomer(ctx, "123", "contact-1", &DetachContactFromConversationRequest{
+	conv, err := svc.RemoveCustomer(ctx, "123", "contact-1", &conversations.DetachContactRequest{
 		AdminID: "admin-1",
 	})
 	if err != nil {
-		t.Fatalf("Conversations.RemoveCustomer returned error: %v", err)
+		t.Fatalf("RemoveCustomer returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("Conversation.ID = %v, want 123", conv.ID)
 	}
 }
 
-func TestConversationsService_AddTag(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_AddTag(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/tags", func(w http.ResponseWriter, r *http.Request) {
@@ -639,9 +748,9 @@ func TestConversationsService_AddTag(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	tag, err := client.Conversations.AddTag(ctx, "123", "tag-1", "admin-1")
+	tag, err := svc.AddTag(ctx, "123", "tag-1", "admin-1")
 	if err != nil {
-		t.Fatalf("Conversations.AddTag returned error: %v", err)
+		t.Fatalf("AddTag returned error: %v", err)
 	}
 	if tag.ID != "tag-1" {
 		t.Errorf("Tag.ID = %v, want tag-1", tag.ID)
@@ -651,8 +760,8 @@ func TestConversationsService_AddTag(t *testing.T) {
 	}
 }
 
-func TestConversationsService_RemoveTag(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_RemoveTag(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/tags/tag-1", func(w http.ResponseWriter, r *http.Request) {
@@ -670,17 +779,17 @@ func TestConversationsService_RemoveTag(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	tag, err := client.Conversations.RemoveTag(ctx, "123", "tag-1", "admin-1")
+	tag, err := svc.RemoveTag(ctx, "123", "tag-1", "admin-1")
 	if err != nil {
-		t.Fatalf("Conversations.RemoveTag returned error: %v", err)
+		t.Fatalf("RemoveTag returned error: %v", err)
 	}
 	if tag.ID != "tag-1" {
 		t.Errorf("Tag.ID = %v, want tag-1", tag.ID)
 	}
 }
 
-func TestConversationsService_Get_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Get_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/999", func(w http.ResponseWriter, r *http.Request) {
@@ -689,17 +798,17 @@ func TestConversationsService_Get_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.Conversations.Get(ctx, "999")
+	_, err := svc.Get(ctx, "999")
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("IsNotFound = false, want true")
 	}
 }
 
-func TestConversationsService_List_RateLimit(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_List_RateLimit(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations", func(w http.ResponseWriter, r *http.Request) {
@@ -708,19 +817,19 @@ func TestConversationsService_List_RateLimit(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.Conversations.List(ctx, nil)
+	_, err := svc.List(ctx, nil)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsRateLimited(err) {
+	if !api.IsRateLimited(err) {
 		t.Errorf("IsRateLimited = false, want true")
 	}
 }
 
 // --- Raw method tests ---
 
-func TestConversationsService_GetRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123", func(w http.ResponseWriter, r *http.Request) {
@@ -730,13 +839,13 @@ func TestConversationsService_GetRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.GetRaw(ctx, "123")
+	result, err := svc.GetRaw(ctx, "123")
 	if err != nil {
 		t.Fatalf("GetRaw returned error: %v", err)
 	}
-	conv, err := ParseConversationGetResult(result)
+	conv, err := conversations.ParseGetResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationGetResult returned error: %v", err)
+		t.Fatalf("ParseGetResult returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("conv.ID = %v, want 123", conv.ID)
@@ -755,8 +864,8 @@ func TestConversationsService_GetRaw_Success(t *testing.T) {
 	}
 }
 
-func TestConversationsService_GetRaw_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetRaw_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/999", func(w http.ResponseWriter, r *http.Request) {
@@ -765,7 +874,7 @@ func TestConversationsService_GetRaw_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.GetRaw(ctx, "999")
+	result, err := svc.GetRaw(ctx, "999")
 	if err != nil {
 		t.Fatalf("GetRaw returned Go error: %v", err)
 	}
@@ -780,8 +889,8 @@ func TestConversationsService_GetRaw_NotFound(t *testing.T) {
 	}
 }
 
-func TestConversationsService_ListRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations", func(w http.ResponseWriter, r *http.Request) {
@@ -798,13 +907,13 @@ func TestConversationsService_ListRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.ListRaw(ctx, nil)
+	result, err := svc.ListRaw(ctx, nil)
 	if err != nil {
 		t.Fatalf("ListRaw returned error: %v", err)
 	}
-	page, err := ParseConversationListResult(result)
+	page, err := conversations.ParseListResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationListResult returned error: %v", err)
+		t.Fatalf("ParseListResult returned error: %v", err)
 	}
 	if len(page.Data) != 2 {
 		t.Errorf("Data count = %d, want 2", len(page.Data))
@@ -817,8 +926,8 @@ func TestConversationsService_ListRaw(t *testing.T) {
 	}
 }
 
-func TestConversationsService_CreateRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CreateRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations", func(w http.ResponseWriter, r *http.Request) {
@@ -827,16 +936,16 @@ func TestConversationsService_CreateRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.CreateRaw(ctx, &CreateConversationRequest{
-		From: ConversationFrom{Type: "user", ID: "abc123"},
+	result, err := svc.CreateRaw(ctx, &conversations.CreateRequest{
+		From: conversations.From{Type: "user", ID: "abc123"},
 		Body: "Hello",
 	})
 	if err != nil {
 		t.Fatalf("CreateRaw returned error: %v", err)
 	}
-	msg, err := ParseConversationCreateResult(result)
+	msg, err := conversations.ParseCreateResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationCreateResult returned error: %v", err)
+		t.Fatalf("ParseCreateResult returned error: %v", err)
 	}
 	if msg.ConversationID != "499" {
 		t.Errorf("msg.ConversationID = %v, want 499", msg.ConversationID)
@@ -846,8 +955,8 @@ func TestConversationsService_CreateRaw(t *testing.T) {
 	}
 }
 
-func TestConversationsService_UpdateRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_UpdateRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123", func(w http.ResponseWriter, r *http.Request) {
@@ -856,23 +965,23 @@ func TestConversationsService_UpdateRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.UpdateRaw(ctx, "123", &UpdateConversationRequest{
+	result, err := svc.UpdateRaw(ctx, "123", &conversations.UpdateRequest{
 		Title: "new title",
 	})
 	if err != nil {
 		t.Fatalf("UpdateRaw returned error: %v", err)
 	}
-	conv, err := ParseConversationUpdateResult(result)
+	conv, err := conversations.ParseUpdateResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationUpdateResult returned error: %v", err)
+		t.Fatalf("ParseUpdateResult returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("conv.ID = %v, want 123", conv.ID)
 	}
 }
 
-func TestConversationsService_DeleteRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_DeleteRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123", func(w http.ResponseWriter, r *http.Request) {
@@ -881,13 +990,13 @@ func TestConversationsService_DeleteRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.DeleteRaw(ctx, "123")
+	result, err := svc.DeleteRaw(ctx, "123")
 	if err != nil {
 		t.Fatalf("DeleteRaw returned error: %v", err)
 	}
-	deleted, err := ParseConversationDeleteResult(result)
+	deleted, err := conversations.ParseDeleteResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationDeleteResult returned error: %v", err)
+		t.Fatalf("ParseDeleteResult returned error: %v", err)
 	}
 	if !deleted.Deleted {
 		t.Error("deleted.Deleted = false, want true")
@@ -897,8 +1006,8 @@ func TestConversationsService_DeleteRaw(t *testing.T) {
 	}
 }
 
-func TestConversationsService_SearchRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_SearchRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/search", func(w http.ResponseWriter, r *http.Request) {
@@ -912,16 +1021,16 @@ func TestConversationsService_SearchRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.SearchRaw(ctx, &SearchRequest{
-		Query:      And(SingleFilterOf("created_at", ">", "1306054154")),
-		Pagination: &SearchPagination{PerPage: 5},
+	result, err := svc.SearchRaw(ctx, &api.SearchRequest{
+		Query:      api.And(api.SingleFilterOf("created_at", ">", "1306054154")),
+		Pagination: &api.SearchPagination{PerPage: 5},
 	})
 	if err != nil {
 		t.Fatalf("SearchRaw returned error: %v", err)
 	}
-	page, err := ParseConversationSearchResult(result)
+	page, err := conversations.ParseSearchResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationSearchResult returned error: %v", err)
+		t.Fatalf("ParseSearchResult returned error: %v", err)
 	}
 	if len(page.Data) != 1 {
 		t.Errorf("Data count = %d, want 1", len(page.Data))
@@ -931,8 +1040,8 @@ func TestConversationsService_SearchRaw(t *testing.T) {
 	}
 }
 
-func TestConversationsService_ReplyRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ReplyRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/reply", func(w http.ResponseWriter, r *http.Request) {
@@ -941,7 +1050,7 @@ func TestConversationsService_ReplyRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.ReplyRaw(ctx, "123", &ReplyConversationRequest{
+	result, err := svc.ReplyRaw(ctx, "123", &conversations.ReplyRequest{
 		MessageType:    "comment",
 		Type:           "user",
 		IntercomUserID: "abc123",
@@ -950,17 +1059,17 @@ func TestConversationsService_ReplyRaw(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReplyRaw returned error: %v", err)
 	}
-	conv, err := ParseConversationReplyResult(result)
+	conv, err := conversations.ParseReplyResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationReplyResult returned error: %v", err)
+		t.Fatalf("ParseReplyResult returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("conv.ID = %v, want 123", conv.ID)
 	}
 }
 
-func TestConversationsService_CloseRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CloseRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/parts", func(w http.ResponseWriter, r *http.Request) {
@@ -969,7 +1078,7 @@ func TestConversationsService_CloseRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.CloseRaw(ctx, "123", &ManageConversationRequest{
+	result, err := svc.CloseRaw(ctx, "123", &conversations.ManageRequest{
 		MessageType: "close",
 		Type:        "admin",
 		AdminID:     "admin-1",
@@ -977,17 +1086,17 @@ func TestConversationsService_CloseRaw(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CloseRaw returned error: %v", err)
 	}
-	conv, err := ParseConversationCloseResult(result)
+	conv, err := conversations.ParseCloseResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationCloseResult returned error: %v", err)
+		t.Fatalf("ParseCloseResult returned error: %v", err)
 	}
 	if conv.State != "closed" {
 		t.Errorf("conv.State = %v, want closed", conv.State)
 	}
 }
 
-func TestConversationsService_OpenRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_OpenRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/parts", func(w http.ResponseWriter, r *http.Request) {
@@ -996,24 +1105,24 @@ func TestConversationsService_OpenRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.OpenRaw(ctx, "123", &ManageConversationRequest{
+	result, err := svc.OpenRaw(ctx, "123", &conversations.ManageRequest{
 		MessageType: "open",
 		AdminID:     "admin-1",
 	})
 	if err != nil {
 		t.Fatalf("OpenRaw returned error: %v", err)
 	}
-	conv, err := ParseConversationOpenResult(result)
+	conv, err := conversations.ParseOpenResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationOpenResult returned error: %v", err)
+		t.Fatalf("ParseOpenResult returned error: %v", err)
 	}
 	if conv.State != "open" {
 		t.Errorf("conv.State = %v, want open", conv.State)
 	}
 }
 
-func TestConversationsService_SnoozeRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_SnoozeRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/parts", func(w http.ResponseWriter, r *http.Request) {
@@ -1022,7 +1131,7 @@ func TestConversationsService_SnoozeRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.SnoozeRaw(ctx, "123", &ManageConversationRequest{
+	result, err := svc.SnoozeRaw(ctx, "123", &conversations.ManageRequest{
 		MessageType:  "snoozed",
 		AdminID:      "admin-1",
 		SnoozedUntil: 1734541187,
@@ -1030,17 +1139,17 @@ func TestConversationsService_SnoozeRaw(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SnoozeRaw returned error: %v", err)
 	}
-	conv, err := ParseConversationSnoozeResult(result)
+	conv, err := conversations.ParseSnoozeResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationSnoozeResult returned error: %v", err)
+		t.Fatalf("ParseSnoozeResult returned error: %v", err)
 	}
 	if conv.State != "snoozed" {
 		t.Errorf("conv.State = %v, want snoozed", conv.State)
 	}
 }
 
-func TestConversationsService_AssignRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_AssignRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/parts", func(w http.ResponseWriter, r *http.Request) {
@@ -1049,7 +1158,7 @@ func TestConversationsService_AssignRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.AssignRaw(ctx, "123", &ManageConversationRequest{
+	result, err := svc.AssignRaw(ctx, "123", &conversations.ManageRequest{
 		MessageType: "assignment",
 		Type:        "admin",
 		AdminID:     "admin-1",
@@ -1058,17 +1167,17 @@ func TestConversationsService_AssignRaw(t *testing.T) {
 	if err != nil {
 		t.Fatalf("AssignRaw returned error: %v", err)
 	}
-	conv, err := ParseConversationAssignResult(result)
+	conv, err := conversations.ParseAssignResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationAssignResult returned error: %v", err)
+		t.Fatalf("ParseAssignResult returned error: %v", err)
 	}
 	if conv.AdminAssigneeID != "admin-2" {
 		t.Errorf("conv.AdminAssigneeID = %v, want admin-2", conv.AdminAssigneeID)
 	}
 }
 
-func TestConversationsService_ConvertRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ConvertRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/convert", func(w http.ResponseWriter, r *http.Request) {
@@ -1077,15 +1186,15 @@ func TestConversationsService_ConvertRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.ConvertRaw(ctx, "123", &ConvertConversationRequest{
+	result, err := svc.ConvertRaw(ctx, "123", &conversations.ConvertRequest{
 		TicketTypeID: "53",
 	})
 	if err != nil {
 		t.Fatalf("ConvertRaw returned error: %v", err)
 	}
-	ticket, err := ParseConversationConvertResult(result)
+	ticket, err := conversations.ParseConvertResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationConvertResult returned error: %v", err)
+		t.Fatalf("ParseConvertResult returned error: %v", err)
 	}
 	if ticket.ID != "611" {
 		t.Errorf("ticket.ID = %v, want 611", ticket.ID)
@@ -1095,8 +1204,8 @@ func TestConversationsService_ConvertRaw(t *testing.T) {
 	}
 }
 
-func TestConversationsService_RedactRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_RedactRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/redact", func(w http.ResponseWriter, r *http.Request) {
@@ -1105,7 +1214,7 @@ func TestConversationsService_RedactRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.RedactRaw(ctx, &RedactConversationRequest{
+	result, err := svc.RedactRaw(ctx, &conversations.RedactRequest{
 		Type:               "conversation_part",
 		ConversationID:     "608",
 		ConversationPartID: "149",
@@ -1113,17 +1222,17 @@ func TestConversationsService_RedactRaw(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RedactRaw returned error: %v", err)
 	}
-	conv, err := ParseConversationRedactResult(result)
+	conv, err := conversations.ParseRedactResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationRedactResult returned error: %v", err)
+		t.Fatalf("ParseRedactResult returned error: %v", err)
 	}
 	if conv.ID != "608" {
 		t.Errorf("conv.ID = %v, want 608", conv.ID)
 	}
 }
 
-func TestConversationsService_AddCustomerRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_AddCustomerRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/customers", func(w http.ResponseWriter, r *http.Request) {
@@ -1132,26 +1241,26 @@ func TestConversationsService_AddCustomerRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.AddCustomerRaw(ctx, "123", &AttachContactToConversationRequest{
+	result, err := svc.AddCustomerRaw(ctx, "123", &conversations.AttachContactRequest{
 		AdminID: "admin-1",
-		Customer: ConversationCustomer{
+		Customer: conversations.Customer{
 			IntercomUserID: "contact-1",
 		},
 	})
 	if err != nil {
 		t.Fatalf("AddCustomerRaw returned error: %v", err)
 	}
-	conv, err := ParseConversationAddCustomerResult(result)
+	conv, err := conversations.ParseAddCustomerResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationAddCustomerResult returned error: %v", err)
+		t.Fatalf("ParseAddCustomerResult returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("conv.ID = %v, want 123", conv.ID)
 	}
 }
 
-func TestConversationsService_RemoveCustomerRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_RemoveCustomerRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/customers/contact-1", func(w http.ResponseWriter, r *http.Request) {
@@ -1160,23 +1269,23 @@ func TestConversationsService_RemoveCustomerRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.RemoveCustomerRaw(ctx, "123", "contact-1", &DetachContactFromConversationRequest{
+	result, err := svc.RemoveCustomerRaw(ctx, "123", "contact-1", &conversations.DetachContactRequest{
 		AdminID: "admin-1",
 	})
 	if err != nil {
 		t.Fatalf("RemoveCustomerRaw returned error: %v", err)
 	}
-	conv, err := ParseConversationRemoveCustomerResult(result)
+	conv, err := conversations.ParseRemoveCustomerResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationRemoveCustomerResult returned error: %v", err)
+		t.Fatalf("ParseRemoveCustomerResult returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("conv.ID = %v, want 123", conv.ID)
 	}
 }
 
-func TestConversationsService_AddTagRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_AddTagRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/tags", func(w http.ResponseWriter, r *http.Request) {
@@ -1185,13 +1294,13 @@ func TestConversationsService_AddTagRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.AddTagRaw(ctx, "123", "tag-1", "admin-1")
+	result, err := svc.AddTagRaw(ctx, "123", "tag-1", "admin-1")
 	if err != nil {
 		t.Fatalf("AddTagRaw returned error: %v", err)
 	}
-	tag, err := ParseConversationAddTagResult(result)
+	tag, err := conversations.ParseAddTagResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationAddTagResult returned error: %v", err)
+		t.Fatalf("ParseAddTagResult returned error: %v", err)
 	}
 	if tag.ID != "tag-1" {
 		t.Errorf("tag.ID = %v, want tag-1", tag.ID)
@@ -1201,8 +1310,8 @@ func TestConversationsService_AddTagRaw(t *testing.T) {
 	}
 }
 
-func TestConversationsService_RemoveTagRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_RemoveTagRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/tags/tag-1", func(w http.ResponseWriter, r *http.Request) {
@@ -1211,21 +1320,21 @@ func TestConversationsService_RemoveTagRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Conversations.RemoveTagRaw(ctx, "123", "tag-1", "admin-1")
+	result, err := svc.RemoveTagRaw(ctx, "123", "tag-1", "admin-1")
 	if err != nil {
 		t.Fatalf("RemoveTagRaw returned error: %v", err)
 	}
-	tag, err := ParseConversationRemoveTagResult(result)
+	tag, err := conversations.ParseRemoveTagResult(result)
 	if err != nil {
-		t.Fatalf("ParseConversationRemoveTagResult returned error: %v", err)
+		t.Fatalf("ParseRemoveTagResult returned error: %v", err)
 	}
 	if tag.ID != "tag-1" {
 		t.Errorf("tag.ID = %v, want tag-1", tag.ID)
 	}
 }
 
-func TestConversationsService_Reply_WithQuickReplyOptions(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Reply_WithQuickReplyOptions(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/reply", func(w http.ResponseWriter, r *http.Request) {
@@ -1249,25 +1358,25 @@ func TestConversationsService_Reply_WithQuickReplyOptions(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := client.Conversations.Reply(ctx, "123", &ReplyConversationRequest{
+	conv, err := svc.Reply(ctx, "123", &conversations.ReplyRequest{
 		MessageType: "quick_reply",
 		Type:        "admin",
 		AdminID:     "admin-1",
-		ReplyOptions: []QuickReplyOption{
+		ReplyOptions: []conversations.QuickReplyOption{
 			{Text: "Yes", UUID: "uuid-1"},
 			{Text: "No", UUID: "uuid-2"},
 		},
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Reply returned error: %v", err)
+		t.Fatalf("Reply returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("Conversation.ID = %v, want 123", conv.ID)
 	}
 }
 
-func TestConversationsService_Reply_WithAttachmentFiles(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Reply_WithAttachmentFiles(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/conversations/123/reply", func(w http.ResponseWriter, r *http.Request) {
@@ -1293,18 +1402,18 @@ func TestConversationsService_Reply_WithAttachmentFiles(t *testing.T) {
 
 	ctx := context.Background()
 	skipNotif := true
-	conv, err := client.Conversations.Reply(ctx, "123", &ReplyConversationRequest{
+	conv, err := svc.Reply(ctx, "123", &conversations.ReplyRequest{
 		MessageType: "comment",
 		Type:        "admin",
 		AdminID:     "admin-1",
 		Body:        "See attachment",
-		AttachmentFiles: []AttachmentFile{
+		AttachmentFiles: []conversations.AttachmentFile{
 			{ContentType: "application/pdf", Data: "base64data", Name: "doc.pdf"},
 		},
 		SkipNotifications: &skipNotif,
 	})
 	if err != nil {
-		t.Fatalf("Conversations.Reply returned error: %v", err)
+		t.Fatalf("Reply returned error: %v", err)
 	}
 	if conv.ID != "123" {
 		t.Errorf("Conversation.ID = %v, want 123", conv.ID)

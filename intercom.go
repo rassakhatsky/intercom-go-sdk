@@ -15,6 +15,7 @@ import (
 	"github.com/rassakhatsky/intercom-go-sdk/articles"
 	"github.com/rassakhatsky/intercom-go-sdk/calls"
 	"github.com/rassakhatsky/intercom-go-sdk/companies"
+	"github.com/rassakhatsky/intercom-go-sdk/conversations"
 	"github.com/rassakhatsky/intercom-go-sdk/data"
 	"github.com/rassakhatsky/intercom-go-sdk/export"
 	"github.com/rassakhatsky/intercom-go-sdk/helpcenter"
@@ -49,7 +50,7 @@ type Client struct {
 	calls               *calls.Service
 	companies           *companies.Service
 	Contacts            *ContactsService
-	Conversations       *ConversationsService
+	conversations       *conversations.Service
 	customChannelEvents *settings.ChannelEventsService
 	customObjects       *data.ObjectsService
 	dataAttributes      *data.AttributesService
@@ -135,7 +136,7 @@ func (c *Client) initialize() {
 	c.calls = calls.NewService(c)
 	c.Contacts = (*ContactsService)(&c.common)
 	c.companies = companies.NewService(c)
-	c.Conversations = (*ConversationsService)(&c.common)
+	c.conversations = conversations.NewService(c)
 	c.customChannelEvents = settings.NewChannelEventsService(c)
 	c.customObjects = data.NewObjectsService(c)
 	c.dataAttributes = data.NewAttributesService(c)
@@ -286,6 +287,11 @@ func (c *Client) Articles() *articles.Service {
 // InternalArticles returns the internal articles service.
 func (c *Client) InternalArticles() *articles.InternalService {
 	return c.internalArticles
+}
+
+// Conversations returns the conversations service.
+func (c *Client) Conversations() *conversations.Service {
+	return c.conversations
 }
 
 // Tickets returns the tickets service.
