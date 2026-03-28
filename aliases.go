@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/tags"
 )
 
 // Type aliases re-export internal/api types as part of the public intercom API.
@@ -21,6 +22,16 @@ type ErrorResponse = api.ErrorResponse
 
 // Shared domain types
 type TagRef = api.TagRef
+type AdminRef = api.AdminRef
+
+// Tag sub-package aliases (for backward compat while other root services still reference these)
+type Tag = tags.Tag
+type TagList = tags.List
+type CreateOrUpdateTagRequest = tags.CreateOrUpdateRequest
+type TagCompanyItem = tags.TagCompanyItem
+type TagCompanyRequest = tags.TagCompanyRequest
+type UntagCompanyItem = tags.UntagCompanyItem
+type UntagCompanyRequest = tags.UntagCompanyRequest
 
 // Response wraps a Result to provide additional API-specific data.
 type Response = api.Response

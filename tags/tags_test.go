@@ -1,15 +1,101 @@
-package intercom
+package tags_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/tags"
 )
 
-func TestTagsService_Get(t *testing.T) {
-	client, mux, teardown := setup()
+// testCaller implements api.Caller for testing, backed by an httptest.Server.
+type testCaller struct {
+	baseURL string
+	client  *http.Client
+}
+
+func (tc *testCaller) NewRequest(method, urlStr string, body any) (*http.Request, error) {
+	var buf io.Reader
+	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+		buf = bytes.NewBuffer(jsonBody)
+	}
+	req, err := http.NewRequest(method, tc.baseURL+"/"+urlStr, buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer test-token")
+	req.Header.Set("Accept", "application/json")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	return req, nil
+}
+
+func (tc *testCaller) DoRaw(ctx context.Context, req *http.Request) (*api.Result, error) {
+	req = req.WithContext(ctx)
+	resp, err := tc.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return api.BuildResult(resp, b), nil
+}
+
+func (tc *testCaller) Do(ctx context.Context, req *http.Request, v any) (*api.Response, error) {
+	result, err := tc.DoRaw(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	response := &api.Response{Result: result}
+	if result.Error != nil {
+		return response, api.ResultError(result)
+	}
+	if v != nil && result.StatusCode != http.StatusNoContent && len(result.Body) > 0 {
+		if err := json.Unmarshal(result.Body, v); err != nil {
+			return response, err
+		}
+	}
+	return response, nil
+}
+
+func setup() (svc *tags.Service, mux *http.ServeMux, teardown func()) {
+	mux = http.NewServeMux()
+	server := httptest.NewServer(mux)
+	caller := &testCaller{baseURL: server.URL, client: server.Client()}
+	svc = tags.NewService(caller)
+	return svc, mux, server.Close
+}
+
+func testMethod(t *testing.T, r *http.Request, want string) {
+	t.Helper()
+	if got := r.Method; got != want {
+		t.Errorf("Request method = %v, want %v", got, want)
+	}
+}
+
+func testHeader(t *testing.T, r *http.Request, header, want string) {
+	t.Helper()
+	if got := r.Header.Get(header); got != want {
+		t.Errorf("Header %v = %q, want %q", header, got, want)
+	}
+}
+
+func TestService_Get(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags/123", func(w http.ResponseWriter, r *http.Request) {
@@ -23,9 +109,9 @@ func TestTagsService_Get(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	tag, err := client.Tags.Get(ctx, "123")
+	tag, err := svc.Get(ctx, "123")
 	if err != nil {
-		t.Fatalf("Tags.Get returned error: %v", err)
+		t.Fatalf("Get returned error: %v", err)
 	}
 	if tag.ID != "123" {
 		t.Errorf("Tag.ID = %v, want 123", tag.ID)
@@ -38,8 +124,8 @@ func TestTagsService_Get(t *testing.T) {
 	}
 }
 
-func TestTagsService_Get_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Get_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags/nonexistent", func(w http.ResponseWriter, r *http.Request) {
@@ -52,17 +138,17 @@ func TestTagsService_Get_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.Tags.Get(ctx, "nonexistent")
+	_, err := svc.Get(ctx, "nonexistent")
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("Expected IsNotFound, got: %v", err)
 	}
 }
 
-func TestTagsService_List(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_List(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags", func(w http.ResponseWriter, r *http.Request) {
@@ -78,31 +164,31 @@ func TestTagsService_List(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	tags, err := client.Tags.List(ctx)
+	list, err := svc.List(ctx)
 	if err != nil {
-		t.Fatalf("Tags.List returned error: %v", err)
+		t.Fatalf("List returned error: %v", err)
 	}
-	if tags.Type != "list" {
-		t.Errorf("TagList.Type = %v, want list", tags.Type)
+	if list.Type != "list" {
+		t.Errorf("List.Type = %v, want list", list.Type)
 	}
-	if len(tags.Data) != 3 {
-		t.Fatalf("TagList.Data length = %d, want 3", len(tags.Data))
+	if len(list.Data) != 3 {
+		t.Fatalf("List.Data length = %d, want 3", len(list.Data))
 	}
-	if tags.Data[0].Name != "VIP" {
-		t.Errorf("Data[0].Name = %v, want VIP", tags.Data[0].Name)
+	if list.Data[0].Name != "VIP" {
+		t.Errorf("Data[0].Name = %v, want VIP", list.Data[0].Name)
 	}
-	if tags.Data[2].Name != "Enterprise" {
-		t.Errorf("Data[2].Name = %v, want Enterprise", tags.Data[2].Name)
+	if list.Data[2].Name != "Enterprise" {
+		t.Errorf("Data[2].Name = %v, want Enterprise", list.Data[2].Name)
 	}
 }
 
-func TestTagsService_CreateOrUpdate_Create(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CreateOrUpdate_Create(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body CreateOrUpdateTagRequest
+		var body tags.CreateOrUpdateRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -120,11 +206,11 @@ func TestTagsService_CreateOrUpdate_Create(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	tag, err := client.Tags.CreateOrUpdate(ctx, &CreateOrUpdateTagRequest{
+	tag, err := svc.CreateOrUpdate(ctx, &tags.CreateOrUpdateRequest{
 		Name: "NewTag",
 	})
 	if err != nil {
-		t.Fatalf("Tags.CreateOrUpdate returned error: %v", err)
+		t.Fatalf("CreateOrUpdate returned error: %v", err)
 	}
 	if tag.ID != "456" {
 		t.Errorf("Tag.ID = %v, want 456", tag.ID)
@@ -134,13 +220,13 @@ func TestTagsService_CreateOrUpdate_Create(t *testing.T) {
 	}
 }
 
-func TestTagsService_CreateOrUpdate_Update(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CreateOrUpdate_Update(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body CreateOrUpdateTagRequest
+		var body tags.CreateOrUpdateRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -158,20 +244,20 @@ func TestTagsService_CreateOrUpdate_Update(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	tag, err := client.Tags.CreateOrUpdate(ctx, &CreateOrUpdateTagRequest{
+	tag, err := svc.CreateOrUpdate(ctx, &tags.CreateOrUpdateRequest{
 		Name: "RenamedTag",
 		ID:   "456",
 	})
 	if err != nil {
-		t.Fatalf("Tags.CreateOrUpdate returned error: %v", err)
+		t.Fatalf("CreateOrUpdate returned error: %v", err)
 	}
 	if tag.Name != "RenamedTag" {
 		t.Errorf("Tag.Name = %v, want RenamedTag", tag.Name)
 	}
 }
 
-func TestTagsService_Delete(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Delete(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags/123", func(w http.ResponseWriter, r *http.Request) {
@@ -180,14 +266,14 @@ func TestTagsService_Delete(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	err := client.Tags.Delete(ctx, "123")
+	err := svc.Delete(ctx, "123")
 	if err != nil {
-		t.Fatalf("Tags.Delete returned error: %v", err)
+		t.Fatalf("Delete returned error: %v", err)
 	}
 }
 
-func TestTagsService_TagCompany(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_TagCompany(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags", func(w http.ResponseWriter, r *http.Request) {
@@ -218,22 +304,22 @@ func TestTagsService_TagCompany(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	tag, err := client.Tags.TagCompany(ctx, &TagCompanyRequest{
+	tag, err := svc.TagCompany(ctx, &tags.TagCompanyRequest{
 		Name: "VIP",
-		Companies: []TagCompanyItem{
+		Companies: []tags.TagCompanyItem{
 			{ID: "comp_123"},
 		},
 	})
 	if err != nil {
-		t.Fatalf("Tags.TagCompany returned error: %v", err)
+		t.Fatalf("TagCompany returned error: %v", err)
 	}
 	if tag.Name != "VIP" {
 		t.Errorf("Tag.Name = %v, want VIP", tag.Name)
 	}
 }
 
-func TestTagsService_TagCompany_WithCompanyID(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_TagCompany_WithCompanyID(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags", func(w http.ResponseWriter, r *http.Request) {
@@ -255,22 +341,22 @@ func TestTagsService_TagCompany_WithCompanyID(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	tag, err := client.Tags.TagCompany(ctx, &TagCompanyRequest{
+	tag, err := svc.TagCompany(ctx, &tags.TagCompanyRequest{
 		Name: "VIP",
-		Companies: []TagCompanyItem{
+		Companies: []tags.TagCompanyItem{
 			{CompanyID: "ext_456"},
 		},
 	})
 	if err != nil {
-		t.Fatalf("Tags.TagCompany returned error: %v", err)
+		t.Fatalf("TagCompany returned error: %v", err)
 	}
 	if tag.ID != "789" {
 		t.Errorf("Tag.ID = %v, want 789", tag.ID)
 	}
 }
 
-func TestTagsService_GetRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags/123", func(w http.ResponseWriter, r *http.Request) {
@@ -280,13 +366,13 @@ func TestTagsService_GetRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Tags.GetRaw(ctx, "123")
+	result, err := svc.GetRaw(ctx, "123")
 	if err != nil {
 		t.Fatalf("GetRaw returned error: %v", err)
 	}
-	data, err := ParseTagGetResult(result)
+	data, err := tags.ParseGetResult(result)
 	if err != nil {
-		t.Fatalf("ParseTagGetResult returned error: %v", err)
+		t.Fatalf("ParseGetResult returned error: %v", err)
 	}
 	if data.ID != "123" {
 		t.Errorf("Data.ID = %v, want 123", data.ID)
@@ -305,8 +391,8 @@ func TestTagsService_GetRaw_Success(t *testing.T) {
 	}
 }
 
-func TestTagsService_GetRaw_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetRaw_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags/nonexistent", func(w http.ResponseWriter, r *http.Request) {
@@ -315,7 +401,7 @@ func TestTagsService_GetRaw_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Tags.GetRaw(ctx, "nonexistent")
+	result, err := svc.GetRaw(ctx, "nonexistent")
 	if err != nil {
 		t.Fatalf("GetRaw returned Go error: %v", err)
 	}
@@ -330,8 +416,8 @@ func TestTagsService_GetRaw_NotFound(t *testing.T) {
 	}
 }
 
-func TestTagsService_ListRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags", func(w http.ResponseWriter, r *http.Request) {
@@ -341,13 +427,13 @@ func TestTagsService_ListRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Tags.ListRaw(ctx)
+	result, err := svc.ListRaw(ctx)
 	if err != nil {
 		t.Fatalf("ListRaw returned error: %v", err)
 	}
-	data, err := ParseTagListResult(result)
+	data, err := tags.ParseListResult(result)
 	if err != nil {
-		t.Fatalf("ParseTagListResult returned error: %v", err)
+		t.Fatalf("ParseListResult returned error: %v", err)
 	}
 	if len(data.Data) != 2 {
 		t.Fatalf("Data.Data length = %d, want 2", len(data.Data))
@@ -363,8 +449,8 @@ func TestTagsService_ListRaw_Success(t *testing.T) {
 	}
 }
 
-func TestTagsService_CreateOrUpdateRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CreateOrUpdateRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags", func(w http.ResponseWriter, r *http.Request) {
@@ -374,13 +460,13 @@ func TestTagsService_CreateOrUpdateRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Tags.CreateOrUpdateRaw(ctx, &CreateOrUpdateTagRequest{Name: "NewTag"})
+	result, err := svc.CreateOrUpdateRaw(ctx, &tags.CreateOrUpdateRequest{Name: "NewTag"})
 	if err != nil {
 		t.Fatalf("CreateOrUpdateRaw returned error: %v", err)
 	}
-	data, err := ParseTagCreateOrUpdateResult(result)
+	data, err := tags.ParseCreateOrUpdateResult(result)
 	if err != nil {
-		t.Fatalf("ParseTagCreateOrUpdateResult returned error: %v", err)
+		t.Fatalf("ParseCreateOrUpdateResult returned error: %v", err)
 	}
 	if data.ID != "456" {
 		t.Errorf("Data.ID = %v, want 456", data.ID)
@@ -390,8 +476,8 @@ func TestTagsService_CreateOrUpdateRaw_Success(t *testing.T) {
 	}
 }
 
-func TestTagsService_DeleteRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_DeleteRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags/123", func(w http.ResponseWriter, r *http.Request) {
@@ -401,7 +487,7 @@ func TestTagsService_DeleteRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Tags.DeleteRaw(ctx, "123")
+	result, err := svc.DeleteRaw(ctx, "123")
 	if err != nil {
 		t.Fatalf("DeleteRaw returned error: %v", err)
 	}
@@ -416,8 +502,8 @@ func TestTagsService_DeleteRaw_Success(t *testing.T) {
 	}
 }
 
-func TestTagsService_TagCompanyRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_TagCompanyRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags", func(w http.ResponseWriter, r *http.Request) {
@@ -427,16 +513,16 @@ func TestTagsService_TagCompanyRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Tags.TagCompanyRaw(ctx, &TagCompanyRequest{
+	result, err := svc.TagCompanyRaw(ctx, &tags.TagCompanyRequest{
 		Name:      "VIP",
-		Companies: []TagCompanyItem{{ID: "comp_123"}},
+		Companies: []tags.TagCompanyItem{{ID: "comp_123"}},
 	})
 	if err != nil {
 		t.Fatalf("TagCompanyRaw returned error: %v", err)
 	}
-	data, err := ParseTagTagCompanyResult(result)
+	data, err := tags.ParseTagCompanyResult(result)
 	if err != nil {
-		t.Fatalf("ParseTagTagCompanyResult returned error: %v", err)
+		t.Fatalf("ParseTagCompanyResult returned error: %v", err)
 	}
 	if data.Name != "VIP" {
 		t.Errorf("Data.Name = %v, want VIP", data.Name)
@@ -446,8 +532,8 @@ func TestTagsService_TagCompanyRaw_Success(t *testing.T) {
 	}
 }
 
-func TestTagsService_UntagCompanyRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_UntagCompanyRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags", func(w http.ResponseWriter, r *http.Request) {
@@ -457,16 +543,16 @@ func TestTagsService_UntagCompanyRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Tags.UntagCompanyRaw(ctx, &UntagCompanyRequest{
+	result, err := svc.UntagCompanyRaw(ctx, &tags.UntagCompanyRequest{
 		Name:      "VIP",
-		Companies: []UntagCompanyItem{{ID: "comp_123", Untag: true}},
+		Companies: []tags.UntagCompanyItem{{ID: "comp_123", Untag: true}},
 	})
 	if err != nil {
 		t.Fatalf("UntagCompanyRaw returned error: %v", err)
 	}
-	data, err := ParseTagUntagCompanyResult(result)
+	data, err := tags.ParseUntagCompanyResult(result)
 	if err != nil {
-		t.Fatalf("ParseTagUntagCompanyResult returned error: %v", err)
+		t.Fatalf("ParseUntagCompanyResult returned error: %v", err)
 	}
 	if data.Name != "VIP" {
 		t.Errorf("Data.Name = %v, want VIP", data.Name)
@@ -476,8 +562,8 @@ func TestTagsService_UntagCompanyRaw_Success(t *testing.T) {
 	}
 }
 
-func TestTagsService_UntagCompany(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_UntagCompany(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/tags", func(w http.ResponseWriter, r *http.Request) {
@@ -508,14 +594,14 @@ func TestTagsService_UntagCompany(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	tag, err := client.Tags.UntagCompany(ctx, &UntagCompanyRequest{
+	tag, err := svc.UntagCompany(ctx, &tags.UntagCompanyRequest{
 		Name: "VIP",
-		Companies: []UntagCompanyItem{
+		Companies: []tags.UntagCompanyItem{
 			{ID: "comp_123", Untag: true},
 		},
 	})
 	if err != nil {
-		t.Fatalf("Tags.UntagCompany returned error: %v", err)
+		t.Fatalf("UntagCompany returned error: %v", err)
 	}
 	if tag.Name != "VIP" {
 		t.Errorf("Tag.Name = %v, want VIP", tag.Name)

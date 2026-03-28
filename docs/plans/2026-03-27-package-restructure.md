@@ -82,13 +82,13 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 8: Proof of concept — `tags` sub-package
-- [ ] create `tags/tags.go` — `Service` struct, `NewService(api.Caller)`, move all tag types and methods from root `tags.go`
-- [ ] rename types: `TagsService` → `Service`, `CreateTagRequest` → `CreateRequest`, etc.
-- [ ] add `Tags() *tags.Service` accessor method to `Client` in `intercom.go`
-- [ ] wire `tags.NewService(c)` in `NewClient`
-- [ ] migrate `tags_test.go` to `tags/tags_test.go`, adapt imports
-- [ ] remove root `tags.go`
-- [ ] run tests: `go test ./...`
+- [x] create `tags/tags.go` — `Service` struct, `NewService(api.Caller)`, move all tag types and methods from root `tags.go`
+- [x] rename types: `TagsService` → `Service`, `CreateTagRequest` → `CreateRequest`, etc.
+- [x] add `Tags() *tags.Service` accessor method to `Client` in `intercom.go`
+- [x] wire `tags.NewService(c)` in `NewClient`
+- [x] migrate `tags_test.go` to `tags/tags_test.go`, adapt imports
+- [x] remove root `tags.go`
+- [x] run tests: `go test ./...`
 
 ### Task 9: Migrate `segments` sub-package
 - [ ] create `segments/segments.go` — move types and methods from root `segments.go`

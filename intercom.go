@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/rassakhatsky/intercom-go-sdk/tags"
 )
 
 const (
@@ -53,7 +55,7 @@ type Client struct {
 	PhoneCallRedirects  *PhoneCallRedirectsService
 	Segments            *SegmentsService
 	SubscriptionTypes   *SubscriptionTypesService
-	Tags                *TagsService
+	tags                *tags.Service
 	Teams               *TeamsService
 	Tickets             *TicketsService
 	TicketStates        *TicketStatesService
@@ -139,13 +141,18 @@ func (c *Client) initialize() {
 	c.PhoneCallRedirects = (*PhoneCallRedirectsService)(&c.common)
 	c.Segments = (*SegmentsService)(&c.common)
 	c.SubscriptionTypes = (*SubscriptionTypesService)(&c.common)
-	c.Tags = (*TagsService)(&c.common)
+	c.tags = tags.NewService(c)
 	c.Teams = (*TeamsService)(&c.common)
 	c.Tickets = (*TicketsService)(&c.common)
 	c.TicketStates = (*TicketStatesService)(&c.common)
 	c.TicketTypes = (*TicketTypesService)(&c.common)
 	c.Visitors = (*VisitorsService)(&c.common)
 	c.Workflows = (*WorkflowsService)(&c.common)
+}
+
+// Tags returns the tags service.
+func (c *Client) Tags() *tags.Service {
+	return c.tags
 }
 
 // NewRequest creates an API request. A relative URL path can be provided in

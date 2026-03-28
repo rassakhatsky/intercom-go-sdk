@@ -7,3 +7,12 @@ type TagRef struct {
 	ID   string `json:"id"`
 	Name string `json:"name,omitempty"`
 }
+
+// AdminRef represents an admin in sub-resource responses.
+// It is shared across multiple services (tags, conversations, etc.).
+type AdminRef struct {
+	Type  string `json:"type"`
+	ID    string `json:"id"`
+	Name  string `json:"name,omitempty"`
+	Email string `json:"email,omitempty"`
+}

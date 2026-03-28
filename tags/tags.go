@@ -1,33 +1,42 @@
-package intercom
+package tags
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// TagsService handles communication with the tag related methods
+// Service handles communication with the tag related methods
 // of the Intercom API.
-type TagsService service
+type Service struct {
+	client api.Caller
+}
+
+// NewService creates a new tags Service.
+func NewService(c api.Caller) *Service {
+	return &Service{client: c}
+}
 
 // Tag represents an Intercom tag.
 type Tag struct {
-	Type      string `json:"type"`
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	AppliedAt *int64 `json:"applied_at,omitempty"`
-	AppliedBy *Admin `json:"applied_by,omitempty"`
+	Type      string        `json:"type"`
+	ID        string        `json:"id"`
+	Name      string        `json:"name"`
+	AppliedAt *int64        `json:"applied_at,omitempty"`
+	AppliedBy *api.AdminRef `json:"applied_by,omitempty"`
 }
 
-// TagList represents a list of tags.
-type TagList struct {
+// List represents a list of tags.
+type List struct {
 	Type string `json:"type"`
 	Data []Tag  `json:"data"`
 }
 
-// CreateOrUpdateTagRequest represents the request body for creating or updating a tag.
-type CreateOrUpdateTagRequest struct {
+// CreateOrUpdateRequest represents the request body for creating or updating a tag.
+type CreateOrUpdateRequest struct {
 	Name string `json:"name"`
 	ID   string `json:"id,omitempty"`
 }
@@ -59,34 +68,34 @@ type UntagCompanyRequest struct {
 
 // --- Parse Functions ---
 
-// ParseTagGetResult decodes a Result into a Tag.
-func ParseTagGetResult(r *Result) (*Tag, error) {
-	return Decode[Tag](r)
+// ParseGetResult decodes a Result into a Tag.
+func ParseGetResult(r *api.Result) (*Tag, error) {
+	return api.Decode[Tag](r)
 }
 
-// ParseTagListResult decodes a Result into a TagList.
-func ParseTagListResult(r *Result) (*TagList, error) {
-	return Decode[TagList](r)
+// ParseListResult decodes a Result into a List.
+func ParseListResult(r *api.Result) (*List, error) {
+	return api.Decode[List](r)
 }
 
-// ParseTagCreateOrUpdateResult decodes a Result into a Tag.
-func ParseTagCreateOrUpdateResult(r *Result) (*Tag, error) {
-	return Decode[Tag](r)
+// ParseCreateOrUpdateResult decodes a Result into a Tag.
+func ParseCreateOrUpdateResult(r *api.Result) (*Tag, error) {
+	return api.Decode[Tag](r)
 }
 
-// ParseTagDeleteResult decodes a Result into an Empty.
-func ParseTagDeleteResult(r *Result) (*Empty, error) {
-	return Decode[Empty](r)
+// ParseDeleteResult decodes a Result into an Empty.
+func ParseDeleteResult(r *api.Result) (*api.Empty, error) {
+	return api.Decode[api.Empty](r)
 }
 
-// ParseTagTagCompanyResult decodes a Result into a Tag.
-func ParseTagTagCompanyResult(r *Result) (*Tag, error) {
-	return Decode[Tag](r)
+// ParseTagCompanyResult decodes a Result into a Tag.
+func ParseTagCompanyResult(r *api.Result) (*Tag, error) {
+	return api.Decode[Tag](r)
 }
 
-// ParseTagUntagCompanyResult decodes a Result into a Tag.
-func ParseTagUntagCompanyResult(r *Result) (*Tag, error) {
-	return Decode[Tag](r)
+// ParseUntagCompanyResult decodes a Result into a Tag.
+func ParseUntagCompanyResult(r *api.Result) (*Tag, error) {
+	return api.Decode[Tag](r)
 }
 
 // --- Regular Methods ---
@@ -94,56 +103,56 @@ func ParseTagUntagCompanyResult(r *Result) (*Tag, error) {
 // Get retrieves a tag by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/findtag
-func (s *TagsService) Get(ctx context.Context, id string) (*Tag, error) {
+func (s *Service) Get(ctx context.Context, id string) (*Tag, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTagGetResult(result)
+	return ParseGetResult(result)
 }
 
 // List returns all tags in the workspace.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/listtags
-func (s *TagsService) List(ctx context.Context) (*TagList, error) {
+func (s *Service) List(ctx context.Context) (*List, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTagListResult(result)
+	return ParseListResult(result)
 }
 
 // CreateOrUpdate creates a new tag or updates an existing one.
 // To update, include the ID field in the request.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/createtag
-func (s *TagsService) CreateOrUpdate(ctx context.Context, body *CreateOrUpdateTagRequest) (*Tag, error) {
+func (s *Service) CreateOrUpdate(ctx context.Context, body *CreateOrUpdateRequest) (*Tag, error) {
 	result, err := s.CreateOrUpdateRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTagCreateOrUpdateResult(result)
+	return ParseCreateOrUpdateResult(result)
 }
 
 // Delete deletes a tag by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/deletetag
-func (s *TagsService) Delete(ctx context.Context, id string) error {
+func (s *Service) Delete(ctx context.Context, id string) error {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
 		return err
 	}
 	if result.Error != nil {
-		return resultError(result)
+		return api.ResultError(result)
 	}
 	return nil
 }
@@ -152,29 +161,29 @@ func (s *TagsService) Delete(ctx context.Context, id string) error {
 // The tag will be created if it doesn't already exist.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/createtag
-func (s *TagsService) TagCompany(ctx context.Context, body *TagCompanyRequest) (*Tag, error) {
+func (s *Service) TagCompany(ctx context.Context, body *TagCompanyRequest) (*Tag, error) {
 	result, err := s.TagCompanyRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTagTagCompanyResult(result)
+	return ParseTagCompanyResult(result)
 }
 
 // UntagCompany removes a tag from one or more companies.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/createtag
-func (s *TagsService) UntagCompany(ctx context.Context, body *UntagCompanyRequest) (*Tag, error) {
+func (s *Service) UntagCompany(ctx context.Context, body *UntagCompanyRequest) (*Tag, error) {
 	result, err := s.UntagCompanyRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTagUntagCompanyResult(result)
+	return ParseUntagCompanyResult(result)
 }
 
 // --- Raw Methods ---
@@ -182,7 +191,7 @@ func (s *TagsService) UntagCompany(ctx context.Context, body *UntagCompanyReques
 // GetRaw retrieves a tag by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/findtag
-func (s *TagsService) GetRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) GetRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("tags/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -193,7 +202,7 @@ func (s *TagsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 // ListRaw returns all tags with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/listtags
-func (s *TagsService) ListRaw(ctx context.Context) (*Result, error) {
+func (s *Service) ListRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "tags", nil)
 	if err != nil {
 		return nil, err
@@ -204,7 +213,7 @@ func (s *TagsService) ListRaw(ctx context.Context) (*Result, error) {
 // CreateOrUpdateRaw creates or updates a tag with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/createtag
-func (s *TagsService) CreateOrUpdateRaw(ctx context.Context, body *CreateOrUpdateTagRequest) (*Result, error) {
+func (s *Service) CreateOrUpdateRaw(ctx context.Context, body *CreateOrUpdateRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "tags", body)
 	if err != nil {
 		return nil, err
@@ -215,7 +224,7 @@ func (s *TagsService) CreateOrUpdateRaw(ctx context.Context, body *CreateOrUpdat
 // DeleteRaw deletes a tag by ID and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/deletetag
-func (s *TagsService) DeleteRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) DeleteRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("tags/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -226,7 +235,7 @@ func (s *TagsService) DeleteRaw(ctx context.Context, id string) (*Result, error)
 // TagCompanyRaw tags companies with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/createtag
-func (s *TagsService) TagCompanyRaw(ctx context.Context, body *TagCompanyRequest) (*Result, error) {
+func (s *Service) TagCompanyRaw(ctx context.Context, body *TagCompanyRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "tags", body)
 	if err != nil {
 		return nil, err
@@ -237,7 +246,7 @@ func (s *TagsService) TagCompanyRaw(ctx context.Context, body *TagCompanyRequest
 // UntagCompanyRaw untags companies with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/createtag
-func (s *TagsService) UntagCompanyRaw(ctx context.Context, body *UntagCompanyRequest) (*Result, error) {
+func (s *Service) UntagCompanyRaw(ctx context.Context, body *UntagCompanyRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "tags", body)
 	if err != nil {
 		return nil, err
