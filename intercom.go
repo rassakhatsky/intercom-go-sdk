@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/rassakhatsky/intercom-go-sdk/admins"
 	"github.com/rassakhatsky/intercom-go-sdk/export"
 	"github.com/rassakhatsky/intercom-go-sdk/messaging"
 	"github.com/rassakhatsky/intercom-go-sdk/news"
@@ -34,10 +35,10 @@ type Client struct {
 
 	common service // reuse a single struct for all services
 
+	admins              *admins.Service
 	AIContent           *AIContentService
-	Admins              *AdminsService
 	Articles            *ArticlesService
-	AwayStatusReasons   *AwayStatusReasonsService
+	awayStatusReasons   *admins.AwayStatusReasonsService
 	brands              *settings.BrandsService
 	Calls               *CallsService
 	Contacts            *ContactsService
@@ -62,7 +63,7 @@ type Client struct {
 	segments            *segments.Service
 	subscriptionTypes   *messaging.SubscriptionsService
 	tags                *tags.Service
-	Teams               *TeamsService
+	teams               *admins.TeamsService
 	Tickets             *TicketsService
 	TicketStates        *TicketStatesService
 	TicketTypes         *TicketTypesService
@@ -120,10 +121,10 @@ func NewClient(token string, opts ...ClientOption) *Client {
 
 // initialize wires all services to share the common client.
 func (c *Client) initialize() {
+	c.admins = admins.NewService(c)
 	c.AIContent = (*AIContentService)(&c.common)
-	c.Admins = (*AdminsService)(&c.common)
 	c.Articles = (*ArticlesService)(&c.common)
-	c.AwayStatusReasons = (*AwayStatusReasonsService)(&c.common)
+	c.awayStatusReasons = admins.NewAwayStatusReasonsService(c)
 	c.brands = settings.NewBrandsService(c)
 	c.Calls = (*CallsService)(&c.common)
 	c.Contacts = (*ContactsService)(&c.common)
@@ -148,7 +149,7 @@ func (c *Client) initialize() {
 	c.segments = segments.NewService(c)
 	c.subscriptionTypes = messaging.NewSubscriptionsService(c)
 	c.tags = tags.NewService(c)
-	c.Teams = (*TeamsService)(&c.common)
+	c.teams = admins.NewTeamsService(c)
 	c.Tickets = (*TicketsService)(&c.common)
 	c.TicketStates = (*TicketStatesService)(&c.common)
 	c.TicketTypes = (*TicketTypesService)(&c.common)
@@ -219,6 +220,21 @@ func (c *Client) Jobs() *settings.JobsService {
 // Notes returns the notes service.
 func (c *Client) Notes() *settings.NotesService {
 	return c.notes
+}
+
+// Admins returns the admins service.
+func (c *Client) Admins() *admins.Service {
+	return c.admins
+}
+
+// Teams returns the teams service.
+func (c *Client) Teams() *admins.TeamsService {
+	return c.teams
+}
+
+// AwayStatusReasons returns the away status reasons service.
+func (c *Client) AwayStatusReasons() *admins.AwayStatusReasonsService {
+	return c.awayStatusReasons
 }
 
 // NewRequest creates an API request. A relative URL path can be provided in

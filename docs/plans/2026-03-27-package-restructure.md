@@ -133,13 +133,13 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 14: Migrate `admins` sub-package
-- [ ] create `admins/admins.go` — move from root `admins.go`
-- [ ] create `admins/teams.go` — move from root `teams.go`
-- [ ] create `admins/away.go` — move from root `away_status_reasons.go`
-- [ ] add `Admins()`, `Teams()`, `AwayStatusReasons()` accessors to `Client`
-- [ ] migrate tests to `admins/`
-- [ ] remove root `admins.go`, `teams.go`, `away_status_reasons.go`
-- [ ] run tests: `go test ./...`
+- [x] create `admins/admins.go` — move from root `admins.go`
+- [x] create `admins/teams.go` — move from root `teams.go`
+- [x] create `admins/away.go` — move from root `away_status_reasons.go`
+- [x] add `Admins()`, `Teams()`, `AwayStatusReasons()` accessors to `Client`
+- [x] migrate tests to `admins/`
+- [x] remove root `admins.go`, `teams.go`, `away_status_reasons.go`
+- [x] run tests: `go test ./...`
 
 ### Task 15: Migrate `data` sub-package
 - [ ] create `data/events.go` — move from root `data_events.go`

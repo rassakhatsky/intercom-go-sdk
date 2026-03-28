@@ -1,15 +1,24 @@
-package intercom
+package admins
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
 // TeamsService handles communication with the team related methods
 // of the Intercom API.
-type TeamsService service
+type TeamsService struct {
+	client api.Caller
+}
+
+// NewTeamsService creates a new TeamsService.
+func NewTeamsService(c api.Caller) *TeamsService {
+	return &TeamsService{client: c}
+}
 
 // Team represents an Intercom team.
 type Team struct {
@@ -30,13 +39,13 @@ type TeamList struct {
 // --- Parse Functions ---
 
 // ParseTeamGetResult decodes a Result into a Team.
-func ParseTeamGetResult(r *Result) (*Team, error) {
-	return Decode[Team](r)
+func ParseTeamGetResult(r *api.Result) (*Team, error) {
+	return api.Decode[Team](r)
 }
 
 // ParseTeamListResult decodes a Result into a TeamList.
-func ParseTeamListResult(r *Result) (*TeamList, error) {
-	return Decode[TeamList](r)
+func ParseTeamListResult(r *api.Result) (*TeamList, error) {
+	return api.Decode[TeamList](r)
 }
 
 // --- Regular Methods ---
@@ -50,7 +59,7 @@ func (s *TeamsService) Get(ctx context.Context, id string) (*Team, error) {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
 	return ParseTeamGetResult(result)
 }
@@ -64,7 +73,7 @@ func (s *TeamsService) List(ctx context.Context) (*TeamList, error) {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
 	return ParseTeamListResult(result)
 }
@@ -74,7 +83,7 @@ func (s *TeamsService) List(ctx context.Context) (*TeamList, error) {
 // GetRaw retrieves a team by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/teams/retrieveteam
-func (s *TeamsService) GetRaw(ctx context.Context, id string) (*Result, error) {
+func (s *TeamsService) GetRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("teams/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -85,7 +94,7 @@ func (s *TeamsService) GetRaw(ctx context.Context, id string) (*Result, error) {
 // ListRaw returns all teams with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/teams/listteams
-func (s *TeamsService) ListRaw(ctx context.Context) (*Result, error) {
+func (s *TeamsService) ListRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "teams", nil)
 	if err != nil {
 		return nil, err

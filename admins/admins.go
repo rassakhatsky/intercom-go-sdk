@@ -1,15 +1,24 @@
-package intercom
+package admins
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// AdminsService handles communication with the admin related methods
+// Service handles communication with the admin related methods
 // of the Intercom API.
-type AdminsService service
+type Service struct {
+	client api.Caller
+}
+
+// NewService creates a new admins Service.
+func NewService(c api.Caller) *Service {
+	return &Service{client: c}
+}
 
 // Admin represents an Intercom admin (teammate).
 type Admin struct {
@@ -23,14 +32,14 @@ type Admin struct {
 	AwayStatusReasonID *int           `json:"away_status_reason_id,omitempty"`
 	HasInboxSeat       bool           `json:"has_inbox_seat,omitempty"`
 	TeamIDs            []int          `json:"team_ids,omitempty"`
-	Avatar             *AdminAvatar   `json:"avatar,omitempty"`
+	Avatar             *Avatar        `json:"avatar,omitempty"`
 	TeamPriorityLevel  map[string]any `json:"team_priority_level,omitempty"`
 	EmailVerified      *bool          `json:"email_verified,omitempty"`
 	App                *App           `json:"app,omitempty"`
 }
 
-// AdminAvatar represents an admin's avatar.
-type AdminAvatar struct {
+// Avatar represents an admin's avatar.
+type Avatar struct {
 	Type     string `json:"type,omitempty"`
 	ImageURL string `json:"image_url,omitempty"`
 }
@@ -46,8 +55,8 @@ type App struct {
 	IdentityVerification bool   `json:"identity_verification,omitempty"`
 }
 
-// AdminList represents a list of admins.
-type AdminList struct {
+// List represents a list of admins.
+type List struct {
 	Type   string  `json:"type"`
 	Admins []Admin `json:"admins"`
 }
@@ -79,9 +88,9 @@ type ActivityLogAdmin struct {
 
 // ActivityLogList represents a paginated list of activity logs.
 type ActivityLogList struct {
-	Type         string        `json:"type"`
-	Pages        *CursorPages  `json:"pages,omitempty"`
-	ActivityLogs []ActivityLog `json:"activity_logs"`
+	Type         string           `json:"type"`
+	Pages        *api.CursorPages `json:"pages,omitempty"`
+	ActivityLogs []ActivityLog    `json:"activity_logs"`
 }
 
 // ActivityLogListOptions specifies the query parameters for ListActivityLogs.
@@ -90,97 +99,97 @@ type ActivityLogListOptions struct {
 	CreatedAtBefore string `url:"created_at_before,omitempty"`
 }
 
-// ParseAdminMeResult decodes a Result into an Admin.
-func ParseAdminMeResult(r *Result) (*Admin, error) { return Decode[Admin](r) }
+// ParseMeResult decodes a Result into an Admin.
+func ParseMeResult(r *api.Result) (*Admin, error) { return api.Decode[Admin](r) }
 
-// ParseAdminGetResult decodes a Result into an Admin.
-func ParseAdminGetResult(r *Result) (*Admin, error) { return Decode[Admin](r) }
+// ParseGetResult decodes a Result into an Admin.
+func ParseGetResult(r *api.Result) (*Admin, error) { return api.Decode[Admin](r) }
 
-// ParseAdminListResult decodes a Result into an AdminList.
-func ParseAdminListResult(r *Result) (*AdminList, error) { return Decode[AdminList](r) }
+// ParseListResult decodes a Result into a List.
+func ParseListResult(r *api.Result) (*List, error) { return api.Decode[List](r) }
 
-// ParseAdminSetAwayResult decodes a Result into an Admin.
-func ParseAdminSetAwayResult(r *Result) (*Admin, error) { return Decode[Admin](r) }
+// ParseSetAwayResult decodes a Result into an Admin.
+func ParseSetAwayResult(r *api.Result) (*Admin, error) { return api.Decode[Admin](r) }
 
-// ParseAdminListActivityLogsResult decodes a Result into an ActivityLogList.
-func ParseAdminListActivityLogsResult(r *Result) (*ActivityLogList, error) {
-	return Decode[ActivityLogList](r)
+// ParseListActivityLogsResult decodes a Result into an ActivityLogList.
+func ParseListActivityLogsResult(r *api.Result) (*ActivityLogList, error) {
+	return api.Decode[ActivityLogList](r)
 }
 
 // Me returns the currently authenticated admin along with the app.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/identifyadmin
-func (s *AdminsService) Me(ctx context.Context) (*Admin, error) {
+func (s *Service) Me(ctx context.Context) (*Admin, error) {
 	result, err := s.MeRaw(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAdminMeResult(result)
+	return ParseMeResult(result)
 }
 
 // Get retrieves an admin by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/retrieveadmin
-func (s *AdminsService) Get(ctx context.Context, id string) (*Admin, error) {
+func (s *Service) Get(ctx context.Context, id string) (*Admin, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAdminGetResult(result)
+	return ParseGetResult(result)
 }
 
 // List returns all admins for the workspace.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/listadmins
-func (s *AdminsService) List(ctx context.Context) (*AdminList, error) {
+func (s *Service) List(ctx context.Context) (*List, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAdminListResult(result)
+	return ParseListResult(result)
 }
 
 // SetAway sets an admin's away status.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/setawayadmin
-func (s *AdminsService) SetAway(ctx context.Context, id string, body *SetAwayRequest) (*Admin, error) {
+func (s *Service) SetAway(ctx context.Context, id string, body *SetAwayRequest) (*Admin, error) {
 	result, err := s.SetAwayRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAdminSetAwayResult(result)
+	return ParseSetAwayResult(result)
 }
 
 // ListActivityLogs returns activity logs for the workspace.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/listactivitylogs
-func (s *AdminsService) ListActivityLogs(ctx context.Context, opts *ActivityLogListOptions) (*ActivityLogList, error) {
+func (s *Service) ListActivityLogs(ctx context.Context, opts *ActivityLogListOptions) (*ActivityLogList, error) {
 	result, err := s.ListActivityLogsRaw(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseAdminListActivityLogsResult(result)
+	return ParseListActivityLogsResult(result)
 }
 
 // MeRaw returns the currently authenticated admin with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/identifyadmin
-func (s *AdminsService) MeRaw(ctx context.Context) (*Result, error) {
+func (s *Service) MeRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "me", nil)
 	if err != nil {
 		return nil, err
@@ -191,7 +200,7 @@ func (s *AdminsService) MeRaw(ctx context.Context) (*Result, error) {
 // GetRaw retrieves an admin by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/retrieveadmin
-func (s *AdminsService) GetRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) GetRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("admins/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -202,7 +211,7 @@ func (s *AdminsService) GetRaw(ctx context.Context, id string) (*Result, error) 
 // ListRaw returns all admins for the workspace with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/listadmins
-func (s *AdminsService) ListRaw(ctx context.Context) (*Result, error) {
+func (s *Service) ListRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "admins", nil)
 	if err != nil {
 		return nil, err
@@ -213,7 +222,7 @@ func (s *AdminsService) ListRaw(ctx context.Context) (*Result, error) {
 // SetAwayRaw sets an admin's away status with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/setawayadmin
-func (s *AdminsService) SetAwayRaw(ctx context.Context, id string, body *SetAwayRequest) (*Result, error) {
+func (s *Service) SetAwayRaw(ctx context.Context, id string, body *SetAwayRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("admins/%s/away", url.PathEscape(id)), body)
 	if err != nil {
 		return nil, err
@@ -224,8 +233,8 @@ func (s *AdminsService) SetAwayRaw(ctx context.Context, id string, body *SetAway
 // ListActivityLogsRaw returns activity logs for the workspace with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/admins/listactivitylogs
-func (s *AdminsService) ListActivityLogsRaw(ctx context.Context, opts *ActivityLogListOptions) (*Result, error) {
-	path, err := addQueryOptions("admins/activity_logs", opts)
+func (s *Service) ListActivityLogsRaw(ctx context.Context, opts *ActivityLogListOptions) (*api.Result, error) {
+	path, err := api.AddQueryOptions("admins/activity_logs", opts)
 	if err != nil {
 		return nil, err
 	}

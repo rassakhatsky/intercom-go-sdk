@@ -1,13 +1,22 @@
-package intercom
+package admins
 
 import (
 	"context"
 	"net/http"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
 // AwayStatusReasonsService handles communication with the away status reason
 // related methods of the Intercom API.
-type AwayStatusReasonsService service
+type AwayStatusReasonsService struct {
+	client api.Caller
+}
+
+// NewAwayStatusReasonsService creates a new AwayStatusReasonsService.
+func NewAwayStatusReasonsService(c api.Caller) *AwayStatusReasonsService {
+	return &AwayStatusReasonsService{client: c}
+}
 
 // AwayStatusReason represents an Intercom away status reason.
 type AwayStatusReason struct {
@@ -24,8 +33,8 @@ type AwayStatusReason struct {
 // --- Parse Functions ---
 
 // ParseAwayStatusReasonListResult decodes a Result into a slice of AwayStatusReason.
-func ParseAwayStatusReasonListResult(r *Result) ([]AwayStatusReason, error) {
-	v, err := Decode[[]AwayStatusReason](r)
+func ParseAwayStatusReasonListResult(r *api.Result) ([]AwayStatusReason, error) {
+	v, err := api.Decode[[]AwayStatusReason](r)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +52,7 @@ func (s *AwayStatusReasonsService) List(ctx context.Context) ([]AwayStatusReason
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
 	return ParseAwayStatusReasonListResult(result)
 }
@@ -53,7 +62,7 @@ func (s *AwayStatusReasonsService) List(ctx context.Context) ([]AwayStatusReason
 // ListRaw returns all away status reasons with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/away-status-reasons/listawaystatusreasons
-func (s *AwayStatusReasonsService) ListRaw(ctx context.Context) (*Result, error) {
+func (s *AwayStatusReasonsService) ListRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "away_status_reasons", nil)
 	if err != nil {
 		return nil, err
