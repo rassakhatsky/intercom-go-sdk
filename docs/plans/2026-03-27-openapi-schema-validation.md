@@ -93,11 +93,11 @@ Address all issues found in Task 1-2 reports that weren't caught in preliminary 
 ### Task 6: Verify bidirectional completeness
 Ensure no SDK methods exist without a schema counterpart (excluding legitimate convenience wrappers like TagCompany/UntagCompany).
 
-- [ ] Run validation script in "SDK → schema" direction
-- [ ] Review any SDK methods not mapped to schema operations
-- [ ] Document legitimate extras (convenience wrappers, ListAll iterators) vs actual mismatches
-- [ ] Fix or remove any truly orphaned SDK methods
-- [ ] Run tests — must pass before next task
+- [x] Run validation script in "SDK → schema" direction
+- [x] Review any SDK methods not mapped to schema operations
+- [x] Document legitimate extras (convenience wrappers, ListAll iterators) vs actual mismatches
+- [x] Fix or remove any truly orphaned SDK methods (none found — all extras are legitimate)
+- [x] Run tests — must pass before next task
 
 ### Task 7: Verify acceptance criteria
 - [ ] Re-run full validation script — zero missing operations
@@ -198,9 +198,9 @@ Ensure no SDK methods exist without a schema counterpart (excluding legitimate c
 - ❌ `GET /export/workflows/{id}` (exportWorkflow) — no Workflows support
 
 ### SDK-only methods (not directly in schema but valid):
-- `TagsService.TagCompany` / `UntagCompany` — convenience wrappers over POST /tags (oneOf body)
-- `*Service.ListAll` methods — iterator wrappers, not separate API endpoints
-- `CompaniesService.ListAll` — iterator for List
+- `TagsService.TagCompany` / `UntagCompany` (+ Raw variants) — convenience wrappers over POST /tags (oneOf body)
+- `*Service.ListAll` methods (5) — iterator wrappers: Articles, Companies, Contacts, Conversations, InternalArticles
+- `ConversationsService.Close/Open/Snooze/Assign` (+ Raw variants) + `managePartsRaw` — SDK splits the single `POST /conversations/{id}/parts` (manageConversation) endpoint by action type for better ergonomics
 
 ## Post-Completion
 
