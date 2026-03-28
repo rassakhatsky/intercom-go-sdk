@@ -64,10 +64,10 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./internal/api/...`
 
 ### Task 5: Move search and query types to `internal/api`
-- [ ] create `internal/api/search.go` — move `Filter`, `SearchRequest`, `SearchPagination`, `SingleFilterOf`, `And`, `Or` from root `search.go`
-- [ ] create `internal/api/query.go` — move `addQueryOptions` as exported `AddQueryOptions` (wraps `google/go-querystring`)
-- [ ] create `internal/api/logger.go` — move `Logger` interface from root `logger.go`
-- [ ] run tests: `go test ./internal/api/...`
+- [x] create `internal/api/search.go` — move `Filter`, `SearchRequest`, `SearchPagination`, `SingleFilterOf`, `And`, `Or` from root `search.go`
+- [x] create `internal/api/query.go` — move `addQueryOptions` as exported `AddQueryOptions` (wraps `google/go-querystring`)
+- [x] create `internal/api/logger.go` — move `Logger` interface from root `logger.go`
+- [x] run tests: `go test ./internal/api/...`
 
 ### Task 6: Create root type aliases and refactor Client
 - [ ] create `aliases.go` in root — type aliases for all `internal/api` public types (`Result`, `ErrorResponse`, `PagedResult`, `Iter`, `Filter`, `ListOptions`, etc.)
