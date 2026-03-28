@@ -1,13 +1,22 @@
-package intercom
+package messaging
 
 import (
 	"context"
 	"net/http"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
 // MessagesService handles communication with the message related
 // methods of the Intercom API.
-type MessagesService service
+type MessagesService struct {
+	client api.Caller
+}
+
+// NewMessagesService creates a new MessagesService.
+func NewMessagesService(c api.Caller) *MessagesService {
+	return &MessagesService{client: c}
+}
 
 // Message represents an Intercom message.
 type Message struct {
@@ -48,9 +57,9 @@ type CreateMessageRequest struct {
 
 // --- Parse Functions ---
 
-// ParseMessageCreateResult decodes a Result into a Message.
-func ParseMessageCreateResult(r *Result) (*Message, error) {
-	return Decode[Message](r)
+// ParseCreateResult decodes a Result into a Message.
+func ParseCreateResult(r *api.Result) (*Message, error) {
+	return api.Decode[Message](r)
 }
 
 // --- Regular Methods ---
@@ -64,9 +73,9 @@ func (s *MessagesService) Create(ctx context.Context, body *CreateMessageRequest
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseMessageCreateResult(result)
+	return ParseCreateResult(result)
 }
 
 // --- Raw Methods ---
@@ -74,7 +83,7 @@ func (s *MessagesService) Create(ctx context.Context, body *CreateMessageRequest
 // CreateRaw creates a new message initiated by an admin and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/messages/createmessage
-func (s *MessagesService) CreateRaw(ctx context.Context, body *CreateMessageRequest) (*Result, error) {
+func (s *MessagesService) CreateRaw(ctx context.Context, body *CreateMessageRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "messages", body)
 	if err != nil {
 		return nil, err

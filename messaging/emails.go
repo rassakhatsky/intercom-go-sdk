@@ -1,15 +1,24 @@
-package intercom
+package messaging
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
 // EmailsService handles communication with the email setting related methods
 // of the Intercom API.
-type EmailsService service
+type EmailsService struct {
+	client api.Caller
+}
+
+// NewEmailsService creates a new EmailsService.
+func NewEmailsService(c api.Caller) *EmailsService {
+	return &EmailsService{client: c}
+}
 
 // EmailSetting represents an Intercom email setting.
 type EmailSetting struct {
@@ -33,14 +42,14 @@ type EmailSettingList struct {
 
 // --- Parse Functions ---
 
-// ParseEmailGetResult decodes a Result into an EmailSetting.
-func ParseEmailGetResult(r *Result) (*EmailSetting, error) {
-	return Decode[EmailSetting](r)
+// ParseGetResult decodes a Result into an EmailSetting.
+func ParseGetResult(r *api.Result) (*EmailSetting, error) {
+	return api.Decode[EmailSetting](r)
 }
 
-// ParseEmailListResult decodes a Result into an EmailSettingList.
-func ParseEmailListResult(r *Result) (*EmailSettingList, error) {
-	return Decode[EmailSettingList](r)
+// ParseListResult decodes a Result into an EmailSettingList.
+func ParseListResult(r *api.Result) (*EmailSettingList, error) {
+	return api.Decode[EmailSettingList](r)
 }
 
 // --- Regular Methods ---
@@ -54,9 +63,9 @@ func (s *EmailsService) Get(ctx context.Context, id string) (*EmailSetting, erro
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseEmailGetResult(result)
+	return ParseGetResult(result)
 }
 
 // List returns all email settings.
@@ -68,9 +77,9 @@ func (s *EmailsService) List(ctx context.Context) (*EmailSettingList, error) {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseEmailListResult(result)
+	return ParseListResult(result)
 }
 
 // --- Raw Methods ---
@@ -78,7 +87,7 @@ func (s *EmailsService) List(ctx context.Context) (*EmailSettingList, error) {
 // GetRaw retrieves an email setting by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/emails/retrieveemail
-func (s *EmailsService) GetRaw(ctx context.Context, id string) (*Result, error) {
+func (s *EmailsService) GetRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("emails/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -89,7 +98,7 @@ func (s *EmailsService) GetRaw(ctx context.Context, id string) (*Result, error) 
 // ListRaw returns all email settings with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/emails/listemails
-func (s *EmailsService) ListRaw(ctx context.Context) (*Result, error) {
+func (s *EmailsService) ListRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "emails", nil)
 	if err != nil {
 		return nil, err

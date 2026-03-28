@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/messaging"
 	"github.com/rassakhatsky/intercom-go-sdk/tags"
 )
 
@@ -32,6 +33,17 @@ type TagCompanyItem = tags.TagCompanyItem
 type TagCompanyRequest = tags.TagCompanyRequest
 type UntagCompanyItem = tags.UntagCompanyItem
 type UntagCompanyRequest = tags.UntagCompanyRequest
+
+// Messaging sub-package aliases (for root services that reference these types)
+type SubscriptionType = messaging.SubscriptionType
+type Translation = messaging.Translation
+type SubscriptionTypeList = messaging.SubscriptionTypeList
+type Message = messaging.Message
+type MessageSender = messaging.MessageSender
+type MessageRecipient = messaging.MessageRecipient
+type CreateMessageRequest = messaging.CreateMessageRequest
+type EmailSetting = messaging.EmailSetting
+type EmailSettingList = messaging.EmailSettingList
 
 // Response wraps a Result to provide additional API-specific data.
 type Response = api.Response

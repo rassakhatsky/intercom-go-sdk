@@ -113,13 +113,13 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 12: Migrate `messaging` sub-package
-- [ ] create `messaging/messages.go` — move from root `messages.go`
-- [ ] create `messaging/emails.go` — move from root `emails.go`
-- [ ] create `messaging/subscriptions.go` — move from root `subscription_types.go`
-- [ ] add `Messages()`, `Emails()`, `SubscriptionTypes()` accessors to `Client`
-- [ ] migrate tests to `messaging/`
-- [ ] remove root `messages.go`, `emails.go`, `subscription_types.go`
-- [ ] run tests: `go test ./...`
+- [x] create `messaging/messages.go` — move from root `messages.go`
+- [x] create `messaging/emails.go` — move from root `emails.go`
+- [x] create `messaging/subscriptions.go` — move from root `subscription_types.go`
+- [x] add `Messages()`, `Emails()`, `SubscriptionTypes()` accessors to `Client`
+- [x] migrate tests to `messaging/`
+- [x] remove root `messages.go`, `emails.go`, `subscription_types.go`
+- [x] run tests: `go test ./...`
 
 ### Task 13: Migrate `settings` sub-package
 - [ ] create `settings/brands.go` — move from root `brands.go`

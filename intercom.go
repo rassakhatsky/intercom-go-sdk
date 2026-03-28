@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/rassakhatsky/intercom-go-sdk/export"
+	"github.com/rassakhatsky/intercom-go-sdk/messaging"
 	"github.com/rassakhatsky/intercom-go-sdk/news"
 	"github.com/rassakhatsky/intercom-go-sdk/segments"
 	"github.com/rassakhatsky/intercom-go-sdk/tags"
@@ -46,19 +47,19 @@ type Client struct {
 	DataAttributes      *DataAttributesService
 	DataEvents          *DataEventsService
 	dataExport          *export.DataService
-	Emails              *EmailsService
+	emails              *messaging.EmailsService
 	exportReporting     *export.ReportingService
 	FinVoice            *FinVoiceService
 	HelpCenter          *HelpCenterService
 	InternalArticles    *InternalArticlesService
 	IPAllowlist         *IPAllowlistService
 	Jobs                *JobsService
-	Messages            *MessagesService
+	messages            *messaging.MessagesService
 	news                *news.Service
 	Notes               *NotesService
 	PhoneCallRedirects  *PhoneCallRedirectsService
 	segments            *segments.Service
-	SubscriptionTypes   *SubscriptionTypesService
+	subscriptionTypes   *messaging.SubscriptionsService
 	tags                *tags.Service
 	Teams               *TeamsService
 	Tickets             *TicketsService
@@ -132,19 +133,19 @@ func (c *Client) initialize() {
 	c.DataAttributes = (*DataAttributesService)(&c.common)
 	c.DataEvents = (*DataEventsService)(&c.common)
 	c.dataExport = export.NewDataService(c)
-	c.Emails = (*EmailsService)(&c.common)
+	c.emails = messaging.NewEmailsService(c)
 	c.exportReporting = export.NewReportingService(c)
 	c.FinVoice = (*FinVoiceService)(&c.common)
 	c.HelpCenter = (*HelpCenterService)(&c.common)
 	c.InternalArticles = (*InternalArticlesService)(&c.common)
 	c.IPAllowlist = (*IPAllowlistService)(&c.common)
 	c.Jobs = (*JobsService)(&c.common)
-	c.Messages = (*MessagesService)(&c.common)
+	c.messages = messaging.NewMessagesService(c)
 	c.news = news.NewService(c)
 	c.Notes = (*NotesService)(&c.common)
 	c.PhoneCallRedirects = (*PhoneCallRedirectsService)(&c.common)
 	c.segments = segments.NewService(c)
-	c.SubscriptionTypes = (*SubscriptionTypesService)(&c.common)
+	c.subscriptionTypes = messaging.NewSubscriptionsService(c)
 	c.tags = tags.NewService(c)
 	c.Teams = (*TeamsService)(&c.common)
 	c.Tickets = (*TicketsService)(&c.common)
@@ -177,6 +178,21 @@ func (c *Client) DataExport() *export.DataService {
 // News returns the news service.
 func (c *Client) News() *news.Service {
 	return c.news
+}
+
+// Messages returns the messages service.
+func (c *Client) Messages() *messaging.MessagesService {
+	return c.messages
+}
+
+// Emails returns the emails service.
+func (c *Client) Emails() *messaging.EmailsService {
+	return c.emails
+}
+
+// SubscriptionTypes returns the subscription types service.
+func (c *Client) SubscriptionTypes() *messaging.SubscriptionsService {
+	return c.subscriptionTypes
 }
 
 // NewRequest creates an API request. A relative URL path can be provided in

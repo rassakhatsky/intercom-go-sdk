@@ -1,13 +1,22 @@
-package intercom
+package messaging
 
 import (
 	"context"
 	"net/http"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// SubscriptionTypesService handles communication with the subscription type
+// SubscriptionsService handles communication with the subscription type
 // related methods of the Intercom API.
-type SubscriptionTypesService service
+type SubscriptionsService struct {
+	client api.Caller
+}
+
+// NewSubscriptionsService creates a new SubscriptionsService.
+func NewSubscriptionsService(c api.Caller) *SubscriptionsService {
+	return &SubscriptionsService{client: c}
+}
 
 // SubscriptionType represents a subscription type in Intercom.
 type SubscriptionType struct {
@@ -35,9 +44,9 @@ type SubscriptionTypeList struct {
 
 // --- Parse Functions ---
 
-// ParseSubscriptionTypeListResult decodes a Result into a SubscriptionTypeList.
-func ParseSubscriptionTypeListResult(r *Result) (*SubscriptionTypeList, error) {
-	return Decode[SubscriptionTypeList](r)
+// ParseListResult decodes a Result into a SubscriptionTypeList.
+func ParseSubscriptionListResult(r *api.Result) (*SubscriptionTypeList, error) {
+	return api.Decode[SubscriptionTypeList](r)
 }
 
 // --- Regular Methods ---
@@ -45,15 +54,15 @@ func ParseSubscriptionTypeListResult(r *Result) (*SubscriptionTypeList, error) {
 // List returns all subscription types for the workspace.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/listsubscriptiontypes
-func (s *SubscriptionTypesService) List(ctx context.Context) (*SubscriptionTypeList, error) {
+func (s *SubscriptionsService) List(ctx context.Context) (*SubscriptionTypeList, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseSubscriptionTypeListResult(result)
+	return ParseSubscriptionListResult(result)
 }
 
 // --- Raw Methods ---
@@ -61,7 +70,7 @@ func (s *SubscriptionTypesService) List(ctx context.Context) (*SubscriptionTypeL
 // ListRaw returns all subscription types with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/listsubscriptiontypes
-func (s *SubscriptionTypesService) ListRaw(ctx context.Context) (*Result, error) {
+func (s *SubscriptionsService) ListRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "subscription_types", nil)
 	if err != nil {
 		return nil, err
