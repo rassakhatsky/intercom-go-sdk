@@ -143,3 +143,33 @@ func TestIPAllowlistService_UpdateRaw_Success(t *testing.T) {
 		t.Error("Enabled = false, want true")
 	}
 }
+
+func TestIPAllowlistService_Update_WithType(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/ip_allowlist", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodPut)
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatalf("decode request body: %v", err)
+		}
+		if body["type"] != "ip_allowlist" {
+			t.Errorf("type = %v, want ip_allowlist", body["type"])
+		}
+		fmt.Fprint(w, `{"type":"ip_allowlist","enabled":true,"ip_allowlist":["10.0.0.1"]}`)
+	})
+
+	ctx := context.Background()
+	settings, err := client.IPAllowlist.Update(ctx, &UpdateIPAllowlistRequest{
+		Type:        "ip_allowlist",
+		Enabled:     true,
+		IPAllowlist: []string{"10.0.0.1"},
+	})
+	if err != nil {
+		t.Fatalf("IPAllowlist.Update returned error: %v", err)
+	}
+	if !settings.Enabled {
+		t.Error("Enabled = false, want true")
+	}
+}

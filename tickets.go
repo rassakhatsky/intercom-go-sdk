@@ -113,18 +113,20 @@ type CreateTicketRequest struct {
 	CreatedAt            *int64             `json:"created_at,omitempty"`
 	TicketAttributes     map[string]any     `json:"ticket_attributes,omitempty"`
 	Assignment           *TicketAssignment  `json:"assignment,omitempty"`
+	SkipNotifications    *bool              `json:"skip_notifications,omitempty"`
 }
 
 // UpdateTicketRequest represents the body for updating a ticket.
 type UpdateTicketRequest struct {
-	TicketAttributes map[string]any `json:"ticket_attributes,omitempty"`
-	TicketStateID    string         `json:"ticket_state_id,omitempty"`
-	CompanyID        string         `json:"company_id,omitempty"`
-	Open             *bool          `json:"open,omitempty"`
-	IsShared         *bool          `json:"is_shared,omitempty"`
-	SnoozedUntil     *int64         `json:"snoozed_until,omitempty"`
-	AdminID          *int           `json:"admin_id,omitempty"`
-	AssigneeID       string         `json:"assignee_id,omitempty"`
+	TicketAttributes  map[string]any `json:"ticket_attributes,omitempty"`
+	TicketStateID     string         `json:"ticket_state_id,omitempty"`
+	CompanyID         string         `json:"company_id,omitempty"`
+	Open              *bool          `json:"open,omitempty"`
+	IsShared          *bool          `json:"is_shared,omitempty"`
+	SnoozedUntil      *int64         `json:"snoozed_until,omitempty"`
+	AdminID           *int           `json:"admin_id,omitempty"`
+	AssigneeID        string         `json:"assignee_id,omitempty"`
+	SkipNotifications *bool          `json:"skip_notifications,omitempty"`
 }
 
 // ReplyTicketRequest represents the body for replying to a ticket.

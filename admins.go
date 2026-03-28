@@ -54,9 +54,9 @@ type AdminList struct {
 
 // SetAwayRequest represents the request body for setting an admin's away status.
 type SetAwayRequest struct {
-	AwayModeEnabled    bool    `json:"away_mode_enabled"`
-	AwayModeReassign   bool    `json:"away_mode_reassign"`
-	AwayStatusReasonID *string `json:"away_status_reason_id,omitempty"`
+	AwayModeEnabled    bool `json:"away_mode_enabled"`
+	AwayModeReassign   bool `json:"away_mode_reassign"`
+	AwayStatusReasonID *int `json:"away_status_reason_id,omitempty"`
 }
 
 // ActivityLog represents an admin activity log entry.

@@ -83,12 +83,12 @@ Add the missing exportWorkflow operation. Decide service placement (new Workflow
 ### Task 5: Fix any additional gaps found by validation script
 Address all issues found in Task 1-2 reports that weren't caught in preliminary scan.
 
-- [ ] Review validation reports from Tasks 1-2
-- [ ] For each missing operation: implement method + Raw + Parse + tests
-- [ ] For each missing struct field: add field with correct JSON tag + omitempty
-- [ ] For each type mismatch: fix Go type to match schema
-- [ ] Write tests for all new/modified code
-- [ ] Run tests — must pass before next task
+- [x] Review validation reports from Tasks 1-2
+- [x] For each missing operation: implement method + Raw + Parse + tests
+- [x] For each missing struct field: add field with correct JSON tag + omitempty
+- [x] For each type mismatch: fix Go type to match schema
+- [x] Write tests for all new/modified code
+- [x] Run tests — must pass before next task
 
 ### Task 6: Verify bidirectional completeness
 Ensure no SDK methods exist without a schema counterpart (excluding legitimate convenience wrappers like TagCompany/UntagCompany).

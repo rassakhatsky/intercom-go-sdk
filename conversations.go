@@ -154,15 +154,31 @@ type UpdateConversationRequest struct {
 
 // ReplyConversationRequest represents the body for replying to a conversation.
 type ReplyConversationRequest struct {
-	MessageType    string   `json:"message_type"`
-	Type           string   `json:"type"`
-	Body           string   `json:"body,omitempty"`
-	AdminID        string   `json:"admin_id,omitempty"`
-	IntercomUserID string   `json:"intercom_user_id,omitempty"`
-	Email          string   `json:"email,omitempty"`
-	UserID         string   `json:"user_id,omitempty"`
-	CreatedAt      *int64   `json:"created_at,omitempty"`
-	AttachmentURLs []string `json:"attachment_urls,omitempty"`
+	MessageType       string             `json:"message_type"`
+	Type              string             `json:"type"`
+	Body              string             `json:"body,omitempty"`
+	AdminID           string             `json:"admin_id,omitempty"`
+	IntercomUserID    string             `json:"intercom_user_id,omitempty"`
+	Email             string             `json:"email,omitempty"`
+	UserID            string             `json:"user_id,omitempty"`
+	CreatedAt         *int64             `json:"created_at,omitempty"`
+	AttachmentURLs    []string           `json:"attachment_urls,omitempty"`
+	AttachmentFiles   []AttachmentFile   `json:"attachment_files,omitempty"`
+	ReplyOptions      []QuickReplyOption `json:"reply_options,omitempty"`
+	SkipNotifications *bool              `json:"skip_notifications,omitempty"`
+}
+
+// AttachmentFile represents a file attachment in a conversation reply.
+type AttachmentFile struct {
+	ContentType string `json:"content_type,omitempty"`
+	Data        string `json:"data,omitempty"`
+	Name        string `json:"name,omitempty"`
+}
+
+// QuickReplyOption represents a quick reply option in a conversation.
+type QuickReplyOption struct {
+	Text string `json:"text"`
+	UUID string `json:"uuid"`
 }
 
 // ManageConversationRequest is the body for close/open/snooze/assign operations.
@@ -741,4 +757,3 @@ func (s *ConversationsService) RemoveTagRaw(ctx context.Context, conversationID,
 	}
 	return s.client.DoRaw(ctx, req)
 }
-

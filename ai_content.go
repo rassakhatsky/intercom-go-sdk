@@ -76,6 +76,7 @@ type UpdateExternalPageRequest struct {
 	FinAvailability *bool  `json:"fin_availability,omitempty"`
 	Locale          string `json:"locale,omitempty"`
 	SourceID        int    `json:"source_id,omitempty"`
+	ExternalID      string `json:"external_id,omitempty"`
 }
 
 // --- Parse Functions ---

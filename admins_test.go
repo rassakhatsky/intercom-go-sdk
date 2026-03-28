@@ -241,7 +241,7 @@ func TestAdminsService_SetAway_WithReason(t *testing.T) {
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
-		if body["away_status_reason_id"] != "99" {
+		if body["away_status_reason_id"] != float64(99) {
 			t.Errorf("SetAway body away_status_reason_id = %v, want 99", body["away_status_reason_id"])
 		}
 		fmt.Fprint(w, `{
@@ -254,7 +254,7 @@ func TestAdminsService_SetAway_WithReason(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	reasonID := "99"
+	reasonID := 99
 	req := &SetAwayRequest{
 		AwayModeEnabled:    true,
 		AwayModeReassign:   true,

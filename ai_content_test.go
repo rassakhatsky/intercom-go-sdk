@@ -914,6 +914,49 @@ func TestAIContentService_DeleteExternalPageRaw_Success(t *testing.T) {
 	}
 }
 
+func TestAIContentService_UpdateExternalPage_WithExternalID(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/ai/external_pages/30", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodPut)
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatalf("decode request body: %v", err)
+		}
+		if body["external_id"] != "new-ext-id" {
+			t.Errorf("external_id = %v, want new-ext-id", body["external_id"])
+		}
+		fmt.Fprint(w, `{
+			"type":"external_page",
+			"id":"30",
+			"title":"Title",
+			"html":"<h1>Test</h1>",
+			"url":"https://www.example.com",
+			"ai_agent_availability":true,
+			"ai_copilot_availability":true,
+			"locale":"en",
+			"source_id":1234,
+			"external_id":"new-ext-id",
+			"created_at":1672928359,
+			"updated_at":1672928700,
+			"last_ingested_at":1672928610
+		}`)
+	})
+
+	ctx := context.Background()
+	page, err := client.AIContent.UpdateExternalPage(ctx, "30", &UpdateExternalPageRequest{
+		Title:      "Title",
+		ExternalID: "new-ext-id",
+	})
+	if err != nil {
+		t.Fatalf("AIContent.UpdateExternalPage returned error: %v", err)
+	}
+	if page.ExternalID != "new-ext-id" {
+		t.Errorf("ExternalID = %v, want new-ext-id", page.ExternalID)
+	}
+}
+
 // boolPtr returns a pointer to the given bool value.
 func boolPtr(b bool) *bool {
 	return &b

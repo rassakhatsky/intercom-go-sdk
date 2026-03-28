@@ -355,3 +355,49 @@ func TestMessagesService_CreateRaw_Unauthorized(t *testing.T) {
 		t.Errorf("Error.Code = %v, want unauthorized", result.Error.Code)
 	}
 }
+
+func TestMessagesService_Create_WithCCBCC(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/messages", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodPost)
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatalf("decode request body: %v", err)
+		}
+		cc, ok := body["cc"].([]any)
+		if !ok || len(cc) != 1 {
+			t.Fatalf("cc length = %v, want 1", len(cc))
+		}
+		ccItem := cc[0].(map[string]any)
+		if ccItem["type"] != "user" || ccItem["id"] != "cc-user-1" {
+			t.Errorf("cc[0] = %v, want {type:user, id:cc-user-1}", ccItem)
+		}
+		bcc, ok := body["bcc"].([]any)
+		if !ok || len(bcc) != 1 {
+			t.Fatalf("bcc length = %v, want 1", len(bcc))
+		}
+		bccItem := bcc[0].(map[string]any)
+		if bccItem["type"] != "user" || bccItem["id"] != "bcc-user-1" {
+			t.Errorf("bcc[0] = %v, want {type:user, id:bcc-user-1}", bccItem)
+		}
+		fmt.Fprint(w, `{"type":"message","id":"msg-1","message_type":"conversation","body":"Hello"}`)
+	})
+
+	ctx := context.Background()
+	msg, err := client.Messages.Create(ctx, &CreateMessageRequest{
+		MessageType: "conversation",
+		Body:        "Hello",
+		From:        MessageSender{Type: "admin", ID: "admin-1"},
+		To:          MessageRecipient{Type: "user", ID: "user-1"},
+		CC:          []MessageRecipient{{Type: "user", ID: "cc-user-1"}},
+		BCC:         []MessageRecipient{{Type: "user", ID: "bcc-user-1"}},
+	})
+	if err != nil {
+		t.Fatalf("Messages.Create returned error: %v", err)
+	}
+	if msg.ID != "msg-1" {
+		t.Errorf("Message.ID = %v, want msg-1", msg.ID)
+	}
+}

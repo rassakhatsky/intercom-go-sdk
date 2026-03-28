@@ -733,3 +733,66 @@ func TestTicketsService_Search_RateLimit(t *testing.T) {
 		t.Errorf("IsRateLimited = false, want true")
 	}
 }
+
+func TestTicketsService_Create_WithSkipNotifications(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/tickets", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodPost)
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatalf("decode request body: %v", err)
+		}
+		skipNotif, ok := body["skip_notifications"]
+		if !ok || skipNotif != true {
+			t.Errorf("skip_notifications = %v, want true", skipNotif)
+		}
+		fmt.Fprint(w, `{"type":"ticket","id":"t-1","ticket_id":"123"}`)
+	})
+
+	ctx := context.Background()
+	skipNotif := true
+	ticket, err := client.Tickets.Create(ctx, &CreateTicketRequest{
+		TicketTypeID:      "tt-1",
+		Contacts:          []TicketContactRef{{ID: "c-1"}},
+		SkipNotifications: &skipNotif,
+	})
+	if err != nil {
+		t.Fatalf("Tickets.Create returned error: %v", err)
+	}
+	if ticket.ID != "t-1" {
+		t.Errorf("Ticket.ID = %v, want t-1", ticket.ID)
+	}
+}
+
+func TestTicketsService_Update_WithSkipNotifications(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/tickets/t-1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodPut)
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatalf("decode request body: %v", err)
+		}
+		skipNotif, ok := body["skip_notifications"]
+		if !ok || skipNotif != true {
+			t.Errorf("skip_notifications = %v, want true", skipNotif)
+		}
+		fmt.Fprint(w, `{"type":"ticket","id":"t-1","ticket_id":"123"}`)
+	})
+
+	ctx := context.Background()
+	skipNotif := true
+	ticket, err := client.Tickets.Update(ctx, "t-1", &UpdateTicketRequest{
+		TicketStateID:     "ts-2",
+		SkipNotifications: &skipNotif,
+	})
+	if err != nil {
+		t.Fatalf("Tickets.Update returned error: %v", err)
+	}
+	if ticket.ID != "t-1" {
+		t.Errorf("Ticket.ID = %v, want t-1", ticket.ID)
+	}
+}

@@ -40,6 +40,8 @@ type CreateMessageRequest struct {
 	Template                              string           `json:"template,omitempty"`
 	From                                  MessageSender    `json:"from"`
 	To                                    MessageRecipient `json:"to"`
+	CC                                    any              `json:"cc,omitempty"`
+	BCC                                   any              `json:"bcc,omitempty"`
 	CreatedAt                             int64            `json:"created_at,omitempty"`
 	CreateConversationWithoutContactReply *bool            `json:"create_conversation_without_contact_reply,omitempty"`
 }

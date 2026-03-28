@@ -1224,3 +1224,89 @@ func TestConversationsService_RemoveTagRaw(t *testing.T) {
 	}
 }
 
+func TestConversationsService_Reply_WithQuickReplyOptions(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/conversations/123/reply", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodPost)
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatalf("decode request body: %v", err)
+		}
+		if body["message_type"] != "quick_reply" {
+			t.Errorf("message_type = %v, want quick_reply", body["message_type"])
+		}
+		opts, ok := body["reply_options"].([]any)
+		if !ok || len(opts) != 2 {
+			t.Fatalf("reply_options length = %v, want 2", len(opts))
+		}
+		opt0 := opts[0].(map[string]any)
+		if opt0["text"] != "Yes" {
+			t.Errorf("reply_options[0].text = %v, want Yes", opt0["text"])
+		}
+		fmt.Fprint(w, `{"type":"conversation","id":"123","state":"open"}`)
+	})
+
+	ctx := context.Background()
+	conv, err := client.Conversations.Reply(ctx, "123", &ReplyConversationRequest{
+		MessageType: "quick_reply",
+		Type:        "admin",
+		AdminID:     "admin-1",
+		ReplyOptions: []QuickReplyOption{
+			{Text: "Yes", UUID: "uuid-1"},
+			{Text: "No", UUID: "uuid-2"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Conversations.Reply returned error: %v", err)
+	}
+	if conv.ID != "123" {
+		t.Errorf("Conversation.ID = %v, want 123", conv.ID)
+	}
+}
+
+func TestConversationsService_Reply_WithAttachmentFiles(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/conversations/123/reply", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodPost)
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatalf("decode request body: %v", err)
+		}
+		files, ok := body["attachment_files"].([]any)
+		if !ok || len(files) != 1 {
+			t.Fatalf("attachment_files length = %v, want 1", len(files))
+		}
+		file0 := files[0].(map[string]any)
+		if file0["content_type"] != "application/pdf" {
+			t.Errorf("attachment_files[0].content_type = %v, want application/pdf", file0["content_type"])
+		}
+		skipNotif, ok := body["skip_notifications"]
+		if !ok || skipNotif != true {
+			t.Errorf("skip_notifications = %v, want true", skipNotif)
+		}
+		fmt.Fprint(w, `{"type":"conversation","id":"123","state":"open"}`)
+	})
+
+	ctx := context.Background()
+	skipNotif := true
+	conv, err := client.Conversations.Reply(ctx, "123", &ReplyConversationRequest{
+		MessageType: "comment",
+		Type:        "admin",
+		AdminID:     "admin-1",
+		Body:        "See attachment",
+		AttachmentFiles: []AttachmentFile{
+			{ContentType: "application/pdf", Data: "base64data", Name: "doc.pdf"},
+		},
+		SkipNotifications: &skipNotif,
+	})
+	if err != nil {
+		t.Fatalf("Conversations.Reply returned error: %v", err)
+	}
+	if conv.ID != "123" {
+		t.Errorf("Conversation.ID = %v, want 123", conv.ID)
+	}
+}

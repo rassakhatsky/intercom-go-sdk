@@ -18,6 +18,7 @@ type IPAllowlistSettings struct {
 
 // UpdateIPAllowlistRequest represents a request to update the IP allowlist.
 type UpdateIPAllowlistRequest struct {
+	Type        string   `json:"type,omitempty"`
 	Enabled     bool     `json:"enabled"`
 	IPAllowlist []string `json:"ip_allowlist"`
 }
