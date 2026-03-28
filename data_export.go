@@ -125,6 +125,8 @@ func (s *DataExportService) CancelRaw(ctx context.Context, jobID string) (*Resul
 // Download writes the exported data to w. The data is typically gzipped CSV.
 // Unlike other methods, Download handles the HTTP response directly to stream
 // binary data rather than decoding JSON.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-export/downloaddataexport
 func (s *DataExportService) Download(ctx context.Context, jobID string, w io.Writer) error {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("download/content/data/%s", url.PathEscape(jobID)), nil)
 	if err != nil {

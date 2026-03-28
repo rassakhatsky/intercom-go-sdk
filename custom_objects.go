@@ -111,7 +111,7 @@ func (s *CustomObjectsService) CreateOrUpdate(ctx context.Context, typeIdentifie
 
 // Delete deletes a custom object instance by type identifier and instance ID.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/deletecustomobjectinstancesbyexternalid
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/deletecustomobjectinstancesbyid
 func (s *CustomObjectsService) Delete(ctx context.Context, typeIdentifier, instanceID string) (*CustomObjectInstanceDeleted, error) {
 	result, err := s.DeleteRaw(ctx, typeIdentifier, instanceID)
 	if err != nil {
@@ -125,7 +125,7 @@ func (s *CustomObjectsService) Delete(ctx context.Context, typeIdentifier, insta
 
 // DeleteByExternalID deletes a custom object instance by type identifier and external ID.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/deletecustomobjectinstancesbyid
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/deletecustomobjectinstancesbyexternalid
 func (s *CustomObjectsService) DeleteByExternalID(ctx context.Context, typeIdentifier, externalID string) (*CustomObjectInstanceDeleted, error) {
 	result, err := s.DeleteByExternalIDRaw(ctx, typeIdentifier, externalID)
 	if err != nil {
@@ -177,7 +177,7 @@ func (s *CustomObjectsService) CreateOrUpdateRaw(ctx context.Context, typeIdenti
 
 // DeleteRaw deletes a custom object instance by type identifier and instance ID with the full HTTP result.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/deletecustomobjectinstancesbyexternalid
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/deletecustomobjectinstancesbyid
 func (s *CustomObjectsService) DeleteRaw(ctx context.Context, typeIdentifier, instanceID string) (*Result, error) {
 	path := fmt.Sprintf("custom_object_instances/%s/%s", url.PathEscape(typeIdentifier), url.PathEscape(instanceID))
 	req, err := s.client.NewRequest(http.MethodDelete, path, nil)
@@ -189,7 +189,7 @@ func (s *CustomObjectsService) DeleteRaw(ctx context.Context, typeIdentifier, in
 
 // DeleteByExternalIDRaw deletes a custom object instance by type identifier and external ID with the full HTTP result.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/deletecustomobjectinstancesbyid
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/deletecustomobjectinstancesbyexternalid
 func (s *CustomObjectsService) DeleteByExternalIDRaw(ctx context.Context, typeIdentifier, externalID string) (*Result, error) {
 	path := fmt.Sprintf("custom_object_instances/%s?external_id=%s", url.PathEscape(typeIdentifier), url.QueryEscape(externalID))
 	req, err := s.client.NewRequest(http.MethodDelete, path, nil)
