@@ -270,10 +270,10 @@ func (s *ContactsService) Get(ctx context.Context, id string) (*Contact, error) 
 - [x] Delete/DeleteRaw → `visitors/convertvisitor` (no Delete method exists; Convert serves this purpose)
 
 ### Task 35: Final verification
-- [ ] Run `go vet ./...`
-- [ ] Run `go test ./...`
-- [ ] Count added comments: `grep -r "// See: https://developers.intercom.com" *.go | wc -l`
-- [ ] Spot-check a few URLs manually
+- [x] Run `go vet ./...`
+- [x] Run `go test ./...`
+- [x] Count added comments: `grep -r "// See: https://developers.intercom.com" *.go | wc -l` — 327 comments
+- [x] Spot-check a few URLs manually
 
 ## Post-Completion
 - No deployment needed — comment-only changes (plus deprecated method removal)
