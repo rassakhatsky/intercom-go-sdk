@@ -92,9 +92,11 @@ Helper functions `testMethod` and `testHeader` assert request properties. Tests 
 - Query param structs use `url:"name,omitempty"` tags (encoded via `google/go-querystring`)
 - Timestamps are `int64` (Unix epoch); optional timestamps are `*int64`
 - 3-layer pattern per method: see Architecture above
+- Every public method (regular + Raw) includes a `// See:` comment linking to the Intercom API reference. Format: `// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/{tag}/{operationId}`. Skip: Parse functions, ListAll methods, model structs, service type declarations
 
 ## Adding a New Service
 
 1. Create `xxx.go`: define `type XxxService service`, request/response structs, and methods following the 3-layer pattern
 2. Register in `intercom.go`: add `Xxx *XxxService` field to `Client`, cast `&c.common` in `initialize()`
 3. Create `xxx_test.go`: use `setup()` helper, `testMethod`/`testHeader`, raw JSON responses
+4. Add `// See:` doc URL comments to every public method (regular + Raw) linking to the Intercom API reference
