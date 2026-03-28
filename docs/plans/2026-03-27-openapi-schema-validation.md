@@ -108,8 +108,8 @@ Ensure no SDK methods exist without a schema counterpart (excluding legitimate c
 - [x] Verify all report files are up to date
 
 ### Task 8: [Final] Update documentation
-- [ ] Update CLAUDE.md if new services/patterns were added
-- [ ] Archive validation reports in `docs/reports/`
+- [x] Update CLAUDE.md if new services/patterns were added
+- [x] Archive validation reports in `docs/reports/`
 
 ## Technical Details
 

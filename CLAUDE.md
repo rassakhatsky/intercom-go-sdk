@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Go SDK for the Intercom API v2.15. Single-package (`package intercom`), minimal dependencies (stdlib + `google/go-querystring`), 33 services.
+Go SDK for the Intercom API v2.15. Single-package (`package intercom`), minimal dependencies (stdlib + `google/go-querystring`), 34 services.
 
 ## Commands
 
