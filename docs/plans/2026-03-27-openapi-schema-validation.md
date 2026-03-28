@@ -100,12 +100,12 @@ Ensure no SDK methods exist without a schema counterpart (excluding legitimate c
 - [x] Run tests — must pass before next task
 
 ### Task 7: Verify acceptance criteria
-- [ ] Re-run full validation script — zero missing operations
-- [ ] Re-run struct field validation — zero missing required fields
-- [ ] Run full test suite (`go test ./...`)
-- [ ] Run linter (`go vet ./...`)
-- [ ] Run format check (`gofmt -l .`)
-- [ ] Verify all report files are up to date
+- [x] Re-run full validation script — zero missing operations
+- [x] Re-run struct field validation — zero missing required fields
+- [x] Run full test suite (`go test ./...`)
+- [x] Run linter (`go vet ./...`)
+- [x] Run format check (`gofmt -l .`)
+- [x] Verify all report files are up to date
 
 ### Task 8: [Final] Update documentation
 - [ ] Update CLAUDE.md if new services/patterns were added
