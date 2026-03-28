@@ -1,16 +1,25 @@
-package intercom
+package data
 
 import (
 	"context"
 	"net/http"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// DataEventsService handles communication with the data event related
+// EventsService handles communication with the data event related
 // methods of the Intercom API.
-type DataEventsService service
+type EventsService struct {
+	client api.Caller
+}
 
-// DataEvent represents an Intercom data event.
-type DataEvent struct {
+// NewEventsService creates a new data events service.
+func NewEventsService(c api.Caller) *EventsService {
+	return &EventsService{client: c}
+}
+
+// Event represents an Intercom data event.
+type Event struct {
 	Type           string         `json:"type,omitempty"`
 	EventName      string         `json:"event_name"`
 	CreatedAt      int64          `json:"created_at"`
@@ -21,10 +30,10 @@ type DataEvent struct {
 	Metadata       map[string]any `json:"metadata,omitempty"`
 }
 
-// DataEventSummaryResponse represents the response from the list events endpoint.
-type DataEventSummaryResponse struct {
+// SummaryResponse represents the response from the list events endpoint.
+type SummaryResponse struct {
 	Type           string      `json:"type"`
-	Events         []DataEvent `json:"events"`
+	Events         []Event     `json:"events"`
 	Pages          *EventPages `json:"pages,omitempty"`
 	Email          string      `json:"email,omitempty"`
 	IntercomUserID string      `json:"intercom_user_id,omitempty"`
@@ -37,8 +46,8 @@ type EventPages struct {
 	Since string `json:"since,omitempty"`
 }
 
-// ListDataEventsOptions specifies parameters to the List method.
-type ListDataEventsOptions struct {
+// ListOptions specifies parameters to the List method.
+type ListOptions struct {
 	Type           string `url:"type"`
 	UserID         string `url:"user_id,omitempty"`
 	Email          string `url:"email,omitempty"`
@@ -47,8 +56,8 @@ type ListDataEventsOptions struct {
 	PerPage        int    `url:"per_page,omitempty"`
 }
 
-// CreateDataEventRequest represents the request body for creating a data event.
-type CreateDataEventRequest struct {
+// CreateEventRequest represents the request body for creating a data event.
+type CreateEventRequest struct {
 	EventName string         `json:"event_name"`
 	CreatedAt int64          `json:"created_at"`
 	UserID    string         `json:"user_id,omitempty"`
@@ -57,8 +66,8 @@ type CreateDataEventRequest struct {
 	Metadata  map[string]any `json:"metadata,omitempty"`
 }
 
-// CreateEventSummariesRequest represents the request body for creating event summaries.
-type CreateEventSummariesRequest struct {
+// CreateSummariesRequest represents the request body for creating event summaries.
+type CreateSummariesRequest struct {
 	UserID         string         `json:"user_id"`
 	EventSummaries []EventSummary `json:"event_summaries"`
 }
@@ -73,20 +82,20 @@ type EventSummary struct {
 
 // --- Parse Functions ---
 
-// ParseDataEventCreateResult validates a Result for the Create endpoint (empty body).
-func ParseDataEventCreateResult(r *Result) error {
-	_, err := Decode[Empty](r)
+// ParseCreateResult validates a Result for the Create endpoint (empty body).
+func ParseCreateResult(r *api.Result) error {
+	_, err := api.Decode[api.Empty](r)
 	return err
 }
 
-// ParseDataEventListResult decodes a Result into a DataEventSummaryResponse.
-func ParseDataEventListResult(r *Result) (*DataEventSummaryResponse, error) {
-	return Decode[DataEventSummaryResponse](r)
+// ParseListResult decodes a Result into a SummaryResponse.
+func ParseListResult(r *api.Result) (*SummaryResponse, error) {
+	return api.Decode[SummaryResponse](r)
 }
 
-// ParseDataEventCreateSummariesResult validates a Result for the CreateSummaries endpoint (empty body).
-func ParseDataEventCreateSummariesResult(r *Result) error {
-	_, err := Decode[Empty](r)
+// ParseCreateSummariesResult validates a Result for the CreateSummaries endpoint (empty body).
+func ParseCreateSummariesResult(r *api.Result) error {
+	_, err := api.Decode[api.Empty](r)
 	return err
 }
 
@@ -95,13 +104,13 @@ func ParseDataEventCreateSummariesResult(r *Result) error {
 // Create submits a new data event. Returns nil on success (API returns 202 with empty body).
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/createdataevent
-func (s *DataEventsService) Create(ctx context.Context, body *CreateDataEventRequest) error {
+func (s *EventsService) Create(ctx context.Context, body *CreateEventRequest) error {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
 		return err
 	}
 	if result.Error != nil {
-		return resultError(result)
+		return api.ResultError(result)
 	}
 	return nil
 }
@@ -109,27 +118,27 @@ func (s *DataEventsService) Create(ctx context.Context, body *CreateDataEventReq
 // List returns data events for a user or lead.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/lisdataevents
-func (s *DataEventsService) List(ctx context.Context, opts *ListDataEventsOptions) (*DataEventSummaryResponse, error) {
+func (s *EventsService) List(ctx context.Context, opts *ListOptions) (*SummaryResponse, error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseDataEventListResult(result)
+	return ParseListResult(result)
 }
 
 // CreateSummaries creates event summaries for a user.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/dataeventsummaries
-func (s *DataEventsService) CreateSummaries(ctx context.Context, body *CreateEventSummariesRequest) error {
+func (s *EventsService) CreateSummaries(ctx context.Context, body *CreateSummariesRequest) error {
 	result, err := s.CreateSummariesRaw(ctx, body)
 	if err != nil {
 		return err
 	}
 	if result.Error != nil {
-		return resultError(result)
+		return api.ResultError(result)
 	}
 	return nil
 }
@@ -139,7 +148,7 @@ func (s *DataEventsService) CreateSummaries(ctx context.Context, body *CreateEve
 // CreateRaw submits a new data event and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/createdataevent
-func (s *DataEventsService) CreateRaw(ctx context.Context, body *CreateDataEventRequest) (*Result, error) {
+func (s *EventsService) CreateRaw(ctx context.Context, body *CreateEventRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "events", body)
 	if err != nil {
 		return nil, err
@@ -150,8 +159,8 @@ func (s *DataEventsService) CreateRaw(ctx context.Context, body *CreateDataEvent
 // ListRaw returns data events for a user or lead with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/lisdataevents
-func (s *DataEventsService) ListRaw(ctx context.Context, opts *ListDataEventsOptions) (*Result, error) {
-	path, err := addQueryOptions("events", opts)
+func (s *EventsService) ListRaw(ctx context.Context, opts *ListOptions) (*api.Result, error) {
+	path, err := api.AddQueryOptions("events", opts)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +174,7 @@ func (s *DataEventsService) ListRaw(ctx context.Context, opts *ListDataEventsOpt
 // CreateSummariesRaw creates event summaries for a user and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/dataeventsummaries
-func (s *DataEventsService) CreateSummariesRaw(ctx context.Context, body *CreateEventSummariesRequest) (*Result, error) {
+func (s *EventsService) CreateSummariesRaw(ctx context.Context, body *CreateSummariesRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "events/summaries", body)
 	if err != nil {
 		return nil, err

@@ -142,13 +142,13 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 15: Migrate `data` sub-package
-- [ ] create `data/events.go` — move from root `data_events.go`
-- [ ] create `data/attributes.go` — move from root `data_attributes.go`
-- [ ] create `data/objects.go` — move from root `custom_objects.go`
-- [ ] add `DataEvents()`, `DataAttributes()`, `CustomObjects()` accessors to `Client`
-- [ ] migrate tests to `data/`
-- [ ] remove root `data_events.go`, `data_attributes.go`, `custom_objects.go`
-- [ ] run tests: `go test ./...`
+- [x] create `data/events.go` — move from root `data_events.go`
+- [x] create `data/attributes.go` — move from root `data_attributes.go`
+- [x] create `data/objects.go` — move from root `custom_objects.go`
+- [x] add `DataEvents()`, `DataAttributes()`, `CustomObjects()` accessors to `Client`
+- [x] migrate tests to `data/`
+- [x] remove root `data_events.go`, `data_attributes.go`, `custom_objects.go`
+- [x] run tests: `go test ./...`
 
 ### Task 16: Migrate `calls` sub-package
 - [ ] create `calls/calls.go` — move from root `calls.go`

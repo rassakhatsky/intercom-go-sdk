@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/rassakhatsky/intercom-go-sdk/admins"
+	"github.com/rassakhatsky/intercom-go-sdk/data"
 	"github.com/rassakhatsky/intercom-go-sdk/export"
 	"github.com/rassakhatsky/intercom-go-sdk/messaging"
 	"github.com/rassakhatsky/intercom-go-sdk/news"
@@ -45,9 +46,9 @@ type Client struct {
 	Companies           *CompaniesService
 	Conversations       *ConversationsService
 	customChannelEvents *settings.ChannelEventsService
-	CustomObjects       *CustomObjectsService
-	DataAttributes      *DataAttributesService
-	DataEvents          *DataEventsService
+	customObjects       *data.ObjectsService
+	dataAttributes      *data.AttributesService
+	dataEvents          *data.EventsService
 	dataExport          *export.DataService
 	emails              *messaging.EmailsService
 	exportReporting     *export.ReportingService
@@ -131,9 +132,9 @@ func (c *Client) initialize() {
 	c.Companies = (*CompaniesService)(&c.common)
 	c.Conversations = (*ConversationsService)(&c.common)
 	c.customChannelEvents = settings.NewChannelEventsService(c)
-	c.CustomObjects = (*CustomObjectsService)(&c.common)
-	c.DataAttributes = (*DataAttributesService)(&c.common)
-	c.DataEvents = (*DataEventsService)(&c.common)
+	c.customObjects = data.NewObjectsService(c)
+	c.dataAttributes = data.NewAttributesService(c)
+	c.dataEvents = data.NewEventsService(c)
 	c.dataExport = export.NewDataService(c)
 	c.emails = messaging.NewEmailsService(c)
 	c.exportReporting = export.NewReportingService(c)
@@ -220,6 +221,21 @@ func (c *Client) Jobs() *settings.JobsService {
 // Notes returns the notes service.
 func (c *Client) Notes() *settings.NotesService {
 	return c.notes
+}
+
+// DataEvents returns the data events service.
+func (c *Client) DataEvents() *data.EventsService {
+	return c.dataEvents
+}
+
+// DataAttributes returns the data attributes service.
+func (c *Client) DataAttributes() *data.AttributesService {
+	return c.dataAttributes
+}
+
+// CustomObjects returns the custom objects service.
+func (c *Client) CustomObjects() *data.ObjectsService {
+	return c.customObjects
 }
 
 // Admins returns the admins service.

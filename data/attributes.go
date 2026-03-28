@@ -1,17 +1,26 @@
-package intercom
+package data
 
 import (
 	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// DataAttributesService handles communication with the data attribute related
+// AttributesService handles communication with the data attribute related
 // methods of the Intercom API.
-type DataAttributesService service
+type AttributesService struct {
+	client api.Caller
+}
 
-// DataAttribute represents an Intercom data attribute.
-type DataAttribute struct {
+// NewAttributesService creates a new data attributes service.
+func NewAttributesService(c api.Caller) *AttributesService {
+	return &AttributesService{client: c}
+}
+
+// Attribute represents an Intercom data attribute.
+type Attribute struct {
 	Type              string   `json:"type"`
 	ID                int      `json:"id,omitempty"`
 	Model             string   `json:"model"`
@@ -31,14 +40,14 @@ type DataAttribute struct {
 	AdminID           string   `json:"admin_id,omitempty"`
 }
 
-// DataAttributeList represents a list of data attributes.
-type DataAttributeList struct {
-	Type string          `json:"type"`
-	Data []DataAttribute `json:"data"`
+// AttributeList represents a list of data attributes.
+type AttributeList struct {
+	Type string      `json:"type"`
+	Data []Attribute `json:"data"`
 }
 
-// ListDataAttributesOptions specifies optional parameters to the List method.
-type ListDataAttributesOptions struct {
+// ListAttributesOptions specifies optional parameters to the List method.
+type ListAttributesOptions struct {
 	Model           string `url:"model,omitempty"`
 	IncludeArchived *bool  `url:"include_archived,omitempty"`
 }
@@ -48,8 +57,8 @@ type AttributeOption struct {
 	Value string `json:"value"`
 }
 
-// CreateDataAttributeRequest represents the request body for creating a data attribute.
-type CreateDataAttributeRequest struct {
+// CreateAttributeRequest represents the request body for creating a data attribute.
+type CreateAttributeRequest struct {
 	Name              string            `json:"name"`
 	Model             string            `json:"model"`
 	DataType          string            `json:"data_type"`
@@ -58,8 +67,8 @@ type CreateDataAttributeRequest struct {
 	Options           []AttributeOption `json:"options,omitempty"`
 }
 
-// UpdateDataAttributeRequest represents the request body for updating a data attribute.
-type UpdateDataAttributeRequest struct {
+// UpdateAttributeRequest represents the request body for updating a data attribute.
+type UpdateAttributeRequest struct {
 	Description       string            `json:"description,omitempty"`
 	Archived          *bool             `json:"archived,omitempty"`
 	MessengerWritable *bool             `json:"messenger_writable,omitempty"`
@@ -68,19 +77,19 @@ type UpdateDataAttributeRequest struct {
 
 // --- Parse Functions ---
 
-// ParseDataAttributeListResult decodes a Result into a DataAttributeList.
-func ParseDataAttributeListResult(r *Result) (*DataAttributeList, error) {
-	return Decode[DataAttributeList](r)
+// ParseListResult decodes a Result into an AttributeList.
+func ParseAttributeListResult(r *api.Result) (*AttributeList, error) {
+	return api.Decode[AttributeList](r)
 }
 
-// ParseDataAttributeCreateResult decodes a Result into a DataAttribute.
-func ParseDataAttributeCreateResult(r *Result) (*DataAttribute, error) {
-	return Decode[DataAttribute](r)
+// ParseCreateResult decodes a Result into an Attribute.
+func ParseAttributeCreateResult(r *api.Result) (*Attribute, error) {
+	return api.Decode[Attribute](r)
 }
 
-// ParseDataAttributeUpdateResult decodes a Result into a DataAttribute.
-func ParseDataAttributeUpdateResult(r *Result) (*DataAttribute, error) {
-	return Decode[DataAttribute](r)
+// ParseUpdateResult decodes a Result into an Attribute.
+func ParseAttributeUpdateResult(r *api.Result) (*Attribute, error) {
+	return api.Decode[Attribute](r)
 }
 
 // --- Regular Methods ---
@@ -88,43 +97,43 @@ func ParseDataAttributeUpdateResult(r *Result) (*DataAttribute, error) {
 // List returns all data attributes for the workspace.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/lisdataattributes
-func (s *DataAttributesService) List(ctx context.Context, opts *ListDataAttributesOptions) (*DataAttributeList, error) {
+func (s *AttributesService) List(ctx context.Context, opts *ListAttributesOptions) (*AttributeList, error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseDataAttributeListResult(result)
+	return ParseAttributeListResult(result)
 }
 
 // Create creates a new data attribute.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/createdataattribute
-func (s *DataAttributesService) Create(ctx context.Context, body *CreateDataAttributeRequest) (*DataAttribute, error) {
+func (s *AttributesService) Create(ctx context.Context, body *CreateAttributeRequest) (*Attribute, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseDataAttributeCreateResult(result)
+	return ParseAttributeCreateResult(result)
 }
 
 // Update updates a data attribute by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/updatedataattribute
-func (s *DataAttributesService) Update(ctx context.Context, id int, body *UpdateDataAttributeRequest) (*DataAttribute, error) {
+func (s *AttributesService) Update(ctx context.Context, id int, body *UpdateAttributeRequest) (*Attribute, error) {
 	result, err := s.UpdateRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseDataAttributeUpdateResult(result)
+	return ParseAttributeUpdateResult(result)
 }
 
 // --- Raw Methods ---
@@ -132,8 +141,8 @@ func (s *DataAttributesService) Update(ctx context.Context, id int, body *Update
 // ListRaw returns all data attributes for the workspace with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/lisdataattributes
-func (s *DataAttributesService) ListRaw(ctx context.Context, opts *ListDataAttributesOptions) (*Result, error) {
-	path, err := addQueryOptions("data_attributes", opts)
+func (s *AttributesService) ListRaw(ctx context.Context, opts *ListAttributesOptions) (*api.Result, error) {
+	path, err := api.AddQueryOptions("data_attributes", opts)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +156,7 @@ func (s *DataAttributesService) ListRaw(ctx context.Context, opts *ListDataAttri
 // CreateRaw creates a new data attribute with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/createdataattribute
-func (s *DataAttributesService) CreateRaw(ctx context.Context, body *CreateDataAttributeRequest) (*Result, error) {
+func (s *AttributesService) CreateRaw(ctx context.Context, body *CreateAttributeRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "data_attributes", body)
 	if err != nil {
 		return nil, err
@@ -158,7 +167,7 @@ func (s *DataAttributesService) CreateRaw(ctx context.Context, body *CreateDataA
 // UpdateRaw updates a data attribute by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/updatedataattribute
-func (s *DataAttributesService) UpdateRaw(ctx context.Context, id int, body *UpdateDataAttributeRequest) (*Result, error) {
+func (s *AttributesService) UpdateRaw(ctx context.Context, id int, body *UpdateAttributeRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("data_attributes/%d", id), body)
 	if err != nil {
 		return nil, err
