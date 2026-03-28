@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/rassakhatsky/intercom-go-sdk/admins"
+	"github.com/rassakhatsky/intercom-go-sdk/articles"
 	"github.com/rassakhatsky/intercom-go-sdk/calls"
 	"github.com/rassakhatsky/intercom-go-sdk/data"
 	"github.com/rassakhatsky/intercom-go-sdk/export"
@@ -40,7 +41,7 @@ type Client struct {
 
 	admins              *admins.Service
 	AIContent           *AIContentService
-	Articles            *ArticlesService
+	articles            *articles.Service
 	awayStatusReasons   *admins.AwayStatusReasonsService
 	brands              *settings.BrandsService
 	calls               *calls.Service
@@ -56,7 +57,7 @@ type Client struct {
 	exportReporting     *export.ReportingService
 	FinVoice            *FinVoiceService
 	helpCenter          *helpcenter.Service
-	InternalArticles    *InternalArticlesService
+	internalArticles    *articles.InternalService
 	ipAllowlist         *settings.IPAllowlistService
 	jobs                *settings.JobsService
 	messages            *messaging.MessagesService
@@ -126,7 +127,7 @@ func NewClient(token string, opts ...ClientOption) *Client {
 func (c *Client) initialize() {
 	c.admins = admins.NewService(c)
 	c.AIContent = (*AIContentService)(&c.common)
-	c.Articles = (*ArticlesService)(&c.common)
+	c.articles = articles.NewService(c)
 	c.awayStatusReasons = admins.NewAwayStatusReasonsService(c)
 	c.brands = settings.NewBrandsService(c)
 	c.calls = calls.NewService(c)
@@ -142,7 +143,7 @@ func (c *Client) initialize() {
 	c.exportReporting = export.NewReportingService(c)
 	c.FinVoice = (*FinVoiceService)(&c.common)
 	c.helpCenter = helpcenter.NewService(c)
-	c.InternalArticles = (*InternalArticlesService)(&c.common)
+	c.internalArticles = articles.NewInternalService(c)
 	c.ipAllowlist = settings.NewIPAllowlistService(c)
 	c.jobs = settings.NewJobsService(c)
 	c.messages = messaging.NewMessagesService(c)
@@ -268,6 +269,16 @@ func (c *Client) PhoneCallRedirects() *calls.RedirectsService {
 // HelpCenter returns the help center service.
 func (c *Client) HelpCenter() *helpcenter.Service {
 	return c.helpCenter
+}
+
+// Articles returns the articles service.
+func (c *Client) Articles() *articles.Service {
+	return c.articles
+}
+
+// InternalArticles returns the internal articles service.
+func (c *Client) InternalArticles() *articles.InternalService {
+	return c.internalArticles
 }
 
 // NewRequest creates an API request. A relative URL path can be provided in

@@ -166,12 +166,12 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 18: Migrate `articles` sub-package
-- [ ] create `articles/articles.go` — move from root `articles.go`
-- [ ] create `articles/internal.go` — move from root `internal_articles.go`
-- [ ] add `Articles()`, `InternalArticles()` accessors to `Client`
-- [ ] migrate tests to `articles/`
-- [ ] remove root `articles.go`, `internal_articles.go`
-- [ ] run tests: `go test ./...`
+- [x] create `articles/articles.go` — move from root `articles.go`
+- [x] create `articles/internal.go` — move from root `internal_articles.go`
+- [x] add `Articles()`, `InternalArticles()` accessors to `Client`
+- [x] migrate tests to `articles/`
+- [x] remove root `articles.go`, `internal_articles.go`
+- [x] run tests: `go test ./...`
 
 ### Task 19: Migrate `companies` sub-package
 - [ ] create `companies/companies.go` — move from root `companies.go` (includes scroll pagination)
