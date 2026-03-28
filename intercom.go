@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/rassakhatsky/intercom-go-sdk/export"
+	"github.com/rassakhatsky/intercom-go-sdk/news"
 	"github.com/rassakhatsky/intercom-go-sdk/segments"
 	"github.com/rassakhatsky/intercom-go-sdk/tags"
 )
@@ -53,7 +54,7 @@ type Client struct {
 	IPAllowlist         *IPAllowlistService
 	Jobs                *JobsService
 	Messages            *MessagesService
-	News                *NewsService
+	news                *news.Service
 	Notes               *NotesService
 	PhoneCallRedirects  *PhoneCallRedirectsService
 	segments            *segments.Service
@@ -139,7 +140,7 @@ func (c *Client) initialize() {
 	c.IPAllowlist = (*IPAllowlistService)(&c.common)
 	c.Jobs = (*JobsService)(&c.common)
 	c.Messages = (*MessagesService)(&c.common)
-	c.News = (*NewsService)(&c.common)
+	c.news = news.NewService(c)
 	c.Notes = (*NotesService)(&c.common)
 	c.PhoneCallRedirects = (*PhoneCallRedirectsService)(&c.common)
 	c.segments = segments.NewService(c)
@@ -171,6 +172,11 @@ func (c *Client) ExportReporting() *export.ReportingService {
 // DataExport returns the data export service.
 func (c *Client) DataExport() *export.DataService {
 	return c.dataExport
+}
+
+// News returns the news service.
+func (c *Client) News() *news.Service {
+	return c.news
 }
 
 // NewRequest creates an API request. A relative URL path can be provided in

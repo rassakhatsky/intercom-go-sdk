@@ -1,15 +1,120 @@
-package intercom
+package news_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/news"
 )
 
-func TestNewsService_ListNewsItems(t *testing.T) {
-	client, mux, teardown := setup()
+// testCaller implements api.Caller for testing, backed by an httptest.Server.
+type testCaller struct {
+	baseURL string
+	client  *http.Client
+}
+
+func (tc *testCaller) NewRequest(method, urlStr string, body any) (*http.Request, error) {
+	var buf io.Reader
+	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+		buf = bytes.NewBuffer(jsonBody)
+	}
+	req, err := http.NewRequest(method, tc.baseURL+"/"+urlStr, buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer test-token")
+	req.Header.Set("Accept", "application/json")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	return req, nil
+}
+
+func (tc *testCaller) DoRaw(ctx context.Context, req *http.Request) (*api.Result, error) {
+	req = req.WithContext(ctx)
+	resp, err := tc.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return api.BuildResult(resp, b), nil
+}
+
+func (tc *testCaller) Do(ctx context.Context, req *http.Request, v any) (*api.Response, error) {
+	result, err := tc.DoRaw(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	response := &api.Response{Result: result}
+	if result.Error != nil {
+		return response, api.ResultError(result)
+	}
+	if v != nil && result.StatusCode != http.StatusNoContent && len(result.Body) > 0 {
+		if err := json.Unmarshal(result.Body, v); err != nil {
+			return response, err
+		}
+	}
+	return response, nil
+}
+
+func (tc *testCaller) DoDownload(ctx context.Context, req *http.Request, w io.Writer) error {
+	req = req.WithContext(ctx)
+	resp, err := tc.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		b, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return fmt.Errorf("HTTP %d: failed to read error body: %w", resp.StatusCode, readErr)
+		}
+		result := api.BuildResult(resp, b)
+		return api.ResultError(result)
+	}
+	_, err = io.Copy(w, resp.Body)
+	return err
+}
+
+func setup() (svc *news.Service, mux *http.ServeMux, teardown func()) {
+	mux = http.NewServeMux()
+	server := httptest.NewServer(mux)
+	caller := &testCaller{baseURL: server.URL, client: server.Client()}
+	svc = news.NewService(caller)
+	return svc, mux, server.Close
+}
+
+func testMethod(t *testing.T, r *http.Request, want string) {
+	t.Helper()
+	if got := r.Method; got != want {
+		t.Errorf("Request method = %v, want %v", got, want)
+	}
+}
+
+func testHeader(t *testing.T, r *http.Request, header, want string) {
+	t.Helper()
+	if got := r.Header.Get(header); got != want {
+		t.Errorf("Header %v = %q, want %q", header, got, want)
+	}
+}
+
+func TestService_ListItems(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/news_items", func(w http.ResponseWriter, r *http.Request) {
@@ -48,9 +153,9 @@ func TestNewsService_ListNewsItems(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.News.ListNewsItems(ctx, nil)
+	result, err := svc.ListItems(ctx, nil)
 	if err != nil {
-		t.Fatalf("News.ListNewsItems returned error: %v", err)
+		t.Fatalf("ListItems returned error: %v", err)
 	}
 	if result.TotalCount != 2 {
 		t.Errorf("TotalCount = %v, want 2", result.TotalCount)
@@ -91,8 +196,8 @@ func TestNewsService_ListNewsItems(t *testing.T) {
 	}
 }
 
-func TestNewsService_GetNewsItem(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetItem(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/news_items/42", func(w http.ResponseWriter, r *http.Request) {
@@ -114,9 +219,9 @@ func TestNewsService_GetNewsItem(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	item, err := client.News.GetNewsItem(ctx, "42")
+	item, err := svc.GetItem(ctx, "42")
 	if err != nil {
-		t.Fatalf("News.GetNewsItem returned error: %v", err)
+		t.Fatalf("GetItem returned error: %v", err)
 	}
 	if item.ID != "42" {
 		t.Errorf("ID = %v, want 42", item.ID)
@@ -129,8 +234,8 @@ func TestNewsService_GetNewsItem(t *testing.T) {
 	}
 }
 
-func TestNewsService_GetNewsItem_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetItem_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/news_items/999", func(w http.ResponseWriter, r *http.Request) {
@@ -143,22 +248,22 @@ func TestNewsService_GetNewsItem_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.News.GetNewsItem(ctx, "999")
+	_, err := svc.GetItem(ctx, "999")
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("expected not found error, got %v", err)
 	}
 }
 
-func TestNewsService_CreateNewsItem(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CreateItem(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/news_items", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body CreateNewsItemRequest
+		var body news.CreateItemRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -197,7 +302,7 @@ func TestNewsService_CreateNewsItem(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	item, err := client.News.CreateNewsItem(ctx, &CreateNewsItemRequest{
+	item, err := svc.CreateItem(ctx, &news.CreateItemRequest{
 		Title:           "Halloween is here!",
 		Body:            "<p>New costumes</p>",
 		SenderID:        123,
@@ -205,12 +310,12 @@ func TestNewsService_CreateNewsItem(t *testing.T) {
 		DeliverSilently: true,
 		Labels:          []string{"Product", "Update"},
 		Reactions:       []string{"😆", "😅"},
-		NewsfeedAssignments: []NewsfeedAssignment{
+		NewsfeedAssignments: []news.NewsfeedAssignment{
 			{NewsfeedID: 53, PublishedAt: 1664638214},
 		},
 	})
 	if err != nil {
-		t.Fatalf("News.CreateNewsItem returned error: %v", err)
+		t.Fatalf("CreateItem returned error: %v", err)
 	}
 	if item.ID != "50" {
 		t.Errorf("ID = %v, want 50", item.ID)
@@ -220,13 +325,13 @@ func TestNewsService_CreateNewsItem(t *testing.T) {
 	}
 }
 
-func TestNewsService_UpdateNewsItem(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_UpdateItem(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/news_items/50", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPut)
-		var body UpdateNewsItemRequest
+		var body news.UpdateItemRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -247,12 +352,12 @@ func TestNewsService_UpdateNewsItem(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	item, err := client.News.UpdateNewsItem(ctx, "50", &UpdateNewsItemRequest{
+	item, err := svc.UpdateItem(ctx, "50", &news.UpdateItemRequest{
 		Title: "Updated Title",
 		Body:  "<p>Updated body</p>",
 	})
 	if err != nil {
-		t.Fatalf("News.UpdateNewsItem returned error: %v", err)
+		t.Fatalf("UpdateItem returned error: %v", err)
 	}
 	if item.ID != "50" {
 		t.Errorf("ID = %v, want 50", item.ID)
@@ -262,8 +367,8 @@ func TestNewsService_UpdateNewsItem(t *testing.T) {
 	}
 }
 
-func TestNewsService_DeleteNewsItem(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_DeleteItem(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/news_items/50", func(w http.ResponseWriter, r *http.Request) {
@@ -276,9 +381,9 @@ func TestNewsService_DeleteNewsItem(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	deleted, err := client.News.DeleteNewsItem(ctx, "50")
+	deleted, err := svc.DeleteItem(ctx, "50")
 	if err != nil {
-		t.Fatalf("News.DeleteNewsItem returned error: %v", err)
+		t.Fatalf("DeleteItem returned error: %v", err)
 	}
 	if deleted.ID != "50" {
 		t.Errorf("ID = %v, want 50", deleted.ID)
@@ -288,8 +393,8 @@ func TestNewsService_DeleteNewsItem(t *testing.T) {
 	}
 }
 
-func TestNewsService_ListNewsfeeds(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListNewsfeeds(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/newsfeeds", func(w http.ResponseWriter, r *http.Request) {
@@ -306,9 +411,9 @@ func TestNewsService_ListNewsfeeds(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.News.ListNewsfeeds(ctx, nil)
+	result, err := svc.ListNewsfeeds(ctx, nil)
 	if err != nil {
-		t.Fatalf("News.ListNewsfeeds returned error: %v", err)
+		t.Fatalf("ListNewsfeeds returned error: %v", err)
 	}
 	if result.TotalCount != 2 {
 		t.Errorf("TotalCount = %v, want 2", result.TotalCount)
@@ -321,8 +426,8 @@ func TestNewsService_ListNewsfeeds(t *testing.T) {
 	}
 }
 
-func TestNewsService_GetNewsfeed(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetNewsfeed(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/newsfeeds/10", func(w http.ResponseWriter, r *http.Request) {
@@ -337,9 +442,9 @@ func TestNewsService_GetNewsfeed(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	feed, err := client.News.GetNewsfeed(ctx, "10")
+	feed, err := svc.GetNewsfeed(ctx, "10")
 	if err != nil {
-		t.Fatalf("News.GetNewsfeed returned error: %v", err)
+		t.Fatalf("GetNewsfeed returned error: %v", err)
 	}
 	if feed.ID != "10" {
 		t.Errorf("ID = %v, want 10", feed.ID)
@@ -349,8 +454,8 @@ func TestNewsService_GetNewsfeed(t *testing.T) {
 	}
 }
 
-func TestNewsService_ListNewsfeedItems(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListNewsfeedItems(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/newsfeeds/10/items", func(w http.ResponseWriter, r *http.Request) {
@@ -372,9 +477,9 @@ func TestNewsService_ListNewsfeedItems(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.News.ListNewsfeedItems(ctx, "10", nil)
+	result, err := svc.ListNewsfeedItems(ctx, "10", nil)
 	if err != nil {
-		t.Fatalf("News.ListNewsfeedItems returned error: %v", err)
+		t.Fatalf("ListNewsfeedItems returned error: %v", err)
 	}
 	if result.TotalCount != 1 {
 		t.Errorf("TotalCount = %v, want 1", result.TotalCount)
@@ -387,8 +492,8 @@ func TestNewsService_ListNewsfeedItems(t *testing.T) {
 	}
 }
 
-func TestNewsService_ListNewsItemsRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListItemsRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/news_items", func(w http.ResponseWriter, r *http.Request) {
@@ -398,13 +503,13 @@ func TestNewsService_ListNewsItemsRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.News.ListNewsItemsRaw(ctx, nil)
+	result, err := svc.ListItemsRaw(ctx, nil)
 	if err != nil {
-		t.Fatalf("ListNewsItemsRaw returned error: %v", err)
+		t.Fatalf("ListItemsRaw returned error: %v", err)
 	}
-	data, err := ParseNewsListNewsItemsResult(result)
+	data, err := news.ParseListItemsResult(result)
 	if err != nil {
-		t.Fatalf("ParseNewsListNewsItemsResult returned error: %v", err)
+		t.Fatalf("ParseListItemsResult returned error: %v", err)
 	}
 	if data.TotalCount != 1 {
 		t.Errorf("TotalCount = %v, want 1", data.TotalCount)
@@ -414,8 +519,8 @@ func TestNewsService_ListNewsItemsRaw_Success(t *testing.T) {
 	}
 }
 
-func TestNewsService_GetNewsItemRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetItemRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/news_items/42", func(w http.ResponseWriter, r *http.Request) {
@@ -425,13 +530,13 @@ func TestNewsService_GetNewsItemRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.News.GetNewsItemRaw(ctx, "42")
+	result, err := svc.GetItemRaw(ctx, "42")
 	if err != nil {
-		t.Fatalf("GetNewsItemRaw returned error: %v", err)
+		t.Fatalf("GetItemRaw returned error: %v", err)
 	}
-	data, err := ParseNewsGetNewsItemResult(result)
+	data, err := news.ParseGetItemResult(result)
 	if err != nil {
-		t.Fatalf("ParseNewsGetNewsItemResult returned error: %v", err)
+		t.Fatalf("ParseGetItemResult returned error: %v", err)
 	}
 	if data.ID != "42" {
 		t.Errorf("Data.ID = %v, want 42", data.ID)
@@ -447,8 +552,8 @@ func TestNewsService_GetNewsItemRaw_Success(t *testing.T) {
 	}
 }
 
-func TestNewsService_GetNewsItemRaw_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetItemRaw_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/news_items/999", func(w http.ResponseWriter, r *http.Request) {
@@ -457,9 +562,9 @@ func TestNewsService_GetNewsItemRaw_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.News.GetNewsItemRaw(ctx, "999")
+	result, err := svc.GetItemRaw(ctx, "999")
 	if err != nil {
-		t.Fatalf("GetNewsItemRaw returned Go error: %v", err)
+		t.Fatalf("GetItemRaw returned Go error: %v", err)
 	}
 	if result.Error == nil {
 		t.Fatal("Result.Error is nil, want non-nil")
@@ -472,8 +577,8 @@ func TestNewsService_GetNewsItemRaw_NotFound(t *testing.T) {
 	}
 }
 
-func TestNewsService_CreateNewsItemRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CreateItemRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/news_items", func(w http.ResponseWriter, r *http.Request) {
@@ -483,16 +588,16 @@ func TestNewsService_CreateNewsItemRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.News.CreateNewsItemRaw(ctx, &CreateNewsItemRequest{
+	result, err := svc.CreateItemRaw(ctx, &news.CreateItemRequest{
 		Title:    "Halloween is here!",
 		SenderID: 123,
 	})
 	if err != nil {
-		t.Fatalf("CreateNewsItemRaw returned error: %v", err)
+		t.Fatalf("CreateItemRaw returned error: %v", err)
 	}
-	data, err := ParseNewsCreateNewsItemResult(result)
+	data, err := news.ParseCreateItemResult(result)
 	if err != nil {
-		t.Fatalf("ParseNewsCreateNewsItemResult returned error: %v", err)
+		t.Fatalf("ParseCreateItemResult returned error: %v", err)
 	}
 	if data.ID != "50" {
 		t.Errorf("Data.ID = %v, want 50", data.ID)
@@ -502,8 +607,8 @@ func TestNewsService_CreateNewsItemRaw_Success(t *testing.T) {
 	}
 }
 
-func TestNewsService_UpdateNewsItemRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_UpdateItemRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/news_items/50", func(w http.ResponseWriter, r *http.Request) {
@@ -513,13 +618,13 @@ func TestNewsService_UpdateNewsItemRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.News.UpdateNewsItemRaw(ctx, "50", &UpdateNewsItemRequest{Title: "Updated Title"})
+	result, err := svc.UpdateItemRaw(ctx, "50", &news.UpdateItemRequest{Title: "Updated Title"})
 	if err != nil {
-		t.Fatalf("UpdateNewsItemRaw returned error: %v", err)
+		t.Fatalf("UpdateItemRaw returned error: %v", err)
 	}
-	data, err := ParseNewsUpdateNewsItemResult(result)
+	data, err := news.ParseUpdateItemResult(result)
 	if err != nil {
-		t.Fatalf("ParseNewsUpdateNewsItemResult returned error: %v", err)
+		t.Fatalf("ParseUpdateItemResult returned error: %v", err)
 	}
 	if data.Title != "Updated Title" {
 		t.Errorf("Data.Title = %v, want Updated Title", data.Title)
@@ -529,8 +634,8 @@ func TestNewsService_UpdateNewsItemRaw_Success(t *testing.T) {
 	}
 }
 
-func TestNewsService_DeleteNewsItemRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_DeleteItemRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/news_items/50", func(w http.ResponseWriter, r *http.Request) {
@@ -540,13 +645,13 @@ func TestNewsService_DeleteNewsItemRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.News.DeleteNewsItemRaw(ctx, "50")
+	result, err := svc.DeleteItemRaw(ctx, "50")
 	if err != nil {
-		t.Fatalf("DeleteNewsItemRaw returned error: %v", err)
+		t.Fatalf("DeleteItemRaw returned error: %v", err)
 	}
-	data, err := ParseNewsDeleteNewsItemResult(result)
+	data, err := news.ParseDeleteItemResult(result)
 	if err != nil {
-		t.Fatalf("ParseNewsDeleteNewsItemResult returned error: %v", err)
+		t.Fatalf("ParseDeleteItemResult returned error: %v", err)
 	}
 	if !data.Deleted {
 		t.Error("Data.Deleted = false, want true")
@@ -556,8 +661,8 @@ func TestNewsService_DeleteNewsItemRaw_Success(t *testing.T) {
 	}
 }
 
-func TestNewsService_ListNewsfeedsRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListNewsfeedsRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/newsfeeds", func(w http.ResponseWriter, r *http.Request) {
@@ -567,13 +672,13 @@ func TestNewsService_ListNewsfeedsRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.News.ListNewsfeedsRaw(ctx, nil)
+	result, err := svc.ListNewsfeedsRaw(ctx, nil)
 	if err != nil {
 		t.Fatalf("ListNewsfeedsRaw returned error: %v", err)
 	}
-	data, err := ParseNewsListNewsfeedsResult(result)
+	data, err := news.ParseListNewsfeedsResult(result)
 	if err != nil {
-		t.Fatalf("ParseNewsListNewsfeedsResult returned error: %v", err)
+		t.Fatalf("ParseListNewsfeedsResult returned error: %v", err)
 	}
 	if data.TotalCount != 1 {
 		t.Errorf("TotalCount = %v, want 1", data.TotalCount)
@@ -583,8 +688,8 @@ func TestNewsService_ListNewsfeedsRaw_Success(t *testing.T) {
 	}
 }
 
-func TestNewsService_GetNewsfeedRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetNewsfeedRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/newsfeeds/10", func(w http.ResponseWriter, r *http.Request) {
@@ -594,13 +699,13 @@ func TestNewsService_GetNewsfeedRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.News.GetNewsfeedRaw(ctx, "10")
+	result, err := svc.GetNewsfeedRaw(ctx, "10")
 	if err != nil {
 		t.Fatalf("GetNewsfeedRaw returned error: %v", err)
 	}
-	data, err := ParseNewsGetNewsfeedResult(result)
+	data, err := news.ParseGetNewsfeedResult(result)
 	if err != nil {
-		t.Fatalf("ParseNewsGetNewsfeedResult returned error: %v", err)
+		t.Fatalf("ParseGetNewsfeedResult returned error: %v", err)
 	}
 	if data.ID != "10" {
 		t.Errorf("Data.ID = %v, want 10", data.ID)
@@ -613,8 +718,8 @@ func TestNewsService_GetNewsfeedRaw_Success(t *testing.T) {
 	}
 }
 
-func TestNewsService_ListNewsfeedItemsRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListNewsfeedItemsRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/news/newsfeeds/10/items", func(w http.ResponseWriter, r *http.Request) {
@@ -624,13 +729,13 @@ func TestNewsService_ListNewsfeedItemsRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.News.ListNewsfeedItemsRaw(ctx, "10", nil)
+	result, err := svc.ListNewsfeedItemsRaw(ctx, "10", nil)
 	if err != nil {
 		t.Fatalf("ListNewsfeedItemsRaw returned error: %v", err)
 	}
-	data, err := ParseNewsListNewsfeedItemsResult(result)
+	data, err := news.ParseListNewsfeedItemsResult(result)
 	if err != nil {
-		t.Fatalf("ParseNewsListNewsfeedItemsResult returned error: %v", err)
+		t.Fatalf("ParseListNewsfeedItemsResult returned error: %v", err)
 	}
 	if data.TotalCount != 1 {
 		t.Errorf("TotalCount = %v, want 1", data.TotalCount)

@@ -106,11 +106,11 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 11: Migrate `news` sub-package
-- [ ] create `news/news.go` — move types and methods from root `news.go`
-- [ ] add `News()` accessor to `Client`
-- [ ] migrate tests to `news/news_test.go`
-- [ ] remove root `news.go`
-- [ ] run tests: `go test ./...`
+- [x] create `news/news.go` — move types and methods from root `news.go`
+- [x] add `News()` accessor to `Client`
+- [x] migrate tests to `news/news_test.go`
+- [x] remove root `news.go`
+- [x] run tests: `go test ./...`
 
 ### Task 12: Migrate `messaging` sub-package
 - [ ] create `messaging/messages.go` — move from root `messages.go`
