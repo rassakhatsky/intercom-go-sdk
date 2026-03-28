@@ -174,11 +174,11 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 19: Migrate `companies` sub-package
-- [ ] create `companies/companies.go` — move from root `companies.go` (includes scroll pagination)
-- [ ] add `Companies()` accessor to `Client`
-- [ ] migrate tests to `companies/companies_test.go`
-- [ ] remove root `companies.go`
-- [ ] run tests: `go test ./...`
+- [x] create `companies/companies.go` — move from root `companies.go` (includes scroll pagination)
+- [x] add `Companies()` accessor to `Client`
+- [x] migrate tests to `companies/companies_test.go`
+- [x] remove root `companies.go`
+- [x] run tests: `go test ./...`
 
 ### Task 20: Migrate `tickets` sub-package
 - [ ] create `tickets/tickets.go` — move from root `tickets.go`

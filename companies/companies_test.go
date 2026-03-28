@@ -1,15 +1,141 @@
-package intercom
+package companies_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/companies"
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-func TestCompaniesService_Get(t *testing.T) {
-	client, mux, teardown := setup()
+// testCaller implements api.Caller for testing, backed by an httptest.Server.
+type testCaller struct {
+	baseURL string
+	client  *http.Client
+}
+
+func (tc *testCaller) NewRequest(method, urlStr string, body any) (*http.Request, error) {
+	var buf io.Reader
+	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+		buf = bytes.NewBuffer(jsonBody)
+	}
+	req, err := http.NewRequest(method, tc.baseURL+"/"+urlStr, buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer test-token")
+	req.Header.Set("Accept", "application/json")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	return req, nil
+}
+
+func (tc *testCaller) DoRaw(ctx context.Context, req *http.Request) (*api.Result, error) {
+	req = req.WithContext(ctx)
+	resp, err := tc.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return api.BuildResult(resp, b), nil
+}
+
+func (tc *testCaller) Do(ctx context.Context, req *http.Request, v any) (*api.Response, error) {
+	result, err := tc.DoRaw(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	response := &api.Response{Result: result}
+	if result.Error != nil {
+		return response, api.ResultError(result)
+	}
+	if v != nil && result.StatusCode != http.StatusNoContent && len(result.Body) > 0 {
+		if err := json.Unmarshal(result.Body, v); err != nil {
+			return response, err
+		}
+	}
+	return response, nil
+}
+
+func (tc *testCaller) DoRawNoRedirect(ctx context.Context, req *http.Request) (*api.Result, error) {
+	noRedirectClient := &http.Client{
+		Transport: tc.client.Transport,
+		Timeout:   tc.client.Timeout,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	req = req.WithContext(ctx)
+	resp, err := noRedirectClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return api.BuildResult(resp, b), nil
+}
+
+func (tc *testCaller) DoDownload(ctx context.Context, req *http.Request, w io.Writer) error {
+	req = req.WithContext(ctx)
+	resp, err := tc.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		b, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return fmt.Errorf("HTTP %d: failed to read error body: %w", resp.StatusCode, readErr)
+		}
+		result := api.BuildResult(resp, b)
+		return api.ResultError(result)
+	}
+	_, err = io.Copy(w, resp.Body)
+	return err
+}
+
+func setup() (svc *companies.Service, mux *http.ServeMux, teardown func()) {
+	mux = http.NewServeMux()
+	server := httptest.NewServer(mux)
+	caller := &testCaller{baseURL: server.URL, client: server.Client()}
+	svc = companies.NewService(caller)
+	return svc, mux, server.Close
+}
+
+func testMethod(t *testing.T, r *http.Request, want string) {
+	t.Helper()
+	if got := r.Method; got != want {
+		t.Errorf("Request method = %v, want %v", got, want)
+	}
+}
+
+func testHeader(t *testing.T, r *http.Request, header, want string) {
+	t.Helper()
+	if got := r.Header.Get(header); got != want {
+		t.Errorf("Header %v = %q, want %q", header, got, want)
+	}
+}
+
+func TestService_Get(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/abc123", func(w http.ResponseWriter, r *http.Request) {
@@ -30,9 +156,9 @@ func TestCompaniesService_Get(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	company, err := client.Companies.Get(ctx, "abc123")
+	company, err := svc.Get(ctx, "abc123")
 	if err != nil {
-		t.Fatalf("Companies.Get returned error: %v", err)
+		t.Fatalf("Get returned error: %v", err)
 	}
 	if company.ID != "abc123" {
 		t.Errorf("Company.ID = %v, want abc123", company.ID)
@@ -48,13 +174,13 @@ func TestCompaniesService_Get(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_Create(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Create(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body CreateOrUpdateCompanyRequest
+		var body companies.CreateOrUpdateRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -68,12 +194,12 @@ func TestCompaniesService_Create(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	company, err := client.Companies.Create(ctx, &CreateOrUpdateCompanyRequest{
+	company, err := svc.Create(ctx, &companies.CreateOrUpdateRequest{
 		CompanyID: "remote-1",
 		Name:      "Acme Inc",
 	})
 	if err != nil {
-		t.Fatalf("Companies.Create returned error: %v", err)
+		t.Fatalf("Create returned error: %v", err)
 	}
 	if company.ID != "abc123" {
 		t.Errorf("Company.ID = %v, want abc123", company.ID)
@@ -83,13 +209,13 @@ func TestCompaniesService_Create(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_Update(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Update(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/abc123", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPut)
-		var body UpdateCompanyRequest
+		var body companies.UpdateRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -100,19 +226,19 @@ func TestCompaniesService_Update(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	company, err := client.Companies.Update(ctx, "abc123", &UpdateCompanyRequest{
+	company, err := svc.Update(ctx, "abc123", &companies.UpdateRequest{
 		Name: "Acme Updated",
 	})
 	if err != nil {
-		t.Fatalf("Companies.Update returned error: %v", err)
+		t.Fatalf("Update returned error: %v", err)
 	}
 	if company.Name != "Acme Updated" {
 		t.Errorf("Company.Name = %v, want Acme Updated", company.Name)
 	}
 }
 
-func TestCompaniesService_Delete(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Delete(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/abc123", func(w http.ResponseWriter, r *http.Request) {
@@ -121,23 +247,23 @@ func TestCompaniesService_Delete(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	deleted, err := client.Companies.Delete(ctx, "abc123")
+	deleted, err := svc.Delete(ctx, "abc123")
 	if err != nil {
-		t.Fatalf("Companies.Delete returned error: %v", err)
+		t.Fatalf("Delete returned error: %v", err)
 	}
 	if !deleted.Deleted {
-		t.Error("CompanyDeleted.Deleted = false, want true")
+		t.Error("Deleted.Deleted = false, want true")
 	}
 	if deleted.ID != "abc123" {
-		t.Errorf("CompanyDeleted.ID = %v, want abc123", deleted.ID)
+		t.Errorf("Deleted.ID = %v, want abc123", deleted.ID)
 	}
 	if deleted.Object != "company" {
-		t.Errorf("CompanyDeleted.Object = %v, want company", deleted.Object)
+		t.Errorf("Deleted.Object = %v, want company", deleted.Object)
 	}
 }
 
-func TestCompaniesService_List(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_List(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies", func(w http.ResponseWriter, r *http.Request) {
@@ -154,9 +280,9 @@ func TestCompaniesService_List(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.List(ctx, nil)
+	result, err := svc.List(ctx, nil)
 	if err != nil {
-		t.Fatalf("Companies.List returned error: %v", err)
+		t.Fatalf("List returned error: %v", err)
 	}
 	if len(result.Data) != 2 {
 		t.Errorf("List returned %d companies, want 2", len(result.Data))
@@ -166,8 +292,8 @@ func TestCompaniesService_List(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_ListAll(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListAll(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	callCount := 0
@@ -192,7 +318,7 @@ func TestCompaniesService_ListAll(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	iter := client.Companies.ListAll(ctx, &ListOptions{PerPage: 1})
+	iter := svc.ListAll(ctx, &api.ListOptions{PerPage: 1})
 	var ids []string
 	for iter.Next() {
 		ids = append(ids, iter.Current().ID)
@@ -208,15 +334,14 @@ func TestCompaniesService_ListAll(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_Scroll(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Scroll(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/scroll", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
 		scrollParam := r.URL.Query().Get("scroll_param")
 		if scrollParam == "" {
-			// First request - no scroll param
 			fmt.Fprint(w, `{
 				"type":"list",
 				"data":[{"type":"company","id":"c1","name":"Acme"}],
@@ -225,7 +350,6 @@ func TestCompaniesService_Scroll(t *testing.T) {
 				"pages":{"type":"pages"}
 			}`)
 		} else if scrollParam == "scroll-token-1" {
-			// Second request with scroll param
 			fmt.Fprint(w, `{
 				"type":"list",
 				"data":[{"type":"company","id":"c2","name":"Globex"}],
@@ -234,7 +358,6 @@ func TestCompaniesService_Scroll(t *testing.T) {
 				"pages":{"type":"pages"}
 			}`)
 		} else {
-			// End of scroll
 			fmt.Fprint(w, `{
 				"type":"list",
 				"data":[],
@@ -246,10 +369,9 @@ func TestCompaniesService_Scroll(t *testing.T) {
 
 	ctx := context.Background()
 
-	// First request with empty scroll param
-	result, err := client.Companies.Scroll(ctx, "")
+	result, err := svc.Scroll(ctx, "")
 	if err != nil {
-		t.Fatalf("Companies.Scroll (first) returned error: %v", err)
+		t.Fatalf("Scroll (first) returned error: %v", err)
 	}
 	if len(result.Data) != 1 {
 		t.Fatalf("Scroll returned %d companies, want 1", len(result.Data))
@@ -261,10 +383,9 @@ func TestCompaniesService_Scroll(t *testing.T) {
 		t.Errorf("ScrollParam = %v, want scroll-token-1", result.ScrollParam)
 	}
 
-	// Second request with scroll param
-	result, err = client.Companies.Scroll(ctx, result.ScrollParam)
+	result, err = svc.Scroll(ctx, result.ScrollParam)
 	if err != nil {
-		t.Fatalf("Companies.Scroll (second) returned error: %v", err)
+		t.Fatalf("Scroll (second) returned error: %v", err)
 	}
 	if len(result.Data) != 1 {
 		t.Fatalf("Scroll returned %d companies, want 1", len(result.Data))
@@ -274,8 +395,8 @@ func TestCompaniesService_Scroll(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_Scroll_EmptyStart(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Scroll_EmptyStart(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/scroll", func(w http.ResponseWriter, r *http.Request) {
@@ -293,17 +414,17 @@ func TestCompaniesService_Scroll_EmptyStart(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.Scroll(ctx, "")
+	result, err := svc.Scroll(ctx, "")
 	if err != nil {
-		t.Fatalf("Companies.Scroll returned error: %v", err)
+		t.Fatalf("Scroll returned error: %v", err)
 	}
 	if len(result.Data) != 0 {
 		t.Errorf("Scroll returned %d companies, want 0", len(result.Data))
 	}
 }
 
-func TestCompaniesService_ListContacts(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListContacts(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/abc123/contacts", func(w http.ResponseWriter, r *http.Request) {
@@ -317,9 +438,9 @@ func TestCompaniesService_ListContacts(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.ListContacts(ctx, "abc123", nil)
+	result, err := svc.ListContacts(ctx, "abc123", nil)
 	if err != nil {
-		t.Fatalf("Companies.ListContacts returned error: %v", err)
+		t.Fatalf("ListContacts returned error: %v", err)
 	}
 	if len(result.Data) != 1 {
 		t.Errorf("ListContacts returned %d contacts, want 1", len(result.Data))
@@ -329,8 +450,8 @@ func TestCompaniesService_ListContacts(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_ListSegments(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListSegments(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/abc123/segments", func(w http.ResponseWriter, r *http.Request) {
@@ -342,9 +463,9 @@ func TestCompaniesService_ListSegments(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.ListSegments(ctx, "abc123")
+	result, err := svc.ListSegments(ctx, "abc123")
 	if err != nil {
-		t.Fatalf("Companies.ListSegments returned error: %v", err)
+		t.Fatalf("ListSegments returned error: %v", err)
 	}
 	if len(result.Data) != 1 {
 		t.Errorf("ListSegments returned %d segments, want 1", len(result.Data))
@@ -354,8 +475,8 @@ func TestCompaniesService_ListSegments(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_ListNotes(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListNotes(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/abc123/notes", func(w http.ResponseWriter, r *http.Request) {
@@ -369,9 +490,9 @@ func TestCompaniesService_ListNotes(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.ListNotes(ctx, "abc123")
+	result, err := svc.ListNotes(ctx, "abc123")
 	if err != nil {
-		t.Fatalf("Companies.ListNotes returned error: %v", err)
+		t.Fatalf("ListNotes returned error: %v", err)
 	}
 	if len(result.Data) != 1 {
 		t.Errorf("ListNotes returned %d notes, want 1", len(result.Data))
@@ -381,8 +502,8 @@ func TestCompaniesService_ListNotes(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_CompanyList(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CompanyList(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/list", func(w http.ResponseWriter, r *http.Request) {
@@ -409,12 +530,12 @@ func TestCompaniesService_CompanyList(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.CompanyList(ctx, &CompanyListOptions{
+	result, err := svc.CompanyList(ctx, &companies.ListOptions{
 		Page:    1,
 		PerPage: 15,
 	})
 	if err != nil {
-		t.Fatalf("Companies.CompanyList returned error: %v", err)
+		t.Fatalf("CompanyList returned error: %v", err)
 	}
 	if len(result.Data) != 2 {
 		t.Errorf("CompanyList returned %d companies, want 2", len(result.Data))
@@ -424,8 +545,8 @@ func TestCompaniesService_CompanyList(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_Get_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_Get_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/999", func(w http.ResponseWriter, r *http.Request) {
@@ -434,19 +555,19 @@ func TestCompaniesService_Get_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.Companies.Get(ctx, "999")
+	_, err := svc.Get(ctx, "999")
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("IsNotFound = false, want true")
 	}
 }
 
 // --- Raw companion method tests ---
 
-func TestCompaniesService_GetRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/abc123", func(w http.ResponseWriter, r *http.Request) {
@@ -456,13 +577,13 @@ func TestCompaniesService_GetRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.GetRaw(ctx, "abc123")
+	result, err := svc.GetRaw(ctx, "abc123")
 	if err != nil {
 		t.Fatalf("GetRaw returned error: %v", err)
 	}
-	company, err := ParseCompanyGetResult(result)
+	company, err := companies.ParseGetResult(result)
 	if err != nil {
-		t.Fatalf("ParseCompanyGetResult returned error: %v", err)
+		t.Fatalf("ParseGetResult returned error: %v", err)
 	}
 	if company.ID != "abc123" {
 		t.Errorf("Company.ID = %v, want abc123", company.ID)
@@ -481,8 +602,8 @@ func TestCompaniesService_GetRaw_Success(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_GetRaw_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetRaw_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/999", func(w http.ResponseWriter, r *http.Request) {
@@ -491,7 +612,7 @@ func TestCompaniesService_GetRaw_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.GetRaw(ctx, "999")
+	result, err := svc.GetRaw(ctx, "999")
 	if err != nil {
 		t.Fatalf("GetRaw returned Go error: %v", err)
 	}
@@ -506,8 +627,8 @@ func TestCompaniesService_GetRaw_NotFound(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_ListRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies", func(w http.ResponseWriter, r *http.Request) {
@@ -521,13 +642,13 @@ func TestCompaniesService_ListRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.ListRaw(ctx, nil)
+	result, err := svc.ListRaw(ctx, nil)
 	if err != nil {
 		t.Fatalf("ListRaw returned error: %v", err)
 	}
-	paged, err := ParseCompanyListResult(result)
+	paged, err := companies.ParseListResult(result)
 	if err != nil {
-		t.Fatalf("ParseCompanyListResult returned error: %v", err)
+		t.Fatalf("ParseListResult returned error: %v", err)
 	}
 	if len(paged.Data) != 2 {
 		t.Errorf("Data length = %d, want 2", len(paged.Data))
@@ -537,8 +658,8 @@ func TestCompaniesService_ListRaw(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_CompanyListRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CompanyListRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/list", func(w http.ResponseWriter, r *http.Request) {
@@ -552,13 +673,13 @@ func TestCompaniesService_CompanyListRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.CompanyListRaw(ctx, &CompanyListOptions{Page: 1, PerPage: 15})
+	result, err := svc.CompanyListRaw(ctx, &companies.ListOptions{Page: 1, PerPage: 15})
 	if err != nil {
 		t.Fatalf("CompanyListRaw returned error: %v", err)
 	}
-	paged, err := ParseCompanyCompanyListResult(result)
+	paged, err := companies.ParseCompanyListResult(result)
 	if err != nil {
-		t.Fatalf("ParseCompanyCompanyListResult returned error: %v", err)
+		t.Fatalf("ParseCompanyListResult returned error: %v", err)
 	}
 	if len(paged.Data) != 1 {
 		t.Errorf("Data length = %d, want 1", len(paged.Data))
@@ -568,8 +689,8 @@ func TestCompaniesService_CompanyListRaw(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_CreateRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CreateRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies", func(w http.ResponseWriter, r *http.Request) {
@@ -578,16 +699,16 @@ func TestCompaniesService_CreateRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.CreateRaw(ctx, &CreateOrUpdateCompanyRequest{
+	result, err := svc.CreateRaw(ctx, &companies.CreateOrUpdateRequest{
 		CompanyID: "remote-1",
 		Name:      "Acme Inc",
 	})
 	if err != nil {
 		t.Fatalf("CreateRaw returned error: %v", err)
 	}
-	company, err := ParseCompanyCreateResult(result)
+	company, err := companies.ParseCreateResult(result)
 	if err != nil {
-		t.Fatalf("ParseCompanyCreateResult returned error: %v", err)
+		t.Fatalf("ParseCreateResult returned error: %v", err)
 	}
 	if company.ID != "abc123" {
 		t.Errorf("Company.ID = %v, want abc123", company.ID)
@@ -597,8 +718,8 @@ func TestCompaniesService_CreateRaw(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_UpdateRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_UpdateRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/abc123", func(w http.ResponseWriter, r *http.Request) {
@@ -607,13 +728,13 @@ func TestCompaniesService_UpdateRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.UpdateRaw(ctx, "abc123", &UpdateCompanyRequest{Name: "Acme Updated"})
+	result, err := svc.UpdateRaw(ctx, "abc123", &companies.UpdateRequest{Name: "Acme Updated"})
 	if err != nil {
 		t.Fatalf("UpdateRaw returned error: %v", err)
 	}
-	company, err := ParseCompanyUpdateResult(result)
+	company, err := companies.ParseUpdateResult(result)
 	if err != nil {
-		t.Fatalf("ParseCompanyUpdateResult returned error: %v", err)
+		t.Fatalf("ParseUpdateResult returned error: %v", err)
 	}
 	if company.Name != "Acme Updated" {
 		t.Errorf("Company.Name = %v, want Acme Updated", company.Name)
@@ -623,8 +744,8 @@ func TestCompaniesService_UpdateRaw(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_DeleteRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_DeleteRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/abc123", func(w http.ResponseWriter, r *http.Request) {
@@ -633,13 +754,13 @@ func TestCompaniesService_DeleteRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.DeleteRaw(ctx, "abc123")
+	result, err := svc.DeleteRaw(ctx, "abc123")
 	if err != nil {
 		t.Fatalf("DeleteRaw returned error: %v", err)
 	}
-	deleted, err := ParseCompanyDeleteResult(result)
+	deleted, err := companies.ParseDeleteResult(result)
 	if err != nil {
-		t.Fatalf("ParseCompanyDeleteResult returned error: %v", err)
+		t.Fatalf("ParseDeleteResult returned error: %v", err)
 	}
 	if !deleted.Deleted {
 		t.Error("Deleted = false, want true")
@@ -649,8 +770,8 @@ func TestCompaniesService_DeleteRaw(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_ScrollRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ScrollRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/scroll", func(w http.ResponseWriter, r *http.Request) {
@@ -666,13 +787,13 @@ func TestCompaniesService_ScrollRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.ScrollRaw(ctx, "")
+	result, err := svc.ScrollRaw(ctx, "")
 	if err != nil {
 		t.Fatalf("ScrollRaw returned error: %v", err)
 	}
-	scroll, err := ParseCompanyScrollResult(result)
+	scroll, err := companies.ParseScrollResult(result)
 	if err != nil {
-		t.Fatalf("ParseCompanyScrollResult returned error: %v", err)
+		t.Fatalf("ParseScrollResult returned error: %v", err)
 	}
 	if len(scroll.Data) != 1 {
 		t.Errorf("Data length = %d, want 1", len(scroll.Data))
@@ -688,8 +809,8 @@ func TestCompaniesService_ScrollRaw(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_ListContactsRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListContactsRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/abc123/contacts", func(w http.ResponseWriter, r *http.Request) {
@@ -703,13 +824,13 @@ func TestCompaniesService_ListContactsRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.ListContactsRaw(ctx, "abc123", nil)
+	result, err := svc.ListContactsRaw(ctx, "abc123", nil)
 	if err != nil {
 		t.Fatalf("ListContactsRaw returned error: %v", err)
 	}
-	paged, err := ParseCompanyListContactsResult(result)
+	paged, err := companies.ParseListContactsResult(result)
 	if err != nil {
-		t.Fatalf("ParseCompanyListContactsResult returned error: %v", err)
+		t.Fatalf("ParseListContactsResult returned error: %v", err)
 	}
 	if len(paged.Data) != 1 {
 		t.Errorf("Data length = %d, want 1", len(paged.Data))
@@ -722,8 +843,8 @@ func TestCompaniesService_ListContactsRaw(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_ListSegmentsRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListSegmentsRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/abc123/segments", func(w http.ResponseWriter, r *http.Request) {
@@ -735,13 +856,13 @@ func TestCompaniesService_ListSegmentsRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.ListSegmentsRaw(ctx, "abc123")
+	result, err := svc.ListSegmentsRaw(ctx, "abc123")
 	if err != nil {
 		t.Fatalf("ListSegmentsRaw returned error: %v", err)
 	}
-	segments, err := ParseCompanyListSegmentsResult(result)
+	segments, err := companies.ParseListSegmentsResult(result)
 	if err != nil {
-		t.Fatalf("ParseCompanyListSegmentsResult returned error: %v", err)
+		t.Fatalf("ParseListSegmentsResult returned error: %v", err)
 	}
 	if len(segments.Data) != 1 {
 		t.Errorf("Data length = %d, want 1", len(segments.Data))
@@ -754,8 +875,8 @@ func TestCompaniesService_ListSegmentsRaw(t *testing.T) {
 	}
 }
 
-func TestCompaniesService_ListNotesRaw(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListNotesRaw(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/companies/abc123/notes", func(w http.ResponseWriter, r *http.Request) {
@@ -769,13 +890,13 @@ func TestCompaniesService_ListNotesRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.Companies.ListNotesRaw(ctx, "abc123")
+	result, err := svc.ListNotesRaw(ctx, "abc123")
 	if err != nil {
 		t.Fatalf("ListNotesRaw returned error: %v", err)
 	}
-	notes, err := ParseCompanyListNotesResult(result)
+	notes, err := companies.ParseListNotesResult(result)
 	if err != nil {
-		t.Fatalf("ParseCompanyListNotesResult returned error: %v", err)
+		t.Fatalf("ParseListNotesResult returned error: %v", err)
 	}
 	if len(notes.Data) != 1 {
 		t.Errorf("Data length = %d, want 1", len(notes.Data))

@@ -53,6 +53,24 @@ type NoteListResult struct {
 	Pages      CursorPages `json:"pages"`
 }
 
+// SegmentRef represents a segment in sub-resource responses.
+// It is shared across contacts and companies services.
+type SegmentRef struct {
+	Type       string `json:"type"`
+	ID         string `json:"id"`
+	Name       string `json:"name,omitempty"`
+	CreatedAt  int64  `json:"created_at,omitempty"`
+	UpdatedAt  int64  `json:"updated_at,omitempty"`
+	PersonType string `json:"person_type,omitempty"`
+}
+
+// SegmentListResult is the response for listing segments for a contact or company.
+// It is shared across contacts and companies services.
+type SegmentListResult struct {
+	Type string       `json:"type"`
+	Data []SegmentRef `json:"data"`
+}
+
 // ArticleContent represents translated content for a single locale.
 // It is shared across articles and help center services.
 type ArticleContent struct {

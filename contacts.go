@@ -191,22 +191,6 @@ type CreateNoteRequest struct {
 	AdminID string `json:"admin_id,omitempty"`
 }
 
-// SegmentRef represents a segment in sub-resource responses.
-type SegmentRef struct {
-	Type       string `json:"type"`
-	ID         string `json:"id"`
-	Name       string `json:"name,omitempty"`
-	CreatedAt  int64  `json:"created_at,omitempty"`
-	UpdatedAt  int64  `json:"updated_at,omitempty"`
-	PersonType string `json:"person_type,omitempty"`
-}
-
-// SegmentListResult is the response for listing segments for a contact.
-type SegmentListResult struct {
-	Type string       `json:"type"`
-	Data []SegmentRef `json:"data"`
-}
-
 // SubscriptionListResult is the response for listing subscriptions for a contact.
 type SubscriptionListResult struct {
 	Type string             `json:"type"`

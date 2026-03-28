@@ -28,6 +28,8 @@ type ContactRef = api.ContactRef
 type NoteAuthor = api.NoteAuthor
 type Note = api.Note
 type NoteListResult = api.NoteListResult
+type SegmentRef = api.SegmentRef
+type SegmentListResult = api.SegmentListResult
 type ArticleContent = api.ArticleContent
 type ArticleTranslatedContent = api.ArticleTranslatedContent
 
