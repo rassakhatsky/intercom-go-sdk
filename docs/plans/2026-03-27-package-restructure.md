@@ -47,10 +47,10 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] verify package compiles: `go build ./internal/api/...`
 
 ### Task 2: Move Result types to `internal/api`
-- [ ] create `internal/api/result.go` — move `Result`, `ErrorResult`, `ErrorDetail`, `Empty`, `Decode[T]`, `buildResult` from root `result.go`
-- [ ] export all types and functions needed by sub-packages
-- [ ] write tests for `Decode[T]` and `buildResult` in `internal/api/result_test.go`
-- [ ] run tests: `go test ./internal/api/...`
+- [x] create `internal/api/result.go` — move `Result`, `ErrorResult`, `ErrorDetail`, `Empty`, `Decode[T]`, `buildResult` from root `result.go`
+- [x] export all types and functions needed by sub-packages
+- [x] write tests for `Decode[T]` and `buildResult` in `internal/api/result_test.go`
+- [x] run tests: `go test ./internal/api/...`
 
 ### Task 3: Move error types to `internal/api`
 - [ ] create `internal/api/errors.go` — move `ErrorResponse`, `IsNotFound`, `IsRateLimited`, `IsUnauthorized`, `hasStatusCode` from root `errors.go`
