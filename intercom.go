@@ -61,6 +61,7 @@ type Client struct {
 	TicketStates        *TicketStatesService
 	TicketTypes         *TicketTypesService
 	Visitors            *VisitorsService
+	Workflows           *WorkflowsService
 }
 
 // service is the base type for all Intercom API services.
@@ -146,6 +147,7 @@ func (c *Client) initialize() {
 	c.TicketStates = (*TicketStatesService)(&c.common)
 	c.TicketTypes = (*TicketTypesService)(&c.common)
 	c.Visitors = (*VisitorsService)(&c.common)
+	c.Workflows = (*WorkflowsService)(&c.common)
 }
 
 // NewRequest creates an API request. A relative URL path can be provided in

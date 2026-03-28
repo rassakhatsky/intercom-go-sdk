@@ -73,12 +73,12 @@ Add the missing `GET /contacts/{contact_id}/tags` operation.
 ### Task 4: Fix gap — add `GET /export/workflows/{id}` support
 Add the missing exportWorkflow operation. Decide service placement (new WorkflowsService or add to existing).
 
-- [ ] Evaluate: new `WorkflowsService` vs adding to `DataExportService` — choose based on Intercom API tag ("Workflows")
-- [ ] Implement the method + Raw variant + Parse function following 3-layer pattern
-- [ ] Register service in `intercom.go` if new service
-- [ ] Add `// See:` doc URL comments
-- [ ] Write tests for the new method (success + error cases)
-- [ ] Run tests — must pass before next task
+- [x] Evaluate: new `WorkflowsService` vs adding to `DataExportService` — choose based on Intercom API tag ("Workflows")
+- [x] Implement the method + Raw variant + Parse function following 3-layer pattern
+- [x] Register service in `intercom.go` if new service
+- [x] Add `// See:` doc URL comments
+- [x] Write tests for the new method (success + error cases)
+- [x] Run tests — must pass before next task
 
 ### Task 5: Fix any additional gaps found by validation script
 Address all issues found in Task 1-2 reports that weren't caught in preliminary scan.
