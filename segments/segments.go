@@ -1,15 +1,24 @@
-package intercom
+package segments
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// SegmentsService handles communication with the segment related methods
+// Service handles communication with the segment related methods
 // of the Intercom API.
-type SegmentsService service
+type Service struct {
+	client api.Caller
+}
+
+// NewService creates a new segments Service.
+func NewService(c api.Caller) *Service {
+	return &Service{client: c}
+}
 
 // Segment represents an Intercom segment.
 type Segment struct {
@@ -22,27 +31,27 @@ type Segment struct {
 	Count      int    `json:"count,omitempty"`
 }
 
-// SegmentList represents the response from the list segments endpoint.
-type SegmentList struct {
+// List represents the response from the list segments endpoint.
+type List struct {
 	Type     string    `json:"type"`
 	Segments []Segment `json:"segments"`
 }
 
-// SegmentListOptions specifies optional parameters to the List method.
-type SegmentListOptions struct {
+// ListOptions specifies optional parameters to the List method.
+type ListOptions struct {
 	IncludeCount *bool `url:"include_count,omitempty"`
 }
 
 // --- Parse Functions ---
 
-// ParseSegmentGetResult decodes a Result into a Segment.
-func ParseSegmentGetResult(r *Result) (*Segment, error) {
-	return Decode[Segment](r)
+// ParseGetResult decodes a Result into a Segment.
+func ParseGetResult(r *api.Result) (*Segment, error) {
+	return api.Decode[Segment](r)
 }
 
-// ParseSegmentListResult decodes a Result into a SegmentList.
-func ParseSegmentListResult(r *Result) (*SegmentList, error) {
-	return Decode[SegmentList](r)
+// ParseListResult decodes a Result into a List.
+func ParseListResult(r *api.Result) (*List, error) {
+	return api.Decode[List](r)
 }
 
 // --- Regular Methods ---
@@ -50,29 +59,29 @@ func ParseSegmentListResult(r *Result) (*SegmentList, error) {
 // Get retrieves a segment by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/segments/retrievesegment
-func (s *SegmentsService) Get(ctx context.Context, id string) (*Segment, error) {
+func (s *Service) Get(ctx context.Context, id string) (*Segment, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseSegmentGetResult(result)
+	return ParseGetResult(result)
 }
 
 // List returns all segments.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/segments/listsegments
-func (s *SegmentsService) List(ctx context.Context, opts *SegmentListOptions) (*SegmentList, error) {
+func (s *Service) List(ctx context.Context, opts *ListOptions) (*List, error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseSegmentListResult(result)
+	return ParseListResult(result)
 }
 
 // --- Raw Methods ---
@@ -80,7 +89,7 @@ func (s *SegmentsService) List(ctx context.Context, opts *SegmentListOptions) (*
 // GetRaw retrieves a segment by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/segments/retrievesegment
-func (s *SegmentsService) GetRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) GetRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("segments/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -91,8 +100,8 @@ func (s *SegmentsService) GetRaw(ctx context.Context, id string) (*Result, error
 // ListRaw returns all segments with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/segments/listsegments
-func (s *SegmentsService) ListRaw(ctx context.Context, opts *SegmentListOptions) (*Result, error) {
-	path, err := addQueryOptions("segments", opts)
+func (s *Service) ListRaw(ctx context.Context, opts *ListOptions) (*api.Result, error) {
+	path, err := api.AddQueryOptions("segments", opts)
 	if err != nil {
 		return nil, err
 	}

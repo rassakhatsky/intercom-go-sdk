@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/rassakhatsky/intercom-go-sdk/segments"
 	"github.com/rassakhatsky/intercom-go-sdk/tags"
 )
 
@@ -53,7 +54,7 @@ type Client struct {
 	News                *NewsService
 	Notes               *NotesService
 	PhoneCallRedirects  *PhoneCallRedirectsService
-	Segments            *SegmentsService
+	segments            *segments.Service
 	SubscriptionTypes   *SubscriptionTypesService
 	tags                *tags.Service
 	Teams               *TeamsService
@@ -139,7 +140,7 @@ func (c *Client) initialize() {
 	c.News = (*NewsService)(&c.common)
 	c.Notes = (*NotesService)(&c.common)
 	c.PhoneCallRedirects = (*PhoneCallRedirectsService)(&c.common)
-	c.Segments = (*SegmentsService)(&c.common)
+	c.segments = segments.NewService(c)
 	c.SubscriptionTypes = (*SubscriptionTypesService)(&c.common)
 	c.tags = tags.NewService(c)
 	c.Teams = (*TeamsService)(&c.common)
@@ -148,6 +149,11 @@ func (c *Client) initialize() {
 	c.TicketTypes = (*TicketTypesService)(&c.common)
 	c.Visitors = (*VisitorsService)(&c.common)
 	c.Workflows = (*WorkflowsService)(&c.common)
+}
+
+// Segments returns the segments service.
+func (c *Client) Segments() *segments.Service {
+	return c.segments
 }
 
 // Tags returns the tags service.

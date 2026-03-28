@@ -91,11 +91,11 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 9: Migrate `segments` sub-package
-- [ ] create `segments/segments.go` — move types and methods from root `segments.go`
-- [ ] add `Segments()` accessor to `Client`
-- [ ] migrate tests to `segments/segments_test.go`
-- [ ] remove root `segments.go`
-- [ ] run tests: `go test ./...`
+- [x] create `segments/segments.go` — move types and methods from root `segments.go`
+- [x] add `Segments()` accessor to `Client`
+- [x] migrate tests to `segments/segments_test.go`
+- [x] remove root `segments.go`
+- [x] run tests: `go test ./...`
 
 ### Task 10: Migrate `export` sub-package
 - [ ] create `export/reporting.go` — move from root `export_reporting.go`
