@@ -42,9 +42,9 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 ## Implementation Steps
 
 ### Task 1: Create `internal/api` — Caller interface and Response type
-- [ ] create `internal/api/api.go` with `Caller` interface (`NewRequest`, `DoRaw`, `Do` methods)
-- [ ] define `Response` struct wrapping `*Result` in `api.go`
-- [ ] verify package compiles: `go build ./internal/api/...`
+- [x] create `internal/api/api.go` with `Caller` interface (`NewRequest`, `DoRaw`, `Do` methods)
+- [x] define `Response` struct wrapping `*Result` in `api.go`
+- [x] verify package compiles: `go build ./internal/api/...`
 
 ### Task 2: Move Result types to `internal/api`
 - [ ] create `internal/api/result.go` — move `Result`, `ErrorResult`, `ErrorDetail`, `Empty`, `Decode[T]`, `buildResult` from root `result.go`
