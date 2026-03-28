@@ -1,19 +1,28 @@
-package intercom
+package workflows
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// WorkflowsService handles communication with the workflow
+// Service handles communication with the workflow
 // related methods of the Intercom API.
-type WorkflowsService service
+type Service struct {
+	client api.Caller
+}
 
-// WorkflowExport represents a workflow export containing the complete
+// NewService creates a new workflows service.
+func NewService(c api.Caller) *Service {
+	return &Service{client: c}
+}
+
+// Export represents a workflow export containing the complete
 // workflow configuration.
-type WorkflowExport struct {
+type Export struct {
 	ExportVersion string    `json:"export_version"`
 	ExportedAt    string    `json:"exported_at"`
 	AppID         int       `json:"app_id"`
@@ -39,9 +48,9 @@ type Workflow struct {
 
 // --- Parse Functions ---
 
-// ParseExportWorkflowResult decodes a Result into a WorkflowExport.
-func ParseExportWorkflowResult(r *Result) (*WorkflowExport, error) {
-	return Decode[WorkflowExport](r)
+// ParseExportResult decodes a Result into an Export.
+func ParseExportResult(r *api.Result) (*Export, error) {
+	return api.Decode[Export](r)
 }
 
 // --- Regular Methods ---
@@ -49,15 +58,15 @@ func ParseExportWorkflowResult(r *Result) (*WorkflowExport, error) {
 // Export retrieves the complete workflow configuration by its ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/Workflows/exportWorkflow
-func (s *WorkflowsService) Export(ctx context.Context, id string) (*WorkflowExport, error) {
+func (s *Service) Export(ctx context.Context, id string) (*Export, error) {
 	result, err := s.ExportRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseExportWorkflowResult(result)
+	return ParseExportResult(result)
 }
 
 // --- Raw Methods ---
@@ -66,7 +75,7 @@ func (s *WorkflowsService) Export(ctx context.Context, id string) (*WorkflowExpo
 // and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/Workflows/exportWorkflow
-func (s *WorkflowsService) ExportRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) ExportRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("export/workflows/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err

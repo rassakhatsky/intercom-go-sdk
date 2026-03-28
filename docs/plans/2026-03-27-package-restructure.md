@@ -213,10 +213,10 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 24: Clean up root package
-- [ ] verify no old service files remain in root (only `intercom.go`, `aliases.go`, `doc.go`)
-- [ ] remove `testutil_test.go` from root if all tests moved (or keep if shared)
-- [ ] clean up any unused imports in `intercom.go`
-- [ ] run tests: `go test ./...`
+- [x] verify no old service files remain in root (only `intercom.go`, `aliases.go`, `doc.go`)
+- [x] remove `testutil_test.go` from root if all tests moved (or keep if shared)
+- [x] clean up any unused imports in `intercom.go`
+- [x] run tests: `go test ./...`
 
 ### Task 25: Verify acceptance criteria
 - [ ] verify all 33 services accessible via accessor methods

@@ -27,6 +27,7 @@ import (
 	"github.com/rassakhatsky/intercom-go-sdk/settings"
 	"github.com/rassakhatsky/intercom-go-sdk/tags"
 	"github.com/rassakhatsky/intercom-go-sdk/tickets"
+	"github.com/rassakhatsky/intercom-go-sdk/workflows"
 )
 
 const (
@@ -41,8 +42,6 @@ type Client struct {
 	baseURL    string
 	httpClient *http.Client
 	logger     Logger
-
-	common service // reuse a single struct for all services
 
 	admins              *admins.Service
 	aiContent           *aiPkg.ContentService
@@ -77,12 +76,7 @@ type Client struct {
 	ticketStates        *tickets.StatesService
 	ticketTypes         *tickets.TypesService
 	visitors            *contacts.VisitorsService
-	Workflows           *WorkflowsService
-}
-
-// service is the base type for all Intercom API services.
-type service struct {
-	client *Client
+	workflows           *workflows.Service
 }
 
 // ClientOption configures the Client.
@@ -123,7 +117,6 @@ func NewClient(token string, opts ...ClientOption) *Client {
 	for _, opt := range opts {
 		opt(c)
 	}
-	c.common.client = c
 	c.initialize()
 	return c
 }
@@ -163,7 +156,7 @@ func (c *Client) initialize() {
 	c.ticketStates = tickets.NewStatesService(c)
 	c.ticketTypes = tickets.NewTypesService(c)
 	c.visitors = contacts.NewVisitorsService(c)
-	c.Workflows = (*WorkflowsService)(&c.common)
+	c.workflows = workflows.NewService(c)
 }
 
 // AIContent returns the AI content service.
@@ -329,6 +322,11 @@ func (c *Client) TicketTypes() *tickets.TypesService {
 // TicketStates returns the ticket states service.
 func (c *Client) TicketStates() *tickets.StatesService {
 	return c.ticketStates
+}
+
+// Workflows returns the workflows service.
+func (c *Client) Workflows() *workflows.Service {
+	return c.workflows
 }
 
 // NewRequest creates an API request. A relative URL path can be provided in
