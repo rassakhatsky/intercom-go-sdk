@@ -53,10 +53,10 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./internal/api/...`
 
 ### Task 3: Move error types to `internal/api`
-- [ ] create `internal/api/errors.go` — move `ErrorResponse`, `IsNotFound`, `IsRateLimited`, `IsUnauthorized`, `hasStatusCode` from root `errors.go`
-- [ ] export `ResultError` (currently unexported `resultError`) for sub-package use
-- [ ] migrate error tests to `internal/api/errors_test.go`
-- [ ] run tests: `go test ./internal/api/...`
+- [x] create `internal/api/errors.go` — move `ErrorResponse`, `IsNotFound`, `IsRateLimited`, `IsUnauthorized`, `hasStatusCode` from root `errors.go`
+- [x] export `ResultError` (currently unexported `resultError`) for sub-package use
+- [x] migrate error tests to `internal/api/errors_test.go`
+- [x] run tests: `go test ./internal/api/...`
 
 ### Task 4: Move pagination types to `internal/api`
 - [ ] create `internal/api/pagination.go` — move `PagedResult[T]`, `Iter[T]`, `ListOptions`, `ScrollOptions`, `CursorPages`, `StartingAfterPage`, `NewIter`, `PageFetcher[T]` from root `pagination.go`
