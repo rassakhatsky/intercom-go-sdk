@@ -1,32 +1,41 @@
-package intercom
+package helpcenter
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// HelpCenterService handles communication with the help center related methods
+// Service handles communication with the help center related methods
 // of the Intercom API.
-type HelpCenterService service
+type Service struct {
+	client api.Caller
+}
+
+// NewService creates a new help center Service.
+func NewService(c api.Caller) *Service {
+	return &Service{client: c}
+}
 
 // Collection represents an Intercom help center collection.
 type Collection struct {
-	Type              string                    `json:"type"`
-	ID                string                    `json:"id"`
-	WorkspaceID       string                    `json:"workspace_id,omitempty"`
-	Name              string                    `json:"name,omitempty"`
-	Description       string                    `json:"description,omitempty"`
-	CreatedAt         int64                     `json:"created_at,omitempty"`
-	UpdatedAt         int64                     `json:"updated_at,omitempty"`
-	URL               string                    `json:"url,omitempty"`
-	Icon              string                    `json:"icon,omitempty"`
-	Order             int                       `json:"order,omitempty"`
-	DefaultLocale     string                    `json:"default_locale,omitempty"`
-	TranslatedContent *ArticleTranslatedContent `json:"translated_content,omitempty"`
-	ParentID          string                    `json:"parent_id,omitempty"`
-	HelpCenterID      int                       `json:"help_center_id,omitempty"`
+	Type              string                        `json:"type"`
+	ID                string                        `json:"id"`
+	WorkspaceID       string                        `json:"workspace_id,omitempty"`
+	Name              string                        `json:"name,omitempty"`
+	Description       string                        `json:"description,omitempty"`
+	CreatedAt         int64                         `json:"created_at,omitempty"`
+	UpdatedAt         int64                         `json:"updated_at,omitempty"`
+	URL               string                        `json:"url,omitempty"`
+	Icon              string                        `json:"icon,omitempty"`
+	Order             int                           `json:"order,omitempty"`
+	DefaultLocale     string                        `json:"default_locale,omitempty"`
+	TranslatedContent *api.ArticleTranslatedContent `json:"translated_content,omitempty"`
+	ParentID          string                        `json:"parent_id,omitempty"`
+	HelpCenterID      int                           `json:"help_center_id,omitempty"`
 }
 
 // CollectionDeleted represents the response from deleting a collection.
@@ -38,19 +47,19 @@ type CollectionDeleted struct {
 
 // CreateCollectionRequest represents the request body for creating a collection.
 type CreateCollectionRequest struct {
-	Name              string                    `json:"name"`
-	Description       string                    `json:"description,omitempty"`
-	TranslatedContent *ArticleTranslatedContent `json:"translated_content,omitempty"`
-	ParentID          string                    `json:"parent_id,omitempty"`
-	HelpCenterID      *int                      `json:"help_center_id,omitempty"`
+	Name              string                        `json:"name"`
+	Description       string                        `json:"description,omitempty"`
+	TranslatedContent *api.ArticleTranslatedContent `json:"translated_content,omitempty"`
+	ParentID          string                        `json:"parent_id,omitempty"`
+	HelpCenterID      *int                          `json:"help_center_id,omitempty"`
 }
 
 // UpdateCollectionRequest represents the request body for updating a collection.
 type UpdateCollectionRequest struct {
-	Name              string                    `json:"name,omitempty"`
-	Description       string                    `json:"description,omitempty"`
-	TranslatedContent *ArticleTranslatedContent `json:"translated_content,omitempty"`
-	ParentID          string                    `json:"parent_id,omitempty"`
+	Name              string                        `json:"name,omitempty"`
+	Description       string                        `json:"description,omitempty"`
+	TranslatedContent *api.ArticleTranslatedContent `json:"translated_content,omitempty"`
+	ParentID          string                        `json:"parent_id,omitempty"`
 }
 
 // HelpCenter represents an Intercom help center.
@@ -75,39 +84,39 @@ type HelpCenterList struct {
 
 // --- Parse Functions ---
 
-// ParseHelpCenterListCollectionsResult decodes a Result into a PagedResult[Collection].
-func ParseHelpCenterListCollectionsResult(r *Result) (*PagedResult[Collection], error) {
-	return Decode[PagedResult[Collection]](r)
+// ParseListCollectionsResult decodes a Result into a PagedResult[Collection].
+func ParseListCollectionsResult(r *api.Result) (*api.PagedResult[Collection], error) {
+	return api.Decode[api.PagedResult[Collection]](r)
 }
 
-// ParseHelpCenterGetCollectionResult decodes a Result into a Collection.
-func ParseHelpCenterGetCollectionResult(r *Result) (*Collection, error) {
-	return Decode[Collection](r)
+// ParseGetCollectionResult decodes a Result into a Collection.
+func ParseGetCollectionResult(r *api.Result) (*Collection, error) {
+	return api.Decode[Collection](r)
 }
 
-// ParseHelpCenterCreateCollectionResult decodes a Result into a Collection.
-func ParseHelpCenterCreateCollectionResult(r *Result) (*Collection, error) {
-	return Decode[Collection](r)
+// ParseCreateCollectionResult decodes a Result into a Collection.
+func ParseCreateCollectionResult(r *api.Result) (*Collection, error) {
+	return api.Decode[Collection](r)
 }
 
-// ParseHelpCenterUpdateCollectionResult decodes a Result into a Collection.
-func ParseHelpCenterUpdateCollectionResult(r *Result) (*Collection, error) {
-	return Decode[Collection](r)
+// ParseUpdateCollectionResult decodes a Result into a Collection.
+func ParseUpdateCollectionResult(r *api.Result) (*Collection, error) {
+	return api.Decode[Collection](r)
 }
 
-// ParseHelpCenterDeleteCollectionResult decodes a Result into a CollectionDeleted.
-func ParseHelpCenterDeleteCollectionResult(r *Result) (*CollectionDeleted, error) {
-	return Decode[CollectionDeleted](r)
+// ParseDeleteCollectionResult decodes a Result into a CollectionDeleted.
+func ParseDeleteCollectionResult(r *api.Result) (*CollectionDeleted, error) {
+	return api.Decode[CollectionDeleted](r)
 }
 
-// ParseHelpCenterListHelpCentersResult decodes a Result into a HelpCenterList.
-func ParseHelpCenterListHelpCentersResult(r *Result) (*HelpCenterList, error) {
-	return Decode[HelpCenterList](r)
+// ParseListHelpCentersResult decodes a Result into a HelpCenterList.
+func ParseListHelpCentersResult(r *api.Result) (*HelpCenterList, error) {
+	return api.Decode[HelpCenterList](r)
 }
 
-// ParseHelpCenterGetHelpCenterResult decodes a Result into a HelpCenter.
-func ParseHelpCenterGetHelpCenterResult(r *Result) (*HelpCenter, error) {
-	return Decode[HelpCenter](r)
+// ParseGetHelpCenterResult decodes a Result into a HelpCenter.
+func ParseGetHelpCenterResult(r *api.Result) (*HelpCenter, error) {
+	return api.Decode[HelpCenter](r)
 }
 
 // --- Regular Methods ---
@@ -115,99 +124,99 @@ func ParseHelpCenterGetHelpCenterResult(r *Result) (*HelpCenter, error) {
 // ListCollections returns a single page of collections.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/listallcollections
-func (s *HelpCenterService) ListCollections(ctx context.Context, opts *ListOptions) (*PagedResult[Collection], error) {
+func (s *Service) ListCollections(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[Collection], error) {
 	result, err := s.ListCollectionsRaw(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseHelpCenterListCollectionsResult(result)
+	return ParseListCollectionsResult(result)
 }
 
 // GetCollection retrieves a collection by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/retrievecollection
-func (s *HelpCenterService) GetCollection(ctx context.Context, id string) (*Collection, error) {
+func (s *Service) GetCollection(ctx context.Context, id string) (*Collection, error) {
 	result, err := s.GetCollectionRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseHelpCenterGetCollectionResult(result)
+	return ParseGetCollectionResult(result)
 }
 
 // CreateCollection creates a new collection.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/createcollection
-func (s *HelpCenterService) CreateCollection(ctx context.Context, body *CreateCollectionRequest) (*Collection, error) {
+func (s *Service) CreateCollection(ctx context.Context, body *CreateCollectionRequest) (*Collection, error) {
 	result, err := s.CreateCollectionRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseHelpCenterCreateCollectionResult(result)
+	return ParseCreateCollectionResult(result)
 }
 
 // UpdateCollection updates an existing collection by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/updatecollection
-func (s *HelpCenterService) UpdateCollection(ctx context.Context, id string, body *UpdateCollectionRequest) (*Collection, error) {
+func (s *Service) UpdateCollection(ctx context.Context, id string, body *UpdateCollectionRequest) (*Collection, error) {
 	result, err := s.UpdateCollectionRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseHelpCenterUpdateCollectionResult(result)
+	return ParseUpdateCollectionResult(result)
 }
 
 // DeleteCollection deletes a collection by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/deletecollection
-func (s *HelpCenterService) DeleteCollection(ctx context.Context, id string) (*CollectionDeleted, error) {
+func (s *Service) DeleteCollection(ctx context.Context, id string) (*CollectionDeleted, error) {
 	result, err := s.DeleteCollectionRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseHelpCenterDeleteCollectionResult(result)
+	return ParseDeleteCollectionResult(result)
 }
 
 // ListHelpCenters returns all help centers.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/listhelpcenters
-func (s *HelpCenterService) ListHelpCenters(ctx context.Context) (*HelpCenterList, error) {
+func (s *Service) ListHelpCenters(ctx context.Context) (*HelpCenterList, error) {
 	result, err := s.ListHelpCentersRaw(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseHelpCenterListHelpCentersResult(result)
+	return ParseListHelpCentersResult(result)
 }
 
 // GetHelpCenter retrieves a help center by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/retrievehelpcenter
-func (s *HelpCenterService) GetHelpCenter(ctx context.Context, id string) (*HelpCenter, error) {
+func (s *Service) GetHelpCenter(ctx context.Context, id string) (*HelpCenter, error) {
 	result, err := s.GetHelpCenterRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseHelpCenterGetHelpCenterResult(result)
+	return ParseGetHelpCenterResult(result)
 }
 
 // --- Raw Methods ---
@@ -215,8 +224,8 @@ func (s *HelpCenterService) GetHelpCenter(ctx context.Context, id string) (*Help
 // ListCollectionsRaw returns a single page of collections with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/listallcollections
-func (s *HelpCenterService) ListCollectionsRaw(ctx context.Context, opts *ListOptions) (*Result, error) {
-	path, err := addQueryOptions("help_center/collections", opts)
+func (s *Service) ListCollectionsRaw(ctx context.Context, opts *api.ListOptions) (*api.Result, error) {
+	path, err := api.AddQueryOptions("help_center/collections", opts)
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +239,7 @@ func (s *HelpCenterService) ListCollectionsRaw(ctx context.Context, opts *ListOp
 // GetCollectionRaw retrieves a collection by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/retrievecollection
-func (s *HelpCenterService) GetCollectionRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) GetCollectionRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("help_center/collections/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -241,7 +250,7 @@ func (s *HelpCenterService) GetCollectionRaw(ctx context.Context, id string) (*R
 // CreateCollectionRaw creates a new collection with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/createcollection
-func (s *HelpCenterService) CreateCollectionRaw(ctx context.Context, body *CreateCollectionRequest) (*Result, error) {
+func (s *Service) CreateCollectionRaw(ctx context.Context, body *CreateCollectionRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "help_center/collections", body)
 	if err != nil {
 		return nil, err
@@ -252,7 +261,7 @@ func (s *HelpCenterService) CreateCollectionRaw(ctx context.Context, body *Creat
 // UpdateCollectionRaw updates an existing collection by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/updatecollection
-func (s *HelpCenterService) UpdateCollectionRaw(ctx context.Context, id string, body *UpdateCollectionRequest) (*Result, error) {
+func (s *Service) UpdateCollectionRaw(ctx context.Context, id string, body *UpdateCollectionRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("help_center/collections/%s", url.PathEscape(id)), body)
 	if err != nil {
 		return nil, err
@@ -263,7 +272,7 @@ func (s *HelpCenterService) UpdateCollectionRaw(ctx context.Context, id string, 
 // DeleteCollectionRaw deletes a collection by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/deletecollection
-func (s *HelpCenterService) DeleteCollectionRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) DeleteCollectionRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("help_center/collections/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -274,7 +283,7 @@ func (s *HelpCenterService) DeleteCollectionRaw(ctx context.Context, id string) 
 // ListHelpCentersRaw returns all help centers with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/listhelpcenters
-func (s *HelpCenterService) ListHelpCentersRaw(ctx context.Context) (*Result, error) {
+func (s *Service) ListHelpCentersRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "help_center/help_centers", nil)
 	if err != nil {
 		return nil, err
@@ -285,7 +294,7 @@ func (s *HelpCenterService) ListHelpCentersRaw(ctx context.Context) (*Result, er
 // GetHelpCenterRaw retrieves a help center by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/help-center/retrievehelpcenter
-func (s *HelpCenterService) GetHelpCenterRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) GetHelpCenterRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("help_center/help_centers/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err

@@ -28,6 +28,8 @@ type ContactRef = api.ContactRef
 type NoteAuthor = api.NoteAuthor
 type Note = api.Note
 type NoteListResult = api.NoteListResult
+type ArticleContent = api.ArticleContent
+type ArticleTranslatedContent = api.ArticleTranslatedContent
 
 // Tag sub-package aliases (for backward compat while other root services still reference these)
 type Tag = tags.Tag

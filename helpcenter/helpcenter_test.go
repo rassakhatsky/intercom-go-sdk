@@ -1,15 +1,141 @@
-package intercom
+package helpcenter_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/helpcenter"
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-func TestHelpCenterService_ListCollections(t *testing.T) {
-	client, mux, teardown := setup()
+// testCaller implements api.Caller for testing, backed by an httptest.Server.
+type testCaller struct {
+	baseURL string
+	client  *http.Client
+}
+
+func (tc *testCaller) NewRequest(method, urlStr string, body any) (*http.Request, error) {
+	var buf io.Reader
+	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+		buf = bytes.NewBuffer(jsonBody)
+	}
+	req, err := http.NewRequest(method, tc.baseURL+"/"+urlStr, buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer test-token")
+	req.Header.Set("Accept", "application/json")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	return req, nil
+}
+
+func (tc *testCaller) DoRaw(ctx context.Context, req *http.Request) (*api.Result, error) {
+	req = req.WithContext(ctx)
+	resp, err := tc.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return api.BuildResult(resp, b), nil
+}
+
+func (tc *testCaller) Do(ctx context.Context, req *http.Request, v any) (*api.Response, error) {
+	result, err := tc.DoRaw(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	response := &api.Response{Result: result}
+	if result.Error != nil {
+		return response, api.ResultError(result)
+	}
+	if v != nil && result.StatusCode != http.StatusNoContent && len(result.Body) > 0 {
+		if err := json.Unmarshal(result.Body, v); err != nil {
+			return response, err
+		}
+	}
+	return response, nil
+}
+
+func (tc *testCaller) DoRawNoRedirect(ctx context.Context, req *http.Request) (*api.Result, error) {
+	noRedirectClient := &http.Client{
+		Transport: tc.client.Transport,
+		Timeout:   tc.client.Timeout,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	req = req.WithContext(ctx)
+	resp, err := noRedirectClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return api.BuildResult(resp, b), nil
+}
+
+func (tc *testCaller) DoDownload(ctx context.Context, req *http.Request, w io.Writer) error {
+	req = req.WithContext(ctx)
+	resp, err := tc.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		b, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return fmt.Errorf("HTTP %d: failed to read error body: %w", resp.StatusCode, readErr)
+		}
+		result := api.BuildResult(resp, b)
+		return api.ResultError(result)
+	}
+	_, err = io.Copy(w, resp.Body)
+	return err
+}
+
+func setup() (svc *helpcenter.Service, mux *http.ServeMux, teardown func()) {
+	mux = http.NewServeMux()
+	server := httptest.NewServer(mux)
+	caller := &testCaller{baseURL: server.URL, client: server.Client()}
+	svc = helpcenter.NewService(caller)
+	return svc, mux, server.Close
+}
+
+func testMethod(t *testing.T, r *http.Request, want string) {
+	t.Helper()
+	if got := r.Method; got != want {
+		t.Errorf("Request method = %v, want %v", got, want)
+	}
+}
+
+func testHeader(t *testing.T, r *http.Request, header, want string) {
+	t.Helper()
+	if got := r.Header.Get(header); got != want {
+		t.Errorf("Header %v = %q, want %q", header, got, want)
+	}
+}
+
+func TestService_ListCollections(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections", func(w http.ResponseWriter, r *http.Request) {
@@ -32,9 +158,9 @@ func TestHelpCenterService_ListCollections(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.HelpCenter.ListCollections(ctx, nil)
+	result, err := svc.ListCollections(ctx, nil)
 	if err != nil {
-		t.Fatalf("HelpCenter.ListCollections returned error: %v", err)
+		t.Fatalf("ListCollections returned error: %v", err)
 	}
 	if result.TotalCount != 2 {
 		t.Errorf("TotalCount = %v, want 2", result.TotalCount)
@@ -50,8 +176,8 @@ func TestHelpCenterService_ListCollections(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_GetCollection(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetCollection(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections/123", func(w http.ResponseWriter, r *http.Request) {
@@ -75,9 +201,9 @@ func TestHelpCenterService_GetCollection(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	collection, err := client.HelpCenter.GetCollection(ctx, "123")
+	collection, err := svc.GetCollection(ctx, "123")
 	if err != nil {
-		t.Fatalf("HelpCenter.GetCollection returned error: %v", err)
+		t.Fatalf("GetCollection returned error: %v", err)
 	}
 	if collection.ID != "123" {
 		t.Errorf("Collection.ID = %v, want 123", collection.ID)
@@ -102,8 +228,8 @@ func TestHelpCenterService_GetCollection(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_GetCollection_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetCollection_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections/nonexistent", func(w http.ResponseWriter, r *http.Request) {
@@ -116,22 +242,22 @@ func TestHelpCenterService_GetCollection_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.HelpCenter.GetCollection(ctx, "nonexistent")
+	_, err := svc.GetCollection(ctx, "nonexistent")
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("Expected IsNotFound, got: %v", err)
 	}
 }
 
-func TestHelpCenterService_CreateCollection(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CreateCollection(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body CreateCollectionRequest
+		var body helpcenter.CreateCollectionRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -153,12 +279,12 @@ func TestHelpCenterService_CreateCollection(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	collection, err := client.HelpCenter.CreateCollection(ctx, &CreateCollectionRequest{
+	collection, err := svc.CreateCollection(ctx, &helpcenter.CreateCollectionRequest{
 		Name:        "New Collection",
 		Description: "A new collection",
 	})
 	if err != nil {
-		t.Fatalf("HelpCenter.CreateCollection returned error: %v", err)
+		t.Fatalf("CreateCollection returned error: %v", err)
 	}
 	if collection.ID != "789" {
 		t.Errorf("Collection.ID = %v, want 789", collection.ID)
@@ -168,8 +294,8 @@ func TestHelpCenterService_CreateCollection(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_CreateCollection_WithParent(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CreateCollection_WithParent(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections", func(w http.ResponseWriter, r *http.Request) {
@@ -195,13 +321,13 @@ func TestHelpCenterService_CreateCollection_WithParent(t *testing.T) {
 
 	ctx := context.Background()
 	hcID := 99
-	collection, err := client.HelpCenter.CreateCollection(ctx, &CreateCollectionRequest{
+	collection, err := svc.CreateCollection(ctx, &helpcenter.CreateCollectionRequest{
 		Name:         "Sub Collection",
 		ParentID:     "456",
 		HelpCenterID: &hcID,
 	})
 	if err != nil {
-		t.Fatalf("HelpCenter.CreateCollection returned error: %v", err)
+		t.Fatalf("CreateCollection returned error: %v", err)
 	}
 	if collection.ParentID != "456" {
 		t.Errorf("Collection.ParentID = %v, want 456", collection.ParentID)
@@ -211,13 +337,13 @@ func TestHelpCenterService_CreateCollection_WithParent(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_UpdateCollection(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_UpdateCollection(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections/123", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPut)
-		var body UpdateCollectionRequest
+		var body helpcenter.UpdateCollectionRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -234,19 +360,19 @@ func TestHelpCenterService_UpdateCollection(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	collection, err := client.HelpCenter.UpdateCollection(ctx, "123", &UpdateCollectionRequest{
+	collection, err := svc.UpdateCollection(ctx, "123", &helpcenter.UpdateCollectionRequest{
 		Name: "Updated Collection",
 	})
 	if err != nil {
-		t.Fatalf("HelpCenter.UpdateCollection returned error: %v", err)
+		t.Fatalf("UpdateCollection returned error: %v", err)
 	}
 	if collection.Name != "Updated Collection" {
 		t.Errorf("Collection.Name = %v, want Updated Collection", collection.Name)
 	}
 }
 
-func TestHelpCenterService_DeleteCollection(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_DeleteCollection(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections/123", func(w http.ResponseWriter, r *http.Request) {
@@ -259,9 +385,9 @@ func TestHelpCenterService_DeleteCollection(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	deleted, err := client.HelpCenter.DeleteCollection(ctx, "123")
+	deleted, err := svc.DeleteCollection(ctx, "123")
 	if err != nil {
-		t.Fatalf("HelpCenter.DeleteCollection returned error: %v", err)
+		t.Fatalf("DeleteCollection returned error: %v", err)
 	}
 	if deleted.ID != "123" {
 		t.Errorf("Deleted.ID = %v, want 123", deleted.ID)
@@ -274,8 +400,8 @@ func TestHelpCenterService_DeleteCollection(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_ListHelpCenters(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListHelpCenters(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/help_centers", func(w http.ResponseWriter, r *http.Request) {
@@ -309,9 +435,9 @@ func TestHelpCenterService_ListHelpCenters(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.HelpCenter.ListHelpCenters(ctx)
+	result, err := svc.ListHelpCenters(ctx)
 	if err != nil {
-		t.Fatalf("HelpCenter.ListHelpCenters returned error: %v", err)
+		t.Fatalf("ListHelpCenters returned error: %v", err)
 	}
 	if result.Type != "list" {
 		t.Errorf("Type = %v, want list", result.Type)
@@ -330,8 +456,8 @@ func TestHelpCenterService_ListHelpCenters(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_GetHelpCenter(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetHelpCenter(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/help_centers/42", func(w http.ResponseWriter, r *http.Request) {
@@ -351,9 +477,9 @@ func TestHelpCenterService_GetHelpCenter(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	hc, err := client.HelpCenter.GetHelpCenter(ctx, "42")
+	hc, err := svc.GetHelpCenter(ctx, "42")
 	if err != nil {
-		t.Fatalf("HelpCenter.GetHelpCenter returned error: %v", err)
+		t.Fatalf("GetHelpCenter returned error: %v", err)
 	}
 	if hc.ID != "42" {
 		t.Errorf("HelpCenter.ID = %v, want 42", hc.ID)
@@ -372,8 +498,8 @@ func TestHelpCenterService_GetHelpCenter(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_GetHelpCenter_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetHelpCenter_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/help_centers/999", func(w http.ResponseWriter, r *http.Request) {
@@ -386,17 +512,17 @@ func TestHelpCenterService_GetHelpCenter_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	_, err := client.HelpCenter.GetHelpCenter(ctx, "999")
+	_, err := svc.GetHelpCenter(ctx, "999")
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("Expected IsNotFound, got: %v", err)
 	}
 }
 
-func TestHelpCenterService_ListCollectionsRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListCollectionsRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections", func(w http.ResponseWriter, r *http.Request) {
@@ -406,13 +532,13 @@ func TestHelpCenterService_ListCollectionsRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.HelpCenter.ListCollectionsRaw(ctx, nil)
+	result, err := svc.ListCollectionsRaw(ctx, nil)
 	if err != nil {
 		t.Fatalf("ListCollectionsRaw returned error: %v", err)
 	}
-	data, err := ParseHelpCenterListCollectionsResult(result)
+	data, err := helpcenter.ParseListCollectionsResult(result)
 	if err != nil {
-		t.Fatalf("ParseHelpCenterListCollectionsResult returned error: %v", err)
+		t.Fatalf("ParseListCollectionsResult returned error: %v", err)
 	}
 	if data.TotalCount != 1 {
 		t.Errorf("TotalCount = %v, want 1", data.TotalCount)
@@ -422,8 +548,8 @@ func TestHelpCenterService_ListCollectionsRaw_Success(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_GetCollectionRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetCollectionRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections/123", func(w http.ResponseWriter, r *http.Request) {
@@ -433,13 +559,13 @@ func TestHelpCenterService_GetCollectionRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.HelpCenter.GetCollectionRaw(ctx, "123")
+	result, err := svc.GetCollectionRaw(ctx, "123")
 	if err != nil {
 		t.Fatalf("GetCollectionRaw returned error: %v", err)
 	}
-	data, err := ParseHelpCenterGetCollectionResult(result)
+	data, err := helpcenter.ParseGetCollectionResult(result)
 	if err != nil {
-		t.Fatalf("ParseHelpCenterGetCollectionResult returned error: %v", err)
+		t.Fatalf("ParseGetCollectionResult returned error: %v", err)
 	}
 	if data.ID != "123" {
 		t.Errorf("Data.ID = %v, want 123", data.ID)
@@ -452,8 +578,8 @@ func TestHelpCenterService_GetCollectionRaw_Success(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_GetCollectionRaw_NotFound(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetCollectionRaw_NotFound(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections/nonexistent", func(w http.ResponseWriter, r *http.Request) {
@@ -462,7 +588,7 @@ func TestHelpCenterService_GetCollectionRaw_NotFound(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.HelpCenter.GetCollectionRaw(ctx, "nonexistent")
+	result, err := svc.GetCollectionRaw(ctx, "nonexistent")
 	if err != nil {
 		t.Fatalf("GetCollectionRaw returned Go error: %v", err)
 	}
@@ -477,8 +603,8 @@ func TestHelpCenterService_GetCollectionRaw_NotFound(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_CreateCollectionRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_CreateCollectionRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections", func(w http.ResponseWriter, r *http.Request) {
@@ -488,13 +614,13 @@ func TestHelpCenterService_CreateCollectionRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.HelpCenter.CreateCollectionRaw(ctx, &CreateCollectionRequest{Name: "New Collection"})
+	result, err := svc.CreateCollectionRaw(ctx, &helpcenter.CreateCollectionRequest{Name: "New Collection"})
 	if err != nil {
 		t.Fatalf("CreateCollectionRaw returned error: %v", err)
 	}
-	data, err := ParseHelpCenterCreateCollectionResult(result)
+	data, err := helpcenter.ParseCreateCollectionResult(result)
 	if err != nil {
-		t.Fatalf("ParseHelpCenterCreateCollectionResult returned error: %v", err)
+		t.Fatalf("ParseCreateCollectionResult returned error: %v", err)
 	}
 	if data.ID != "789" {
 		t.Errorf("Data.ID = %v, want 789", data.ID)
@@ -504,8 +630,8 @@ func TestHelpCenterService_CreateCollectionRaw_Success(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_UpdateCollectionRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_UpdateCollectionRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections/123", func(w http.ResponseWriter, r *http.Request) {
@@ -515,13 +641,13 @@ func TestHelpCenterService_UpdateCollectionRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.HelpCenter.UpdateCollectionRaw(ctx, "123", &UpdateCollectionRequest{Name: "Updated Collection"})
+	result, err := svc.UpdateCollectionRaw(ctx, "123", &helpcenter.UpdateCollectionRequest{Name: "Updated Collection"})
 	if err != nil {
 		t.Fatalf("UpdateCollectionRaw returned error: %v", err)
 	}
-	data, err := ParseHelpCenterUpdateCollectionResult(result)
+	data, err := helpcenter.ParseUpdateCollectionResult(result)
 	if err != nil {
-		t.Fatalf("ParseHelpCenterUpdateCollectionResult returned error: %v", err)
+		t.Fatalf("ParseUpdateCollectionResult returned error: %v", err)
 	}
 	if data.Name != "Updated Collection" {
 		t.Errorf("Data.Name = %v, want Updated Collection", data.Name)
@@ -531,8 +657,8 @@ func TestHelpCenterService_UpdateCollectionRaw_Success(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_DeleteCollectionRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_DeleteCollectionRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/collections/123", func(w http.ResponseWriter, r *http.Request) {
@@ -542,13 +668,13 @@ func TestHelpCenterService_DeleteCollectionRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.HelpCenter.DeleteCollectionRaw(ctx, "123")
+	result, err := svc.DeleteCollectionRaw(ctx, "123")
 	if err != nil {
 		t.Fatalf("DeleteCollectionRaw returned error: %v", err)
 	}
-	data, err := ParseHelpCenterDeleteCollectionResult(result)
+	data, err := helpcenter.ParseDeleteCollectionResult(result)
 	if err != nil {
-		t.Fatalf("ParseHelpCenterDeleteCollectionResult returned error: %v", err)
+		t.Fatalf("ParseDeleteCollectionResult returned error: %v", err)
 	}
 	if !data.Deleted {
 		t.Error("Data.Deleted = false, want true")
@@ -558,8 +684,8 @@ func TestHelpCenterService_DeleteCollectionRaw_Success(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_ListHelpCentersRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_ListHelpCentersRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/help_centers", func(w http.ResponseWriter, r *http.Request) {
@@ -569,13 +695,13 @@ func TestHelpCenterService_ListHelpCentersRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.HelpCenter.ListHelpCentersRaw(ctx)
+	result, err := svc.ListHelpCentersRaw(ctx)
 	if err != nil {
 		t.Fatalf("ListHelpCentersRaw returned error: %v", err)
 	}
-	data, err := ParseHelpCenterListHelpCentersResult(result)
+	data, err := helpcenter.ParseListHelpCentersResult(result)
 	if err != nil {
-		t.Fatalf("ParseHelpCenterListHelpCentersResult returned error: %v", err)
+		t.Fatalf("ParseListHelpCentersResult returned error: %v", err)
 	}
 	if len(data.Data) != 1 {
 		t.Fatalf("Data.Data length = %d, want 1", len(data.Data))
@@ -588,8 +714,8 @@ func TestHelpCenterService_ListHelpCentersRaw_Success(t *testing.T) {
 	}
 }
 
-func TestHelpCenterService_GetHelpCenterRaw_Success(t *testing.T) {
-	client, mux, teardown := setup()
+func TestService_GetHelpCenterRaw_Success(t *testing.T) {
+	svc, mux, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/help_center/help_centers/42", func(w http.ResponseWriter, r *http.Request) {
@@ -599,13 +725,13 @@ func TestHelpCenterService_GetHelpCenterRaw_Success(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := client.HelpCenter.GetHelpCenterRaw(ctx, "42")
+	result, err := svc.GetHelpCenterRaw(ctx, "42")
 	if err != nil {
 		t.Fatalf("GetHelpCenterRaw returned error: %v", err)
 	}
-	data, err := ParseHelpCenterGetHelpCenterResult(result)
+	data, err := helpcenter.ParseGetHelpCenterResult(result)
 	if err != nil {
-		t.Fatalf("ParseHelpCenterGetHelpCenterResult returned error: %v", err)
+		t.Fatalf("ParseGetHelpCenterResult returned error: %v", err)
 	}
 	if data.ID != "42" {
 		t.Errorf("Data.ID = %v, want 42", data.ID)

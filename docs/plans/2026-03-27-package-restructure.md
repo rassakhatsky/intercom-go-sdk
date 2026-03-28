@@ -159,11 +159,11 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 17: Migrate `helpcenter` sub-package
-- [ ] create `helpcenter/helpcenter.go` — move from root `help_center.go`
-- [ ] add `HelpCenter()` accessor to `Client`
-- [ ] migrate tests to `helpcenter/helpcenter_test.go`
-- [ ] remove root `help_center.go`
-- [ ] run tests: `go test ./...`
+- [x] create `helpcenter/helpcenter.go` — move from root `help_center.go`
+- [x] add `HelpCenter()` accessor to `Client`
+- [x] migrate tests to `helpcenter/helpcenter_test.go`
+- [x] remove root `help_center.go`
+- [x] run tests: `go test ./...`
 
 ### Task 18: Migrate `articles` sub-package
 - [ ] create `articles/articles.go` — move from root `articles.go`

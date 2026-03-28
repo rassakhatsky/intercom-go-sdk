@@ -15,6 +15,7 @@ import (
 	"github.com/rassakhatsky/intercom-go-sdk/calls"
 	"github.com/rassakhatsky/intercom-go-sdk/data"
 	"github.com/rassakhatsky/intercom-go-sdk/export"
+	"github.com/rassakhatsky/intercom-go-sdk/helpcenter"
 	"github.com/rassakhatsky/intercom-go-sdk/messaging"
 	"github.com/rassakhatsky/intercom-go-sdk/news"
 	"github.com/rassakhatsky/intercom-go-sdk/segments"
@@ -54,7 +55,7 @@ type Client struct {
 	emails              *messaging.EmailsService
 	exportReporting     *export.ReportingService
 	FinVoice            *FinVoiceService
-	HelpCenter          *HelpCenterService
+	helpCenter          *helpcenter.Service
 	InternalArticles    *InternalArticlesService
 	ipAllowlist         *settings.IPAllowlistService
 	jobs                *settings.JobsService
@@ -140,7 +141,7 @@ func (c *Client) initialize() {
 	c.emails = messaging.NewEmailsService(c)
 	c.exportReporting = export.NewReportingService(c)
 	c.FinVoice = (*FinVoiceService)(&c.common)
-	c.HelpCenter = (*HelpCenterService)(&c.common)
+	c.helpCenter = helpcenter.NewService(c)
 	c.InternalArticles = (*InternalArticlesService)(&c.common)
 	c.ipAllowlist = settings.NewIPAllowlistService(c)
 	c.jobs = settings.NewJobsService(c)
@@ -262,6 +263,11 @@ func (c *Client) Calls() *calls.Service {
 // PhoneCallRedirects returns the phone call redirects service.
 func (c *Client) PhoneCallRedirects() *calls.RedirectsService {
 	return c.phoneCallRedirects
+}
+
+// HelpCenter returns the help center service.
+func (c *Client) HelpCenter() *helpcenter.Service {
+	return c.helpCenter
 }
 
 // NewRequest creates an API request. A relative URL path can be provided in

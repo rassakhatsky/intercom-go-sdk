@@ -43,60 +43,8 @@ type ArticleStatistics struct {
 	SadReactionPercentage     float64 `json:"sad_reaction_percentage"`
 }
 
-// ArticleContent represents translated content for a single locale.
-type ArticleContent struct {
-	Type        string `json:"type,omitempty"`
-	Title       string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
-	Body        string `json:"body,omitempty"`
-	AuthorID    int    `json:"author_id,omitempty"`
-	State       string `json:"state,omitempty"`
-	CreatedAt   int64  `json:"created_at,omitempty"`
-	UpdatedAt   int64  `json:"updated_at,omitempty"`
-	URL         string `json:"url,omitempty"`
-}
-
-// ArticleTranslatedContent holds translations for an article keyed by locale.
-type ArticleTranslatedContent struct {
-	Type string          `json:"type,omitempty"`
-	AR   *ArticleContent `json:"ar,omitempty"`
-	BG   *ArticleContent `json:"bg,omitempty"`
-	BS   *ArticleContent `json:"bs,omitempty"`
-	CA   *ArticleContent `json:"ca,omitempty"`
-	CS   *ArticleContent `json:"cs,omitempty"`
-	DA   *ArticleContent `json:"da,omitempty"`
-	DE   *ArticleContent `json:"de,omitempty"`
-	EL   *ArticleContent `json:"el,omitempty"`
-	EN   *ArticleContent `json:"en,omitempty"`
-	ES   *ArticleContent `json:"es,omitempty"`
-	ET   *ArticleContent `json:"et,omitempty"`
-	FI   *ArticleContent `json:"fi,omitempty"`
-	FR   *ArticleContent `json:"fr,omitempty"`
-	HE   *ArticleContent `json:"he,omitempty"`
-	HR   *ArticleContent `json:"hr,omitempty"`
-	HU   *ArticleContent `json:"hu,omitempty"`
-	ID   *ArticleContent `json:"id,omitempty"`
-	IT   *ArticleContent `json:"it,omitempty"`
-	JA   *ArticleContent `json:"ja,omitempty"`
-	KO   *ArticleContent `json:"ko,omitempty"`
-	LT   *ArticleContent `json:"lt,omitempty"`
-	LV   *ArticleContent `json:"lv,omitempty"`
-	MN   *ArticleContent `json:"mn,omitempty"`
-	NB   *ArticleContent `json:"nb,omitempty"`
-	NL   *ArticleContent `json:"nl,omitempty"`
-	PL   *ArticleContent `json:"pl,omitempty"`
-	PT   *ArticleContent `json:"pt,omitempty"`
-	PtBR *ArticleContent `json:"pt-BR,omitempty"`
-	RO   *ArticleContent `json:"ro,omitempty"`
-	RU   *ArticleContent `json:"ru,omitempty"`
-	SL   *ArticleContent `json:"sl,omitempty"`
-	SR   *ArticleContent `json:"sr,omitempty"`
-	SV   *ArticleContent `json:"sv,omitempty"`
-	TR   *ArticleContent `json:"tr,omitempty"`
-	VI   *ArticleContent `json:"vi,omitempty"`
-	ZhCN *ArticleContent `json:"zh-CN,omitempty"`
-	ZhTW *ArticleContent `json:"zh-TW,omitempty"`
-}
+// ArticleContent and ArticleTranslatedContent are defined in internal/api/types.go
+// and re-exported via aliases.go as they are shared with the help center service.
 
 // ArticleDeleted represents the response from deleting an article.
 type ArticleDeleted struct {
