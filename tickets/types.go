@@ -1,33 +1,42 @@
-package intercom
+package tickets
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// TicketTypesService handles communication with the ticket type related
+// TypesService handles communication with the ticket type related
 // methods of the Intercom API.
-type TicketTypesService service
-
-// TicketType represents an Intercom ticket type.
-type TicketType struct {
-	Type        string                   `json:"type"`
-	ID          string                   `json:"id"`
-	Category    string                   `json:"category,omitempty"`
-	Name        string                   `json:"name,omitempty"`
-	Description string                   `json:"description,omitempty"`
-	Icon        string                   `json:"icon,omitempty"`
-	WorkspaceID string                   `json:"workspace_id,omitempty"`
-	Attributes  *TicketTypeAttributeList `json:"ticket_type_attributes,omitempty"`
-	Archived    bool                     `json:"archived,omitempty"`
-	CreatedAt   int64                    `json:"created_at,omitempty"`
-	UpdatedAt   int64                    `json:"updated_at,omitempty"`
+type TypesService struct {
+	client api.Caller
 }
 
-// TicketTypeAttribute represents an attribute on a ticket type.
-type TicketTypeAttribute struct {
+// NewTypesService creates a new ticket types TypesService.
+func NewTypesService(c api.Caller) *TypesService {
+	return &TypesService{client: c}
+}
+
+// Type represents an Intercom ticket type.
+type Type struct {
+	Type        string             `json:"type"`
+	ID          string             `json:"id"`
+	Category    string             `json:"category,omitempty"`
+	Name        string             `json:"name,omitempty"`
+	Description string             `json:"description,omitempty"`
+	Icon        string             `json:"icon,omitempty"`
+	WorkspaceID string             `json:"workspace_id,omitempty"`
+	Attributes  *TypeAttributeList `json:"ticket_type_attributes,omitempty"`
+	Archived    bool               `json:"archived,omitempty"`
+	CreatedAt   int64              `json:"created_at,omitempty"`
+	UpdatedAt   int64              `json:"updated_at,omitempty"`
+}
+
+// TypeAttribute represents an attribute on a ticket type.
+type TypeAttribute struct {
 	Type                        string        `json:"type"`
 	ID                          string        `json:"id"`
 	WorkspaceID                 string        `json:"workspace_id,omitempty"`
@@ -52,20 +61,20 @@ type InputOptions struct {
 	Multiline bool `json:"multiline,omitempty"`
 }
 
-// TicketTypeAttributeList holds a list of ticket type attributes.
-type TicketTypeAttributeList struct {
-	Type string                `json:"type"`
-	Data []TicketTypeAttribute `json:"data"`
+// TypeAttributeList holds a list of ticket type attributes.
+type TypeAttributeList struct {
+	Type string          `json:"type"`
+	Data []TypeAttribute `json:"data"`
 }
 
-// TicketTypeList holds a list of ticket types.
-type TicketTypeList struct {
-	Type string       `json:"type"`
-	Data []TicketType `json:"data"`
+// TypeList holds a list of ticket types.
+type TypeList struct {
+	Type string `json:"type"`
+	Data []Type `json:"data"`
 }
 
-// CreateTicketTypeRequest represents the body for creating a ticket type.
-type CreateTicketTypeRequest struct {
+// CreateTypeRequest represents the body for creating a ticket type.
+type CreateTypeRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description,omitempty"`
 	Category    string `json:"category,omitempty"`
@@ -73,8 +82,8 @@ type CreateTicketTypeRequest struct {
 	IsInternal  bool   `json:"is_internal,omitempty"`
 }
 
-// UpdateTicketTypeRequest represents the body for updating a ticket type.
-type UpdateTicketTypeRequest struct {
+// UpdateTypeRequest represents the body for updating a ticket type.
+type UpdateTypeRequest struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 	Category    string `json:"category,omitempty"`
@@ -83,8 +92,8 @@ type UpdateTicketTypeRequest struct {
 	IsInternal  *bool  `json:"is_internal,omitempty"`
 }
 
-// CreateTicketTypeAttributeRequest represents the body for creating a ticket type attribute.
-type CreateTicketTypeAttributeRequest struct {
+// CreateTypeAttributeRequest represents the body for creating a ticket type attribute.
+type CreateTypeAttributeRequest struct {
 	Name                        string `json:"name"`
 	Description                 string `json:"description"`
 	DataType                    string `json:"data_type"`
@@ -97,8 +106,8 @@ type CreateTicketTypeAttributeRequest struct {
 	AllowMultipleValues         bool   `json:"allow_multiple_values,omitempty"`
 }
 
-// UpdateTicketTypeAttributeRequest represents the body for updating a ticket type attribute.
-type UpdateTicketTypeAttributeRequest struct {
+// UpdateTypeAttributeRequest represents the body for updating a ticket type attribute.
+type UpdateTypeAttributeRequest struct {
 	Name                        string `json:"name,omitempty"`
 	Description                 string `json:"description,omitempty"`
 	RequiredToCreate            *bool  `json:"required_to_create,omitempty"`
@@ -113,34 +122,34 @@ type UpdateTicketTypeAttributeRequest struct {
 
 // --- Parse Functions ---
 
-// ParseTicketTypeGetResult decodes a Result into a TicketType.
-func ParseTicketTypeGetResult(r *Result) (*TicketType, error) {
-	return Decode[TicketType](r)
+// ParseTypeGetResult decodes a Result into a Type.
+func ParseTypeGetResult(r *api.Result) (*Type, error) {
+	return api.Decode[Type](r)
 }
 
-// ParseTicketTypeListResult decodes a Result into a TicketTypeList.
-func ParseTicketTypeListResult(r *Result) (*TicketTypeList, error) {
-	return Decode[TicketTypeList](r)
+// ParseTypeListResult decodes a Result into a TypeList.
+func ParseTypeListResult(r *api.Result) (*TypeList, error) {
+	return api.Decode[TypeList](r)
 }
 
-// ParseTicketTypeCreateResult decodes a Result into a TicketType.
-func ParseTicketTypeCreateResult(r *Result) (*TicketType, error) {
-	return Decode[TicketType](r)
+// ParseTypeCreateResult decodes a Result into a Type.
+func ParseTypeCreateResult(r *api.Result) (*Type, error) {
+	return api.Decode[Type](r)
 }
 
-// ParseTicketTypeUpdateResult decodes a Result into a TicketType.
-func ParseTicketTypeUpdateResult(r *Result) (*TicketType, error) {
-	return Decode[TicketType](r)
+// ParseTypeUpdateResult decodes a Result into a Type.
+func ParseTypeUpdateResult(r *api.Result) (*Type, error) {
+	return api.Decode[Type](r)
 }
 
-// ParseTicketTypeCreateAttributeResult decodes a Result into a TicketTypeAttribute.
-func ParseTicketTypeCreateAttributeResult(r *Result) (*TicketTypeAttribute, error) {
-	return Decode[TicketTypeAttribute](r)
+// ParseTypeCreateAttributeResult decodes a Result into a TypeAttribute.
+func ParseTypeCreateAttributeResult(r *api.Result) (*TypeAttribute, error) {
+	return api.Decode[TypeAttribute](r)
 }
 
-// ParseTicketTypeUpdateAttributeResult decodes a Result into a TicketTypeAttribute.
-func ParseTicketTypeUpdateAttributeResult(r *Result) (*TicketTypeAttribute, error) {
-	return Decode[TicketTypeAttribute](r)
+// ParseTypeUpdateAttributeResult decodes a Result into a TypeAttribute.
+func ParseTypeUpdateAttributeResult(r *api.Result) (*TypeAttribute, error) {
+	return api.Decode[TypeAttribute](r)
 }
 
 // --- Regular Methods ---
@@ -148,85 +157,85 @@ func ParseTicketTypeUpdateAttributeResult(r *Result) (*TicketTypeAttribute, erro
 // Get retrieves a ticket type by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/gettickettype
-func (s *TicketTypesService) Get(ctx context.Context, id string) (*TicketType, error) {
+func (s *TypesService) Get(ctx context.Context, id string) (*Type, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketTypeGetResult(result)
+	return ParseTypeGetResult(result)
 }
 
 // List returns all ticket types.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/listtickettypes
-func (s *TicketTypesService) List(ctx context.Context) (*TicketTypeList, error) {
+func (s *TypesService) List(ctx context.Context) (*TypeList, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketTypeListResult(result)
+	return ParseTypeListResult(result)
 }
 
 // Create creates a new ticket type.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/createtickettype
-func (s *TicketTypesService) Create(ctx context.Context, body *CreateTicketTypeRequest) (*TicketType, error) {
+func (s *TypesService) Create(ctx context.Context, body *CreateTypeRequest) (*Type, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketTypeCreateResult(result)
+	return ParseTypeCreateResult(result)
 }
 
 // Update updates an existing ticket type.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/updatetickettype
-func (s *TicketTypesService) Update(ctx context.Context, id string, body *UpdateTicketTypeRequest) (*TicketType, error) {
+func (s *TypesService) Update(ctx context.Context, id string, body *UpdateTypeRequest) (*Type, error) {
 	result, err := s.UpdateRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketTypeUpdateResult(result)
+	return ParseTypeUpdateResult(result)
 }
 
 // CreateAttribute creates a new attribute for a ticket type.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-type-attributes/createtickettypeattribute
-func (s *TicketTypesService) CreateAttribute(ctx context.Context, ticketTypeID string, body *CreateTicketTypeAttributeRequest) (*TicketTypeAttribute, error) {
+func (s *TypesService) CreateAttribute(ctx context.Context, ticketTypeID string, body *CreateTypeAttributeRequest) (*TypeAttribute, error) {
 	result, err := s.CreateAttributeRaw(ctx, ticketTypeID, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketTypeCreateAttributeResult(result)
+	return ParseTypeCreateAttributeResult(result)
 }
 
 // UpdateAttribute updates an existing attribute for a ticket type.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-type-attributes/updatetickettypeattribute
-func (s *TicketTypesService) UpdateAttribute(ctx context.Context, ticketTypeID, attributeID string, body *UpdateTicketTypeAttributeRequest) (*TicketTypeAttribute, error) {
+func (s *TypesService) UpdateAttribute(ctx context.Context, ticketTypeID, attributeID string, body *UpdateTypeAttributeRequest) (*TypeAttribute, error) {
 	result, err := s.UpdateAttributeRaw(ctx, ticketTypeID, attributeID, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketTypeUpdateAttributeResult(result)
+	return ParseTypeUpdateAttributeResult(result)
 }
 
 // --- Raw Methods ---
@@ -234,7 +243,7 @@ func (s *TicketTypesService) UpdateAttribute(ctx context.Context, ticketTypeID, 
 // GetRaw retrieves a ticket type by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/gettickettype
-func (s *TicketTypesService) GetRaw(ctx context.Context, id string) (*Result, error) {
+func (s *TypesService) GetRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("ticket_types/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -245,7 +254,7 @@ func (s *TicketTypesService) GetRaw(ctx context.Context, id string) (*Result, er
 // ListRaw returns all ticket types with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/listtickettypes
-func (s *TicketTypesService) ListRaw(ctx context.Context) (*Result, error) {
+func (s *TypesService) ListRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "ticket_types", nil)
 	if err != nil {
 		return nil, err
@@ -256,7 +265,7 @@ func (s *TicketTypesService) ListRaw(ctx context.Context) (*Result, error) {
 // CreateRaw creates a new ticket type with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/createtickettype
-func (s *TicketTypesService) CreateRaw(ctx context.Context, body *CreateTicketTypeRequest) (*Result, error) {
+func (s *TypesService) CreateRaw(ctx context.Context, body *CreateTypeRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "ticket_types", body)
 	if err != nil {
 		return nil, err
@@ -267,7 +276,7 @@ func (s *TicketTypesService) CreateRaw(ctx context.Context, body *CreateTicketTy
 // UpdateRaw updates an existing ticket type with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-types/updatetickettype
-func (s *TicketTypesService) UpdateRaw(ctx context.Context, id string, body *UpdateTicketTypeRequest) (*Result, error) {
+func (s *TypesService) UpdateRaw(ctx context.Context, id string, body *UpdateTypeRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("ticket_types/%s", url.PathEscape(id)), body)
 	if err != nil {
 		return nil, err
@@ -278,7 +287,7 @@ func (s *TicketTypesService) UpdateRaw(ctx context.Context, id string, body *Upd
 // CreateAttributeRaw creates a new attribute for a ticket type with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-type-attributes/createtickettypeattribute
-func (s *TicketTypesService) CreateAttributeRaw(ctx context.Context, ticketTypeID string, body *CreateTicketTypeAttributeRequest) (*Result, error) {
+func (s *TypesService) CreateAttributeRaw(ctx context.Context, ticketTypeID string, body *CreateTypeAttributeRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("ticket_types/%s/attributes", url.PathEscape(ticketTypeID)), body)
 	if err != nil {
 		return nil, err
@@ -289,7 +298,7 @@ func (s *TicketTypesService) CreateAttributeRaw(ctx context.Context, ticketTypeI
 // UpdateAttributeRaw updates an existing attribute for a ticket type with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-type-attributes/updatetickettypeattribute
-func (s *TicketTypesService) UpdateAttributeRaw(ctx context.Context, ticketTypeID, attributeID string, body *UpdateTicketTypeAttributeRequest) (*Result, error) {
+func (s *TypesService) UpdateAttributeRaw(ctx context.Context, ticketTypeID, attributeID string, body *UpdateTypeAttributeRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("ticket_types/%s/attributes/%s", url.PathEscape(ticketTypeID), url.PathEscape(attributeID)), body)
 	if err != nil {
 		return nil, err

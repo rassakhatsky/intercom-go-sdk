@@ -181,13 +181,13 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 20: Migrate `tickets` sub-package
-- [ ] create `tickets/tickets.go` — move from root `tickets.go`
-- [ ] create `tickets/types.go` — move from root `ticket_types.go`
-- [ ] create `tickets/states.go` — move from root `ticket_states.go`
-- [ ] add `Tickets()`, `TicketTypes()`, `TicketStates()` accessors to `Client`
-- [ ] migrate tests to `tickets/`
-- [ ] remove root `tickets.go`, `ticket_types.go`, `ticket_states.go`
-- [ ] run tests: `go test ./...`
+- [x] create `tickets/tickets.go` — move from root `tickets.go`
+- [x] create `tickets/types.go` — move from root `ticket_types.go`
+- [x] create `tickets/states.go` — move from root `ticket_states.go`
+- [x] add `Tickets()`, `TicketTypes()`, `TicketStates()` accessors to `Client`
+- [x] migrate tests to `tickets/`
+- [x] remove root `tickets.go`, `ticket_types.go`, `ticket_states.go`
+- [x] run tests: `go test ./...`
 
 ### Task 21: Migrate `conversations` sub-package
 - [ ] create `conversations/conversations.go` — move from root `conversations.go`

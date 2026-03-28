@@ -1,39 +1,48 @@
-package intercom
+package tickets
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// TicketsService handles communication with the ticket related
+// Service handles communication with the ticket related
 // methods of the Intercom API.
-type TicketsService service
+type Service struct {
+	client api.Caller
+}
+
+// NewService creates a new tickets Service.
+func NewService(c api.Caller) *Service {
+	return &Service{client: c}
+}
 
 // Ticket represents an Intercom ticket.
 type Ticket struct {
-	Type             string             `json:"type"`
-	ID               string             `json:"id"`
-	TicketID         string             `json:"ticket_id,omitempty"`
-	Category         string             `json:"category,omitempty"`
-	TicketAttributes map[string]any     `json:"ticket_attributes,omitempty"`
-	TicketState      *TicketStateRef    `json:"ticket_state,omitempty"`
-	TicketType       *TicketTypeRef     `json:"ticket_type,omitempty"`
-	Contacts         *TicketContactList `json:"contacts,omitempty"`
-	AdminAssigneeID  string             `json:"admin_assignee_id,omitempty"`
-	TeamAssigneeID   string             `json:"team_assignee_id,omitempty"`
-	CreatedAt        int64              `json:"created_at,omitempty"`
-	UpdatedAt        int64              `json:"updated_at,omitempty"`
-	Open             bool               `json:"open,omitempty"`
-	SnoozedUntil     *int64             `json:"snoozed_until,omitempty"`
-	LinkedObjects    *LinkedObjectList  `json:"linked_objects,omitempty"`
-	TicketParts      *TicketPartList    `json:"ticket_parts,omitempty"`
-	IsShared         bool               `json:"is_shared,omitempty"`
+	Type             string            `json:"type"`
+	ID               string            `json:"id"`
+	TicketID         string            `json:"ticket_id,omitempty"`
+	Category         string            `json:"category,omitempty"`
+	TicketAttributes map[string]any    `json:"ticket_attributes,omitempty"`
+	TicketState      *StateRef         `json:"ticket_state,omitempty"`
+	TicketType       *TypeRef          `json:"ticket_type,omitempty"`
+	Contacts         *ContactList      `json:"contacts,omitempty"`
+	AdminAssigneeID  string            `json:"admin_assignee_id,omitempty"`
+	TeamAssigneeID   string            `json:"team_assignee_id,omitempty"`
+	CreatedAt        int64             `json:"created_at,omitempty"`
+	UpdatedAt        int64             `json:"updated_at,omitempty"`
+	Open             bool              `json:"open,omitempty"`
+	SnoozedUntil     *int64            `json:"snoozed_until,omitempty"`
+	LinkedObjects    *LinkedObjectList `json:"linked_objects,omitempty"`
+	TicketParts      *PartList         `json:"ticket_parts,omitempty"`
+	IsShared         bool              `json:"is_shared,omitempty"`
 }
 
-// TicketStateRef is a reference to a ticket state within a ticket.
-type TicketStateRef struct {
+// StateRef is a reference to a ticket state within a ticket.
+type StateRef struct {
 	Type          string `json:"type"`
 	ID            string `json:"id"`
 	Category      string `json:"category,omitempty"`
@@ -41,8 +50,8 @@ type TicketStateRef struct {
 	ExternalLabel string `json:"external_label,omitempty"`
 }
 
-// TicketTypeRef is a reference to a ticket type within a ticket.
-type TicketTypeRef struct {
+// TypeRef is a reference to a ticket type within a ticket.
+type TypeRef struct {
 	Type        string `json:"type"`
 	ID          string `json:"id"`
 	Name        string `json:"name,omitempty"`
@@ -50,74 +59,90 @@ type TicketTypeRef struct {
 	Icon        string `json:"icon,omitempty"`
 }
 
-// TicketContactList holds the contacts associated with a ticket.
-type TicketContactList struct {
-	Type     string              `json:"type"`
-	Contacts []TicketContactItem `json:"contacts"`
+// ContactList holds the contacts associated with a ticket.
+type ContactList struct {
+	Type     string        `json:"type"`
+	Contacts []ContactItem `json:"contacts"`
 }
 
-// TicketContactItem is a contact reference within a ticket.
-type TicketContactItem struct {
+// ContactItem is a contact reference within a ticket.
+type ContactItem struct {
 	Type       string `json:"type"`
 	ID         string `json:"id"`
 	ExternalID string `json:"external_id,omitempty"`
 }
 
-// TicketPartList holds the list of ticket parts.
-type TicketPartList struct {
-	Type       string       `json:"type"`
-	Parts      []TicketPart `json:"ticket_parts"`
-	TotalCount int          `json:"total_count"`
+// PartList holds the list of ticket parts.
+type PartList struct {
+	Type       string `json:"type"`
+	Parts      []Part `json:"ticket_parts"`
+	TotalCount int    `json:"total_count"`
 }
 
-// TicketPart represents a single message/event in a ticket.
-type TicketPart struct {
-	Type       string              `json:"type"`
-	ID         string              `json:"id"`
-	PartType   string              `json:"part_type,omitempty"`
-	Body       string              `json:"body,omitempty"`
-	CreatedAt  int64               `json:"created_at,omitempty"`
-	UpdatedAt  int64               `json:"updated_at,omitempty"`
-	AssignedTo *ConversationAuthor `json:"assigned_to,omitempty"`
-	Author     *ConversationAuthor `json:"author,omitempty"`
-	ExternalID string              `json:"external_id,omitempty"`
-	Redacted   bool                `json:"redacted,omitempty"`
+// Part represents a single message/event in a ticket.
+type Part struct {
+	Type       string  `json:"type"`
+	ID         string  `json:"id"`
+	PartType   string  `json:"part_type,omitempty"`
+	Body       string  `json:"body,omitempty"`
+	CreatedAt  int64   `json:"created_at,omitempty"`
+	UpdatedAt  int64   `json:"updated_at,omitempty"`
+	AssignedTo *Author `json:"assigned_to,omitempty"`
+	Author     *Author `json:"author,omitempty"`
+	ExternalID string  `json:"external_id,omitempty"`
+	Redacted   bool    `json:"redacted,omitempty"`
 }
 
-// TicketDeleted represents the response from deleting a ticket.
-type TicketDeleted struct {
+// Author represents the author of a ticket part.
+type Author struct {
+	Type  string `json:"type"`
+	ID    string `json:"id"`
+	Name  string `json:"name,omitempty"`
+	Email string `json:"email,omitempty"`
+}
+
+// LinkedObjectList holds linked objects on a ticket.
+type LinkedObjectList struct {
+	Type       string `json:"type"`
+	Data       []any  `json:"data"`
+	TotalCount int    `json:"total_count"`
+	HasMore    bool   `json:"has_more"`
+}
+
+// Deleted represents the response from deleting a ticket.
+type Deleted struct {
 	ID      string `json:"id"`
 	Object  string `json:"object"`
 	Deleted bool   `json:"deleted"`
 }
 
-// TicketContactRef identifies a contact when creating a ticket.
-type TicketContactRef struct {
+// ContactRef identifies a contact when creating a ticket.
+type ContactRef struct {
 	ID         string `json:"id,omitempty"`
 	ExternalID string `json:"external_id,omitempty"`
 	Email      string `json:"email,omitempty"`
 }
 
-// TicketAssignment specifies assignment when creating a ticket.
-type TicketAssignment struct {
+// Assignment specifies assignment when creating a ticket.
+type Assignment struct {
 	AdminAssigneeID string `json:"admin_assignee_id,omitempty"`
 	TeamAssigneeID  string `json:"team_assignee_id,omitempty"`
 }
 
-// CreateTicketRequest represents the body for creating a ticket.
-type CreateTicketRequest struct {
-	TicketTypeID         string             `json:"ticket_type_id"`
-	Contacts             []TicketContactRef `json:"contacts"`
-	ConversationToLinkID string             `json:"conversation_to_link_id,omitempty"`
-	CompanyID            string             `json:"company_id,omitempty"`
-	CreatedAt            *int64             `json:"created_at,omitempty"`
-	TicketAttributes     map[string]any     `json:"ticket_attributes,omitempty"`
-	Assignment           *TicketAssignment  `json:"assignment,omitempty"`
-	SkipNotifications    *bool              `json:"skip_notifications,omitempty"`
+// CreateRequest represents the body for creating a ticket.
+type CreateRequest struct {
+	TicketTypeID         string         `json:"ticket_type_id"`
+	Contacts             []ContactRef   `json:"contacts"`
+	ConversationToLinkID string         `json:"conversation_to_link_id,omitempty"`
+	CompanyID            string         `json:"company_id,omitempty"`
+	CreatedAt            *int64         `json:"created_at,omitempty"`
+	TicketAttributes     map[string]any `json:"ticket_attributes,omitempty"`
+	Assignment           *Assignment    `json:"assignment,omitempty"`
+	SkipNotifications    *bool          `json:"skip_notifications,omitempty"`
 }
 
-// UpdateTicketRequest represents the body for updating a ticket.
-type UpdateTicketRequest struct {
+// UpdateRequest represents the body for updating a ticket.
+type UpdateRequest struct {
 	TicketAttributes  map[string]any `json:"ticket_attributes,omitempty"`
 	TicketStateID     string         `json:"ticket_state_id,omitempty"`
 	CompanyID         string         `json:"company_id,omitempty"`
@@ -129,8 +154,8 @@ type UpdateTicketRequest struct {
 	SkipNotifications *bool          `json:"skip_notifications,omitempty"`
 }
 
-// ReplyTicketRequest represents the body for replying to a ticket.
-type ReplyTicketRequest struct {
+// ReplyRequest represents the body for replying to a ticket.
+type ReplyRequest struct {
 	MessageType    string        `json:"message_type"`
 	Type           string        `json:"type"`
 	Body           string        `json:"body,omitempty"`
@@ -155,17 +180,17 @@ type EnqueuedJob struct {
 	Status string `json:"status"`
 }
 
-// ticketListResponse is the raw API response for ticket search.
-type ticketListResponse struct {
-	Type       string      `json:"type"`
-	Tickets    []Ticket    `json:"tickets"`
-	TotalCount int         `json:"total_count"`
-	Pages      CursorPages `json:"pages"`
+// listResponse is the raw API response for ticket search.
+type listResponse struct {
+	Type       string          `json:"type"`
+	Tickets    []Ticket        `json:"tickets"`
+	TotalCount int             `json:"total_count"`
+	Pages      api.CursorPages `json:"pages"`
 }
 
 // toPagedResult converts to the standard PagedResult used by the iterator.
-func (r *ticketListResponse) toPagedResult() *PagedResult[Ticket] {
-	return &PagedResult[Ticket]{
+func (r *listResponse) toPagedResult() *api.PagedResult[Ticket] {
+	return &api.PagedResult[Ticket]{
 		Type:       r.Type,
 		Data:       r.Tickets,
 		TotalCount: r.TotalCount,
@@ -175,54 +200,54 @@ func (r *ticketListResponse) toPagedResult() *PagedResult[Ticket] {
 
 // --- Parse Functions ---
 
-// ParseTicketGetResult decodes a Result into a Ticket.
-func ParseTicketGetResult(r *Result) (*Ticket, error) {
-	return Decode[Ticket](r)
+// ParseGetResult decodes a Result into a Ticket.
+func ParseGetResult(r *api.Result) (*Ticket, error) {
+	return api.Decode[Ticket](r)
 }
 
-// ParseTicketCreateResult decodes a Result into a Ticket.
-func ParseTicketCreateResult(r *Result) (*Ticket, error) {
-	return Decode[Ticket](r)
+// ParseCreateResult decodes a Result into a Ticket.
+func ParseCreateResult(r *api.Result) (*Ticket, error) {
+	return api.Decode[Ticket](r)
 }
 
-// ParseTicketUpdateResult decodes a Result into a Ticket.
-func ParseTicketUpdateResult(r *Result) (*Ticket, error) {
-	return Decode[Ticket](r)
+// ParseUpdateResult decodes a Result into a Ticket.
+func ParseUpdateResult(r *api.Result) (*Ticket, error) {
+	return api.Decode[Ticket](r)
 }
 
-// ParseTicketDeleteResult decodes a Result into a TicketDeleted.
-func ParseTicketDeleteResult(r *Result) (*TicketDeleted, error) {
-	return Decode[TicketDeleted](r)
+// ParseDeleteResult decodes a Result into a Deleted.
+func ParseDeleteResult(r *api.Result) (*Deleted, error) {
+	return api.Decode[Deleted](r)
 }
 
-// ParseTicketSearchResult decodes a Result into a PagedResult[Ticket].
+// ParseSearchResult decodes a Result into a PagedResult[Ticket].
 // Handles the Intercom API's "tickets" field instead of "data".
-func ParseTicketSearchResult(r *Result) (*PagedResult[Ticket], error) {
-	raw, err := Decode[ticketListResponse](r)
+func ParseSearchResult(r *api.Result) (*api.PagedResult[Ticket], error) {
+	raw, err := api.Decode[listResponse](r)
 	if err != nil {
 		return nil, err
 	}
 	return raw.toPagedResult(), nil
 }
 
-// ParseTicketReplyResult decodes a Result into a TicketPart.
-func ParseTicketReplyResult(r *Result) (*TicketPart, error) {
-	return Decode[TicketPart](r)
+// ParseReplyResult decodes a Result into a Part.
+func ParseReplyResult(r *api.Result) (*Part, error) {
+	return api.Decode[Part](r)
 }
 
-// ParseTicketAddTagResult decodes a Result into a TagRef.
-func ParseTicketAddTagResult(r *Result) (*TagRef, error) {
-	return Decode[TagRef](r)
+// ParseAddTagResult decodes a Result into a TagRef.
+func ParseAddTagResult(r *api.Result) (*api.TagRef, error) {
+	return api.Decode[api.TagRef](r)
 }
 
-// ParseTicketRemoveTagResult decodes a Result into a TagRef.
-func ParseTicketRemoveTagResult(r *Result) (*TagRef, error) {
-	return Decode[TagRef](r)
+// ParseRemoveTagResult decodes a Result into a TagRef.
+func ParseRemoveTagResult(r *api.Result) (*api.TagRef, error) {
+	return api.Decode[api.TagRef](r)
 }
 
-// ParseTicketEnqueueResult decodes a Result into an EnqueuedJob.
-func ParseTicketEnqueueResult(r *Result) (*EnqueuedJob, error) {
-	return Decode[EnqueuedJob](r)
+// ParseEnqueueResult decodes a Result into an EnqueuedJob.
+func ParseEnqueueResult(r *api.Result) (*EnqueuedJob, error) {
+	return api.Decode[EnqueuedJob](r)
 }
 
 // --- Regular Methods ---
@@ -230,127 +255,127 @@ func ParseTicketEnqueueResult(r *Result) (*EnqueuedJob, error) {
 // Get retrieves a ticket by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/getticket
-func (s *TicketsService) Get(ctx context.Context, id string) (*Ticket, error) {
+func (s *Service) Get(ctx context.Context, id string) (*Ticket, error) {
 	result, err := s.GetRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketGetResult(result)
+	return ParseGetResult(result)
 }
 
 // Create creates a new ticket.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/createticket
-func (s *TicketsService) Create(ctx context.Context, body *CreateTicketRequest) (*Ticket, error) {
+func (s *Service) Create(ctx context.Context, body *CreateRequest) (*Ticket, error) {
 	result, err := s.CreateRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketCreateResult(result)
+	return ParseCreateResult(result)
 }
 
 // Update updates an existing ticket.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/updateticket
-func (s *TicketsService) Update(ctx context.Context, id string, body *UpdateTicketRequest) (*Ticket, error) {
+func (s *Service) Update(ctx context.Context, id string, body *UpdateRequest) (*Ticket, error) {
 	result, err := s.UpdateRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketUpdateResult(result)
+	return ParseUpdateResult(result)
 }
 
 // Delete permanently deletes a ticket.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/deleteticket
-func (s *TicketsService) Delete(ctx context.Context, id string) (*TicketDeleted, error) {
+func (s *Service) Delete(ctx context.Context, id string) (*Deleted, error) {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketDeleteResult(result)
+	return ParseDeleteResult(result)
 }
 
 // Search searches for tickets using the provided query filters.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/searchtickets
-func (s *TicketsService) Search(ctx context.Context, body *SearchRequest) (*PagedResult[Ticket], error) {
+func (s *Service) Search(ctx context.Context, body *api.SearchRequest) (*api.PagedResult[Ticket], error) {
 	result, err := s.SearchRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketSearchResult(result)
+	return ParseSearchResult(result)
 }
 
 // Reply adds a reply to a ticket.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/replyticket
-func (s *TicketsService) Reply(ctx context.Context, id string, body *ReplyTicketRequest) (*TicketPart, error) {
+func (s *Service) Reply(ctx context.Context, id string, body *ReplyRequest) (*Part, error) {
 	result, err := s.ReplyRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketReplyResult(result)
+	return ParseReplyResult(result)
 }
 
 // AddTag adds a tag to a ticket. Requires both the tag ID and admin ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/attachtagtoticket
-func (s *TicketsService) AddTag(ctx context.Context, ticketID, tagID, adminID string) (*TagRef, error) {
+func (s *Service) AddTag(ctx context.Context, ticketID, tagID, adminID string) (*api.TagRef, error) {
 	result, err := s.AddTagRaw(ctx, ticketID, tagID, adminID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketAddTagResult(result)
+	return ParseAddTagResult(result)
 }
 
 // RemoveTag removes a tag from a ticket. Requires the admin ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/detachtagfromticket
-func (s *TicketsService) RemoveTag(ctx context.Context, ticketID, tagID, adminID string) (*TagRef, error) {
+func (s *Service) RemoveTag(ctx context.Context, ticketID, tagID, adminID string) (*api.TagRef, error) {
 	result, err := s.RemoveTagRaw(ctx, ticketID, tagID, adminID)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketRemoveTagResult(result)
+	return ParseRemoveTagResult(result)
 }
 
 // Enqueue asynchronously creates a ticket, returning a job reference.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/enqueuecreateticket
-func (s *TicketsService) Enqueue(ctx context.Context, body *CreateTicketRequest) (*EnqueuedJob, error) {
+func (s *Service) Enqueue(ctx context.Context, body *CreateRequest) (*EnqueuedJob, error) {
 	result, err := s.EnqueueRaw(ctx, body)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketEnqueueResult(result)
+	return ParseEnqueueResult(result)
 }
 
 // --- Raw Methods ---
@@ -358,7 +383,7 @@ func (s *TicketsService) Enqueue(ctx context.Context, body *CreateTicketRequest)
 // GetRaw retrieves a ticket by ID and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/getticket
-func (s *TicketsService) GetRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) GetRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("tickets/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -369,7 +394,7 @@ func (s *TicketsService) GetRaw(ctx context.Context, id string) (*Result, error)
 // CreateRaw creates a new ticket and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/createticket
-func (s *TicketsService) CreateRaw(ctx context.Context, body *CreateTicketRequest) (*Result, error) {
+func (s *Service) CreateRaw(ctx context.Context, body *CreateRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "tickets", body)
 	if err != nil {
 		return nil, err
@@ -380,7 +405,7 @@ func (s *TicketsService) CreateRaw(ctx context.Context, body *CreateTicketReques
 // UpdateRaw updates an existing ticket and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/updateticket
-func (s *TicketsService) UpdateRaw(ctx context.Context, id string, body *UpdateTicketRequest) (*Result, error) {
+func (s *Service) UpdateRaw(ctx context.Context, id string, body *UpdateRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, fmt.Sprintf("tickets/%s", url.PathEscape(id)), body)
 	if err != nil {
 		return nil, err
@@ -391,7 +416,7 @@ func (s *TicketsService) UpdateRaw(ctx context.Context, id string, body *UpdateT
 // DeleteRaw permanently deletes a ticket and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/deleteticket
-func (s *TicketsService) DeleteRaw(ctx context.Context, id string) (*Result, error) {
+func (s *Service) DeleteRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodDelete, fmt.Sprintf("tickets/%s", url.PathEscape(id)), nil)
 	if err != nil {
 		return nil, err
@@ -402,7 +427,7 @@ func (s *TicketsService) DeleteRaw(ctx context.Context, id string) (*Result, err
 // SearchRaw searches for tickets and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/searchtickets
-func (s *TicketsService) SearchRaw(ctx context.Context, body *SearchRequest) (*Result, error) {
+func (s *Service) SearchRaw(ctx context.Context, body *api.SearchRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "tickets/search", body)
 	if err != nil {
 		return nil, err
@@ -413,7 +438,7 @@ func (s *TicketsService) SearchRaw(ctx context.Context, body *SearchRequest) (*R
 // ReplyRaw adds a reply to a ticket and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/replyticket
-func (s *TicketsService) ReplyRaw(ctx context.Context, id string, body *ReplyTicketRequest) (*Result, error) {
+func (s *Service) ReplyRaw(ctx context.Context, id string, body *ReplyRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("tickets/%s/reply", url.PathEscape(id)), body)
 	if err != nil {
 		return nil, err
@@ -424,7 +449,7 @@ func (s *TicketsService) ReplyRaw(ctx context.Context, id string, body *ReplyTic
 // AddTagRaw adds a tag to a ticket and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/attachtagtoticket
-func (s *TicketsService) AddTagRaw(ctx context.Context, ticketID, tagID, adminID string) (*Result, error) {
+func (s *Service) AddTagRaw(ctx context.Context, ticketID, tagID, adminID string) (*api.Result, error) {
 	body := struct {
 		ID      string `json:"id"`
 		AdminID string `json:"admin_id"`
@@ -439,7 +464,7 @@ func (s *TicketsService) AddTagRaw(ctx context.Context, ticketID, tagID, adminID
 // RemoveTagRaw removes a tag from a ticket and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tags/detachtagfromticket
-func (s *TicketsService) RemoveTagRaw(ctx context.Context, ticketID, tagID, adminID string) (*Result, error) {
+func (s *Service) RemoveTagRaw(ctx context.Context, ticketID, tagID, adminID string) (*api.Result, error) {
 	body := struct {
 		AdminID string `json:"admin_id"`
 	}{AdminID: adminID}
@@ -453,7 +478,7 @@ func (s *TicketsService) RemoveTagRaw(ctx context.Context, ticketID, tagID, admi
 // EnqueueRaw asynchronously creates a ticket and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/enqueuecreateticket
-func (s *TicketsService) EnqueueRaw(ctx context.Context, body *CreateTicketRequest) (*Result, error) {
+func (s *Service) EnqueueRaw(ctx context.Context, body *CreateRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "tickets/enqueue", body)
 	if err != nil {
 		return nil, err

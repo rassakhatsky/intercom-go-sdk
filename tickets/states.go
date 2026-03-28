@@ -1,16 +1,25 @@
-package intercom
+package tickets
 
 import (
 	"context"
 	"net/http"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
-// TicketStatesService handles communication with the ticket state related
+// StatesService handles communication with the ticket state related
 // methods of the Intercom API.
-type TicketStatesService service
+type StatesService struct {
+	client api.Caller
+}
 
-// TicketState represents a ticket state in Intercom.
-type TicketState struct {
+// NewStatesService creates a new ticket states StatesService.
+func NewStatesService(c api.Caller) *StatesService {
+	return &StatesService{client: c}
+}
+
+// State represents a ticket state in Intercom.
+type State struct {
 	Type          string `json:"type"`
 	ID            string `json:"id"`
 	Category      string `json:"category"`
@@ -19,17 +28,17 @@ type TicketState struct {
 	Archived      bool   `json:"archived"`
 }
 
-// TicketStateList represents the response from listing ticket states.
-type TicketStateList struct {
-	Type string        `json:"type"`
-	Data []TicketState `json:"data"`
+// StateList represents the response from listing ticket states.
+type StateList struct {
+	Type string  `json:"type"`
+	Data []State `json:"data"`
 }
 
 // --- Parse Functions ---
 
-// ParseTicketStateListResult decodes a Result into a TicketStateList.
-func ParseTicketStateListResult(r *Result) (*TicketStateList, error) {
-	return Decode[TicketStateList](r)
+// ParseStateListResult decodes a Result into a StateList.
+func ParseStateListResult(r *api.Result) (*StateList, error) {
+	return api.Decode[StateList](r)
 }
 
 // --- Regular Methods ---
@@ -37,15 +46,15 @@ func ParseTicketStateListResult(r *Result) (*TicketStateList, error) {
 // List returns all ticket states for the workspace.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-states/listticketstates
-func (s *TicketStatesService) List(ctx context.Context) (*TicketStateList, error) {
+func (s *StatesService) List(ctx context.Context) (*StateList, error) {
 	result, err := s.ListRaw(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
-	return ParseTicketStateListResult(result)
+	return ParseStateListResult(result)
 }
 
 // --- Raw Methods ---
@@ -53,7 +62,7 @@ func (s *TicketStatesService) List(ctx context.Context) (*TicketStateList, error
 // ListRaw returns all ticket states with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ticket-states/listticketstates
-func (s *TicketStatesService) ListRaw(ctx context.Context) (*Result, error) {
+func (s *StatesService) ListRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "ticket_states", nil)
 	if err != nil {
 		return nil, err

@@ -23,6 +23,7 @@ import (
 	"github.com/rassakhatsky/intercom-go-sdk/segments"
 	"github.com/rassakhatsky/intercom-go-sdk/settings"
 	"github.com/rassakhatsky/intercom-go-sdk/tags"
+	"github.com/rassakhatsky/intercom-go-sdk/tickets"
 )
 
 const (
@@ -69,9 +70,9 @@ type Client struct {
 	subscriptionTypes   *messaging.SubscriptionsService
 	tags                *tags.Service
 	teams               *admins.TeamsService
-	Tickets             *TicketsService
-	TicketStates        *TicketStatesService
-	TicketTypes         *TicketTypesService
+	tickets             *tickets.Service
+	ticketStates        *tickets.StatesService
+	ticketTypes         *tickets.TypesService
 	Visitors            *VisitorsService
 	Workflows           *WorkflowsService
 }
@@ -155,9 +156,9 @@ func (c *Client) initialize() {
 	c.subscriptionTypes = messaging.NewSubscriptionsService(c)
 	c.tags = tags.NewService(c)
 	c.teams = admins.NewTeamsService(c)
-	c.Tickets = (*TicketsService)(&c.common)
-	c.TicketStates = (*TicketStatesService)(&c.common)
-	c.TicketTypes = (*TicketTypesService)(&c.common)
+	c.tickets = tickets.NewService(c)
+	c.ticketStates = tickets.NewStatesService(c)
+	c.ticketTypes = tickets.NewTypesService(c)
 	c.Visitors = (*VisitorsService)(&c.common)
 	c.Workflows = (*WorkflowsService)(&c.common)
 }
@@ -285,6 +286,21 @@ func (c *Client) Articles() *articles.Service {
 // InternalArticles returns the internal articles service.
 func (c *Client) InternalArticles() *articles.InternalService {
 	return c.internalArticles
+}
+
+// Tickets returns the tickets service.
+func (c *Client) Tickets() *tickets.Service {
+	return c.tickets
+}
+
+// TicketTypes returns the ticket types service.
+func (c *Client) TicketTypes() *tickets.TypesService {
+	return c.ticketTypes
+}
+
+// TicketStates returns the ticket states service.
+func (c *Client) TicketStates() *tickets.StatesService {
+	return c.ticketStates
 }
 
 // NewRequest creates an API request. A relative URL path can be provided in
