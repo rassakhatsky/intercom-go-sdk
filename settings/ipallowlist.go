@@ -1,13 +1,22 @@
-package intercom
+package settings
 
 import (
 	"context"
 	"net/http"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
 // IPAllowlistService handles communication with the IP allowlist related methods
 // of the Intercom API.
-type IPAllowlistService service
+type IPAllowlistService struct {
+	client api.Caller
+}
+
+// NewIPAllowlistService creates a new IPAllowlistService.
+func NewIPAllowlistService(c api.Caller) *IPAllowlistService {
+	return &IPAllowlistService{client: c}
+}
 
 // IPAllowlistSettings represents the Intercom IP allowlist configuration.
 type IPAllowlistSettings struct {
@@ -26,13 +35,13 @@ type UpdateIPAllowlistRequest struct {
 // --- Parse Functions ---
 
 // ParseIPAllowlistGetResult decodes a Result into IPAllowlistSettings.
-func ParseIPAllowlistGetResult(r *Result) (*IPAllowlistSettings, error) {
-	return Decode[IPAllowlistSettings](r)
+func ParseIPAllowlistGetResult(r *api.Result) (*IPAllowlistSettings, error) {
+	return api.Decode[IPAllowlistSettings](r)
 }
 
 // ParseIPAllowlistUpdateResult decodes a Result into IPAllowlistSettings.
-func ParseIPAllowlistUpdateResult(r *Result) (*IPAllowlistSettings, error) {
-	return Decode[IPAllowlistSettings](r)
+func ParseIPAllowlistUpdateResult(r *api.Result) (*IPAllowlistSettings, error) {
+	return api.Decode[IPAllowlistSettings](r)
 }
 
 // --- Regular Methods ---
@@ -46,7 +55,7 @@ func (s *IPAllowlistService) Get(ctx context.Context) (*IPAllowlistSettings, err
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
 	return ParseIPAllowlistGetResult(result)
 }
@@ -60,7 +69,7 @@ func (s *IPAllowlistService) Update(ctx context.Context, body *UpdateIPAllowlist
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
 	return ParseIPAllowlistUpdateResult(result)
 }
@@ -70,7 +79,7 @@ func (s *IPAllowlistService) Update(ctx context.Context, body *UpdateIPAllowlist
 // GetRaw retrieves the current IP allowlist settings with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ip-allowlist/getipallowlist
-func (s *IPAllowlistService) GetRaw(ctx context.Context) (*Result, error) {
+func (s *IPAllowlistService) GetRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "ip_allowlist", nil)
 	if err != nil {
 		return nil, err
@@ -81,7 +90,7 @@ func (s *IPAllowlistService) GetRaw(ctx context.Context) (*Result, error) {
 // UpdateRaw updates the IP allowlist settings with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/ip-allowlist/updateipallowlist
-func (s *IPAllowlistService) UpdateRaw(ctx context.Context, body *UpdateIPAllowlistRequest) (*Result, error) {
+func (s *IPAllowlistService) UpdateRaw(ctx context.Context, body *UpdateIPAllowlistRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPut, "ip_allowlist", body)
 	if err != nil {
 		return nil, err

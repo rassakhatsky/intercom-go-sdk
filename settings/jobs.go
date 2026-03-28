@@ -1,15 +1,24 @@
-package intercom
+package settings
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
 )
 
 // JobsService handles communication with the job status related methods
 // of the Intercom API.
-type JobsService service
+type JobsService struct {
+	client api.Caller
+}
+
+// NewJobsService creates a new JobsService.
+func NewJobsService(c api.Caller) *JobsService {
+	return &JobsService{client: c}
+}
 
 // Job represents an Intercom async job status.
 type Job struct {
@@ -25,8 +34,8 @@ type Job struct {
 // --- Parse Functions ---
 
 // ParseJobGetStatusResult decodes a Result into a Job.
-func ParseJobGetStatusResult(r *Result) (*Job, error) {
-	return Decode[Job](r)
+func ParseJobGetStatusResult(r *api.Result) (*Job, error) {
+	return api.Decode[Job](r)
 }
 
 // --- Regular Methods ---
@@ -40,7 +49,7 @@ func (s *JobsService) GetStatus(ctx context.Context, jobID string) (*Job, error)
 		return nil, err
 	}
 	if result.Error != nil {
-		return nil, resultError(result)
+		return nil, api.ResultError(result)
 	}
 	return ParseJobGetStatusResult(result)
 }
@@ -50,7 +59,7 @@ func (s *JobsService) GetStatus(ctx context.Context, jobID string) (*Job, error)
 // GetStatusRaw retrieves the status of a job by ID with the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/jobs/jobsstatus
-func (s *JobsService) GetStatusRaw(ctx context.Context, jobID string) (*Result, error) {
+func (s *JobsService) GetStatusRaw(ctx context.Context, jobID string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("jobs/status/%s", url.PathEscape(jobID)), nil)
 	if err != nil {
 		return nil, err

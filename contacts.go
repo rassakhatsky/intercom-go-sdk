@@ -182,36 +182,8 @@ type CompanyListResult struct {
 }
 
 // Note represents an Intercom note on a contact.
-type Note struct {
-	Type      string      `json:"type"`
-	ID        string      `json:"id"`
-	CreatedAt int64       `json:"created_at,omitempty"`
-	Body      string      `json:"body,omitempty"`
-	Contact   *ContactRef `json:"contact,omitempty"`
-	Author    *NoteAuthor `json:"author,omitempty"`
-}
-
-// ContactRef is a lightweight reference to a contact.
-type ContactRef struct {
-	Type string `json:"type"`
-	ID   string `json:"id"`
-}
-
-// NoteAuthor represents the admin who authored a note.
-type NoteAuthor struct {
-	Type  string `json:"type"`
-	ID    string `json:"id"`
-	Name  string `json:"name,omitempty"`
-	Email string `json:"email,omitempty"`
-}
-
-// NoteListResult is the response for listing notes on a contact.
-type NoteListResult struct {
-	Type       string      `json:"type"`
-	Data       []Note      `json:"data"`
-	TotalCount int         `json:"total_count"`
-	Pages      CursorPages `json:"pages"`
-}
+// Note, ContactRef, NoteAuthor, and NoteListResult are now in internal/api/types.go
+// and re-exported via aliases.go.
 
 // CreateNoteRequest represents the body for creating a note on a contact.
 type CreateNoteRequest struct {
@@ -246,7 +218,6 @@ type AddSubscriptionRequest struct {
 	ID          string `json:"id"`
 	ConsentType string `json:"consent_type"`
 }
-
 
 // ParseContactGetResult decodes a Result into a Contact.
 func ParseContactGetResult(r *Result) (*Contact, error) { return Decode[Contact](r) }

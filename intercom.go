@@ -15,6 +15,7 @@ import (
 	"github.com/rassakhatsky/intercom-go-sdk/messaging"
 	"github.com/rassakhatsky/intercom-go-sdk/news"
 	"github.com/rassakhatsky/intercom-go-sdk/segments"
+	"github.com/rassakhatsky/intercom-go-sdk/settings"
 	"github.com/rassakhatsky/intercom-go-sdk/tags"
 )
 
@@ -37,12 +38,12 @@ type Client struct {
 	Admins              *AdminsService
 	Articles            *ArticlesService
 	AwayStatusReasons   *AwayStatusReasonsService
-	Brands              *BrandsService
+	brands              *settings.BrandsService
 	Calls               *CallsService
 	Contacts            *ContactsService
 	Companies           *CompaniesService
 	Conversations       *ConversationsService
-	CustomChannelEvents *CustomChannelEventsService
+	customChannelEvents *settings.ChannelEventsService
 	CustomObjects       *CustomObjectsService
 	DataAttributes      *DataAttributesService
 	DataEvents          *DataEventsService
@@ -52,11 +53,11 @@ type Client struct {
 	FinVoice            *FinVoiceService
 	HelpCenter          *HelpCenterService
 	InternalArticles    *InternalArticlesService
-	IPAllowlist         *IPAllowlistService
-	Jobs                *JobsService
+	ipAllowlist         *settings.IPAllowlistService
+	jobs                *settings.JobsService
 	messages            *messaging.MessagesService
 	news                *news.Service
-	Notes               *NotesService
+	notes               *settings.NotesService
 	PhoneCallRedirects  *PhoneCallRedirectsService
 	segments            *segments.Service
 	subscriptionTypes   *messaging.SubscriptionsService
@@ -123,12 +124,12 @@ func (c *Client) initialize() {
 	c.Admins = (*AdminsService)(&c.common)
 	c.Articles = (*ArticlesService)(&c.common)
 	c.AwayStatusReasons = (*AwayStatusReasonsService)(&c.common)
-	c.Brands = (*BrandsService)(&c.common)
+	c.brands = settings.NewBrandsService(c)
 	c.Calls = (*CallsService)(&c.common)
 	c.Contacts = (*ContactsService)(&c.common)
 	c.Companies = (*CompaniesService)(&c.common)
 	c.Conversations = (*ConversationsService)(&c.common)
-	c.CustomChannelEvents = (*CustomChannelEventsService)(&c.common)
+	c.customChannelEvents = settings.NewChannelEventsService(c)
 	c.CustomObjects = (*CustomObjectsService)(&c.common)
 	c.DataAttributes = (*DataAttributesService)(&c.common)
 	c.DataEvents = (*DataEventsService)(&c.common)
@@ -138,11 +139,11 @@ func (c *Client) initialize() {
 	c.FinVoice = (*FinVoiceService)(&c.common)
 	c.HelpCenter = (*HelpCenterService)(&c.common)
 	c.InternalArticles = (*InternalArticlesService)(&c.common)
-	c.IPAllowlist = (*IPAllowlistService)(&c.common)
-	c.Jobs = (*JobsService)(&c.common)
+	c.ipAllowlist = settings.NewIPAllowlistService(c)
+	c.jobs = settings.NewJobsService(c)
 	c.messages = messaging.NewMessagesService(c)
 	c.news = news.NewService(c)
-	c.Notes = (*NotesService)(&c.common)
+	c.notes = settings.NewNotesService(c)
 	c.PhoneCallRedirects = (*PhoneCallRedirectsService)(&c.common)
 	c.segments = segments.NewService(c)
 	c.subscriptionTypes = messaging.NewSubscriptionsService(c)
@@ -193,6 +194,31 @@ func (c *Client) Emails() *messaging.EmailsService {
 // SubscriptionTypes returns the subscription types service.
 func (c *Client) SubscriptionTypes() *messaging.SubscriptionsService {
 	return c.subscriptionTypes
+}
+
+// Brands returns the brands service.
+func (c *Client) Brands() *settings.BrandsService {
+	return c.brands
+}
+
+// IPAllowlist returns the IP allowlist service.
+func (c *Client) IPAllowlist() *settings.IPAllowlistService {
+	return c.ipAllowlist
+}
+
+// CustomChannelEvents returns the custom channel events service.
+func (c *Client) CustomChannelEvents() *settings.ChannelEventsService {
+	return c.customChannelEvents
+}
+
+// Jobs returns the jobs service.
+func (c *Client) Jobs() *settings.JobsService {
+	return c.jobs
+}
+
+// Notes returns the notes service.
+func (c *Client) Notes() *settings.NotesService {
+	return c.notes
 }
 
 // NewRequest creates an API request. A relative URL path can be provided in

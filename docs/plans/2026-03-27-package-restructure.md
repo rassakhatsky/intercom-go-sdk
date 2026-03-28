@@ -122,15 +122,15 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 13: Migrate `settings` sub-package
-- [ ] create `settings/brands.go` — move from root `brands.go`
-- [ ] create `settings/ipallowlist.go` — move from root `ip_allowlist.go`
-- [ ] create `settings/channelevents.go` — move from root `custom_channel_events.go`
-- [ ] create `settings/jobs.go` — move from root `jobs.go`
-- [ ] create `settings/notes.go` — move from root `notes.go`
-- [ ] add `Brands()`, `IPAllowlist()`, `CustomChannelEvents()`, `Jobs()`, `Notes()` accessors to `Client`
-- [ ] migrate tests to `settings/`
-- [ ] remove root files
-- [ ] run tests: `go test ./...`
+- [x] create `settings/brands.go` — move from root `brands.go`
+- [x] create `settings/ipallowlist.go` — move from root `ip_allowlist.go`
+- [x] create `settings/channelevents.go` — move from root `custom_channel_events.go`
+- [x] create `settings/jobs.go` — move from root `jobs.go`
+- [x] create `settings/notes.go` — move from root `notes.go`
+- [x] add `Brands()`, `IPAllowlist()`, `CustomChannelEvents()`, `Jobs()`, `Notes()` accessors to `Client`
+- [x] migrate tests to `settings/`
+- [x] remove root files
+- [x] run tests: `go test ./...`
 
 ### Task 14: Migrate `admins` sub-package
 - [ ] create `admins/admins.go` — move from root `admins.go`

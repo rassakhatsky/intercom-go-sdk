@@ -24,6 +24,10 @@ type ErrorResponse = api.ErrorResponse
 // Shared domain types
 type TagRef = api.TagRef
 type AdminRef = api.AdminRef
+type ContactRef = api.ContactRef
+type NoteAuthor = api.NoteAuthor
+type Note = api.Note
+type NoteListResult = api.NoteListResult
 
 // Tag sub-package aliases (for backward compat while other root services still reference these)
 type Tag = tags.Tag
