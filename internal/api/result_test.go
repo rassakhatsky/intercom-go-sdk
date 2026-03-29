@@ -197,6 +197,30 @@ func TestBuildResult_500_NonJSON(t *testing.T) {
 	}
 }
 
+func TestBuildResult_NilRequest(t *testing.T) {
+	body := []byte(`{"id":"1"}`)
+	resp := &http.Response{
+		StatusCode: 200,
+		Header:     http.Header{"Content-Type": {"application/json"}},
+		Request:    nil,
+	}
+
+	r := BuildResult(resp, body)
+
+	if r.StatusCode != 200 {
+		t.Errorf("StatusCode = %d, want 200", r.StatusCode)
+	}
+	if r.URL != "" {
+		t.Errorf("URL = %q, want empty string", r.URL)
+	}
+	if string(r.Body) != `{"id":"1"}` {
+		t.Errorf("Body = %q, want %q", string(r.Body), `{"id":"1"}`)
+	}
+	if r.Error != nil {
+		t.Errorf("Error = %v, want nil", r.Error)
+	}
+}
+
 func TestErrorResult_Error(t *testing.T) {
 	tests := []struct {
 		name string

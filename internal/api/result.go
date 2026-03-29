@@ -64,10 +64,15 @@ func Decode[T any](r *Result) (*T, error) {
 // BuildResult constructs a Result from an HTTP response and body,
 // populating Error for 4xx/5xx responses.
 func BuildResult(resp *http.Response, body []byte) *Result {
+	var reqURL string
+	if resp.Request != nil && resp.Request.URL != nil {
+		reqURL = resp.Request.URL.String()
+	}
+
 	result := &Result{
 		StatusCode: resp.StatusCode,
 		Header:     resp.Header,
-		URL:        resp.Request.URL.String(),
+		URL:        reqURL,
 		Body:       body,
 	}
 

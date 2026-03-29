@@ -48,9 +48,9 @@
 - [x] run tests (`go test ./ai/... ./data/... ./messaging/...`) - must pass before next task
 
 ### Task 3: Add nil guard in `BuildResult`
-- [ ] Add nil check for `resp.Request` and `resp.Request.URL` in `internal/api/result.go:70` before accessing `resp.Request.URL.String()`
-- [ ] Write test for `BuildResult` with nil `resp.Request` — verify no panic and `URL` is empty string
-- [ ] run tests (`go test ./internal/api/...`) - must pass before next task
+- [x] Add nil check for `resp.Request` and `resp.Request.URL` in `internal/api/result.go:70` before accessing `resp.Request.URL.String()`
+- [x] Write test for `BuildResult` with nil `resp.Request` — verify no panic and `URL` is empty string
+- [x] run tests (`go test ./internal/api/...`) - must pass before next task
 
 ### Task 4: Add validation to `ParseGetTranscriptResult`
 - [ ] Add nil guard for `r` parameter in `calls/calls.go:104-106`
