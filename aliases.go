@@ -158,8 +158,25 @@ type Iter[T any] = api.Iter[T]
 
 // Search types
 type Filter = api.Filter
+type Operator = api.Operator
 type SearchRequest = api.SearchRequest
 type SearchPagination = api.SearchPagination
+
+// Operator constants — re-exported from internal/api for consumer convenience.
+const (
+	OpEquals      = api.OpEquals
+	OpNotEquals   = api.OpNotEquals
+	OpGreaterThan = api.OpGreaterThan
+	OpLessThan    = api.OpLessThan
+	OpContains    = api.OpContains
+	OpNotContains = api.OpNotContains
+	OpIn          = api.OpIn
+	OpNotIn       = api.OpNotIn
+	OpStarts      = api.OpStarts
+	OpEnds        = api.OpEnds
+	OpAND         = api.OpAND
+	OpOR          = api.OpOR
+)
 
 // Logger types
 type Logger = api.Logger

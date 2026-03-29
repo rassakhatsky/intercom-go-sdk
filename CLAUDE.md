@@ -65,6 +65,7 @@ make fix         # go vet + gofmt -l
 **Search** (`internal/api/search.go`):
 - `Filter` struct serves dual purpose: single field filter or compound (AND/OR) filter
 - Constructed via `SingleFilterOf`, `And`, `Or` helpers
+- `Operator` type alias (`= string`) with typed constants: `OpEquals` (`=`), `OpNotEquals` (`!=`), `OpGreaterThan` (`>`), `OpLessThan` (`<`), `OpContains` (`~`), `OpNotContains` (`!~`), `OpIn` (`IN`), `OpNotIn` (`NIN`), `OpStarts` (`^`), `OpEnds` (`$`), `OpAND` (`AND`), `OpOR` (`OR`)
 
 **Error handling** (`internal/api/errors.go`):
 - `ErrorResponse` wraps API errors with `StatusCode int` and `Headers http.Header` fields (no synthetic `*http.Response`); `ResultError` converts `Result.Error` into `*ErrorResponse` (nil-safe: returns nil for nil input)

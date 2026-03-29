@@ -84,8 +84,8 @@
 - [x] verify no new test failures introduced
 
 ### Task 9: [Final] Update documentation
-- [ ] update CLAUDE.md if operator constants or new conventions were added
-- [ ] update `aliases.go` if new public types were added (operator constants)
+- [x] update CLAUDE.md if operator constants or new conventions were added
+- [x] update `aliases.go` if new public types were added (operator constants)
 
 *Note: ralphex automatically moves completed plans to `docs/plans/completed/`*
 
