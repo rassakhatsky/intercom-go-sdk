@@ -132,6 +132,35 @@ func IsUnauthorized(err error) bool {
 	return hasStatusCode(err, http.StatusUnauthorized)
 }
 
+// IsBadRequest returns true if the error is an Intercom 400 response.
+func IsBadRequest(err error) bool {
+	return hasStatusCode(err, http.StatusBadRequest)
+}
+
+// IsForbidden returns true if the error is an Intercom 403 response.
+func IsForbidden(err error) bool {
+	return hasStatusCode(err, http.StatusForbidden)
+}
+
+// IsConflict returns true if the error is an Intercom 409 response.
+func IsConflict(err error) bool {
+	return hasStatusCode(err, http.StatusConflict)
+}
+
+// IsUnprocessableEntity returns true if the error is an Intercom 422 response.
+func IsUnprocessableEntity(err error) bool {
+	return hasStatusCode(err, http.StatusUnprocessableEntity)
+}
+
+// IsServerError returns true if the error is an Intercom 5xx response.
+func IsServerError(err error) bool {
+	var errResp *ErrorResponse
+	if errors.As(err, &errResp) && errResp.Response != nil {
+		return errResp.Response.StatusCode >= 500 && errResp.Response.StatusCode < 600
+	}
+	return false
+}
+
 func hasStatusCode(err error, code int) bool {
 	var errResp *ErrorResponse
 	if errors.As(err, &errResp) && errResp.Response != nil {

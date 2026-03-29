@@ -183,6 +183,21 @@ func IsRateLimited(err error) bool { return api.IsRateLimited(err) }
 // IsUnauthorized returns true if the error is an Intercom 401 response.
 func IsUnauthorized(err error) bool { return api.IsUnauthorized(err) }
 
+// IsBadRequest returns true if the error is an Intercom 400 response.
+func IsBadRequest(err error) bool { return api.IsBadRequest(err) }
+
+// IsForbidden returns true if the error is an Intercom 403 response.
+func IsForbidden(err error) bool { return api.IsForbidden(err) }
+
+// IsConflict returns true if the error is an Intercom 409 response.
+func IsConflict(err error) bool { return api.IsConflict(err) }
+
+// IsUnprocessableEntity returns true if the error is an Intercom 422 response.
+func IsUnprocessableEntity(err error) bool { return api.IsUnprocessableEntity(err) }
+
+// IsServerError returns true if the error is an Intercom 5xx response.
+func IsServerError(err error) bool { return api.IsServerError(err) }
+
 // SingleFilterOf creates a filter that matches a single field.
 func SingleFilterOf(field, operator string, value any) *Filter {
 	return api.SingleFilterOf(field, operator, value)

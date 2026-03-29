@@ -372,6 +372,117 @@ func TestResultError_NonRateLimited_NoRateLimitInfo(t *testing.T) {
 	}
 }
 
+func TestIsBadRequest(t *testing.T) {
+	err := &ErrorResponse{
+		Response: &http.Response{StatusCode: 400},
+		Errors:   []ErrorDetail{{Code: "client_error", Message: "bad request"}},
+	}
+	if !IsBadRequest(err) {
+		t.Error("IsBadRequest() = false, want true")
+	}
+}
+
+func TestIsBadRequest_FalseForOther(t *testing.T) {
+	if IsBadRequest(errors.New("random error")) {
+		t.Error("IsBadRequest() = true for non-ErrorResponse")
+	}
+	if IsBadRequest(nil) {
+		t.Error("IsBadRequest() = true for nil")
+	}
+}
+
+func TestIsForbidden(t *testing.T) {
+	err := &ErrorResponse{
+		Response: &http.Response{StatusCode: 403},
+		Errors:   []ErrorDetail{{Code: "action_forbidden", Message: "forbidden"}},
+	}
+	if !IsForbidden(err) {
+		t.Error("IsForbidden() = false, want true")
+	}
+}
+
+func TestIsForbidden_FalseForOther(t *testing.T) {
+	if IsForbidden(errors.New("random error")) {
+		t.Error("IsForbidden() = true for non-ErrorResponse")
+	}
+	if IsForbidden(nil) {
+		t.Error("IsForbidden() = true for nil")
+	}
+}
+
+func TestIsConflict(t *testing.T) {
+	err := &ErrorResponse{
+		Response: &http.Response{StatusCode: 409},
+		Errors:   []ErrorDetail{{Code: "conflict", Message: "conflict"}},
+	}
+	if !IsConflict(err) {
+		t.Error("IsConflict() = false, want true")
+	}
+}
+
+func TestIsConflict_FalseForOther(t *testing.T) {
+	if IsConflict(errors.New("random error")) {
+		t.Error("IsConflict() = true for non-ErrorResponse")
+	}
+	if IsConflict(nil) {
+		t.Error("IsConflict() = true for nil")
+	}
+}
+
+func TestIsUnprocessableEntity(t *testing.T) {
+	err := &ErrorResponse{
+		Response: &http.Response{StatusCode: 422},
+		Errors:   []ErrorDetail{{Code: "parameter_invalid", Message: "invalid"}},
+	}
+	if !IsUnprocessableEntity(err) {
+		t.Error("IsUnprocessableEntity() = false, want true")
+	}
+}
+
+func TestIsUnprocessableEntity_FalseForOther(t *testing.T) {
+	if IsUnprocessableEntity(errors.New("random error")) {
+		t.Error("IsUnprocessableEntity() = true for non-ErrorResponse")
+	}
+	if IsUnprocessableEntity(nil) {
+		t.Error("IsUnprocessableEntity() = true for nil")
+	}
+}
+
+func TestIsServerError(t *testing.T) {
+	codes := []int{500, 502, 503, 504}
+	for _, code := range codes {
+		err := &ErrorResponse{
+			Response: &http.Response{StatusCode: code},
+			Errors:   []ErrorDetail{{Code: "server_error", Message: "server error"}},
+		}
+		if !IsServerError(err) {
+			t.Errorf("IsServerError() = false for status %d, want true", code)
+		}
+	}
+}
+
+func TestIsServerError_FalseForClientErrors(t *testing.T) {
+	codes := []int{400, 401, 403, 404, 422, 429}
+	for _, code := range codes {
+		err := &ErrorResponse{
+			Response: &http.Response{StatusCode: code},
+			Errors:   []ErrorDetail{{Code: "client_error", Message: "client error"}},
+		}
+		if IsServerError(err) {
+			t.Errorf("IsServerError() = true for status %d, want false", code)
+		}
+	}
+}
+
+func TestIsServerError_FalseForOther(t *testing.T) {
+	if IsServerError(errors.New("random error")) {
+		t.Error("IsServerError() = true for non-ErrorResponse")
+	}
+	if IsServerError(nil) {
+		t.Error("IsServerError() = true for nil")
+	}
+}
+
 func TestErrorCode_IsStringType(t *testing.T) {
 	// ErrorCode should be usable as a string
 	var code ErrorCode = "test_code"

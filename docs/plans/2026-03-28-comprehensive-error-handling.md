@@ -63,13 +63,13 @@
 - `Retry-After` → `RetryAfter` (time.Duration in seconds)
 
 ### Task 3: Add common status code helpers
-- [ ] Write tests in `internal/api/errors_test.go` for each new helper: `IsBadRequest`, `IsForbidden`, `IsConflict`, `IsUnprocessableEntity`, `IsServerError`
-- [ ] Write tests for `IsServerError` covering 500, 502, 503, 504 (range check)
-- [ ] Write tests verifying helpers return false for nil errors and non-ErrorResponse errors
-- [ ] Implement `IsBadRequest` (400), `IsForbidden` (403), `IsConflict` (409), `IsUnprocessableEntity` (422) using existing `hasStatusCode` pattern
-- [ ] Implement `IsServerError` checking status code range 500-599
-- [ ] Add function aliases in `aliases.go` (or verify they're accessible via root package)
-- [ ] Run tests — must pass before next task
+- [x] Write tests in `internal/api/errors_test.go` for each new helper: `IsBadRequest`, `IsForbidden`, `IsConflict`, `IsUnprocessableEntity`, `IsServerError`
+- [x] Write tests for `IsServerError` covering 500, 502, 503, 504 (range check)
+- [x] Write tests verifying helpers return false for nil errors and non-ErrorResponse errors
+- [x] Implement `IsBadRequest` (400), `IsForbidden` (403), `IsConflict` (409), `IsUnprocessableEntity` (422) using existing `hasStatusCode` pattern
+- [x] Implement `IsServerError` checking status code range 500-599
+- [x] Add function aliases in `aliases.go` (or verify they're accessible via root package)
+- [x] Run tests — must pass before next task
 
 ### Task 4: Add ErrorCode field to ErrorDetail and matching helper
 - [ ] Write tests for `ErrorResponse.HasErrorCode(code ErrorCode) bool` — matches against any error in the Errors slice
