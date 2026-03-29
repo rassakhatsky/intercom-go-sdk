@@ -107,6 +107,15 @@ func TestResultError_429(t *testing.T) {
 	if !IsRateLimited(err) {
 		t.Error("IsRateLimited() = false, want true")
 	}
+
+	// With nil Header, RateLimit should be nil (no panic)
+	var errResp *ErrorResponse
+	if !errors.As(err, &errResp) {
+		t.Fatalf("expected *ErrorResponse, got %T", err)
+	}
+	if errResp.RateLimit != nil {
+		t.Errorf("expected nil RateLimit when Header is nil, got %+v", errResp.RateLimit)
+	}
 }
 
 func TestResultError_401(t *testing.T) {
@@ -449,7 +458,7 @@ func TestIsUnprocessableEntity_FalseForOther(t *testing.T) {
 }
 
 func TestIsServerError(t *testing.T) {
-	codes := []int{500, 502, 503, 504}
+	codes := []int{500, 502, 503, 504, 599}
 	for _, code := range codes {
 		err := &ErrorResponse{
 			Response: &http.Response{StatusCode: code},
@@ -462,7 +471,7 @@ func TestIsServerError(t *testing.T) {
 }
 
 func TestIsServerError_FalseForClientErrors(t *testing.T) {
-	codes := []int{400, 401, 403, 404, 422, 429}
+	codes := []int{400, 401, 403, 404, 422, 429, 499, 600}
 	for _, code := range codes {
 		err := &ErrorResponse{
 			Response: &http.Response{StatusCode: code},

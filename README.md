@@ -104,8 +104,39 @@ if err != nil {
         fmt.Println("Contact not found")
     } else if intercom.IsRateLimited(err) {
         fmt.Println("Rate limited")
+    } else if intercom.IsServerError(err) {
+        fmt.Println("Server error, retry with backoff")
     } else {
         fmt.Printf("Error: %v\n", err)
+    }
+}
+```
+
+Additional status helpers: `IsBadRequest` (400), `IsForbidden` (403), `IsConflict` (409), `IsUnprocessableEntity` (422).
+
+### Rate Limit Details
+
+Rate-limited (429) responses include parsed rate limit metadata:
+
+```go
+if intercom.IsRateLimited(err) {
+    var apiErr *intercom.ErrorResponse
+    if errors.As(err, &apiErr) && apiErr.RateLimit != nil {
+        fmt.Printf("Retry after %v\n", apiErr.RateLimit.RetryAfter)
+        time.Sleep(apiErr.RateLimit.RetryAfter)
+    }
+}
+```
+
+### Error Code Matching
+
+Match specific Intercom API error codes using `HasErrorCode` and predefined `ErrorCode` constants:
+
+```go
+var apiErr *intercom.ErrorResponse
+if errors.As(err, &apiErr) {
+    if apiErr.HasErrorCode(intercom.ErrParameterInvalid) {
+        fmt.Println("Invalid parameter")
     }
 }
 ```

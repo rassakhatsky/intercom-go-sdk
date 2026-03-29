@@ -42,7 +42,7 @@ make fix         # go vet + gofmt -l
 
 **Root package** (`intercom`):
 - `Client` (`intercom.go`): holds auth token, HTTP client, logger, and all service instances; implements `api.Caller`
-- `aliases.go`: type aliases re-exporting `internal/api` types so consumers use `intercom.Result`, `intercom.Iter[T]`, etc. without importing `internal/api`
+- `aliases.go`: type aliases re-exporting `internal/api` types so consumers use `intercom.Result`, `intercom.Iter[T]`, etc. without importing `internal/api`. Also re-exports error code constants (`ErrServerError`, `ErrParameterInvalid`, etc.) and status helper functions (`IsNotFound`, `IsBadRequest`, `IsServerError`, etc.)
 - Accessor methods on `Client` (e.g., `Contacts()`, `Tags()`) return sub-package service pointers
 - `NewRequest` / `Do` / `DoRaw` handle JSON marshaling, auth headers (`Bearer` token), and `Intercom-Version: 2.15`
 
@@ -68,7 +68,9 @@ make fix         # go vet + gofmt -l
 
 **Error handling** (`internal/api/errors.go`):
 - `ErrorResponse` wraps API errors; `ResultError` converts `Result.Error` into `*ErrorResponse`
-- Helper predicates: `IsNotFound`, `IsRateLimited`, `IsUnauthorized`
+- Status predicates: `IsNotFound` (404), `IsRateLimited` (429), `IsUnauthorized` (401), `IsBadRequest` (400), `IsForbidden` (403), `IsConflict` (409), `IsUnprocessableEntity` (422), `IsServerError` (5xx)
+- `ErrorCode` typed constants (e.g., `ErrParameterInvalid`, `ErrRateLimitExceeded`, `ErrTokenRevoked`); `ErrorResponse.HasErrorCode(code)` matches against the `Errors` slice
+- `RateLimitInfo` (Limit, Remaining, Reset, RetryAfter) — auto-parsed from headers on 429 responses, available via `ErrorResponse.RateLimit`
 
 **Raw results** (`internal/api/result.go`):
 - `Result` — non-generic struct: `StatusCode int`, `Header http.Header`, `URL string`, `Body []byte`, `Error *ErrorResult`

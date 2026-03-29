@@ -154,6 +154,160 @@ func TestIsUnauthorized_FalseForOther(t *testing.T) {
 	}
 }
 
+func TestIsBadRequest_True(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/contacts/bad", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"type":"error.list","errors":[{"code":"client_error","message":"bad request"}]}`))
+	})
+
+	req, _ := client.NewRequest("GET", "contacts/bad", nil)
+	_, err := client.Do(context.Background(), req, nil)
+
+	if !IsBadRequest(err) {
+		t.Errorf("IsBadRequest() = false, want true for 400")
+	}
+}
+
+func TestIsForbidden_True(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/contacts/forbidden", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte(`{"type":"error.list","errors":[{"code":"action_forbidden","message":"forbidden"}]}`))
+	})
+
+	req, _ := client.NewRequest("GET", "contacts/forbidden", nil)
+	_, err := client.Do(context.Background(), req, nil)
+
+	if !IsForbidden(err) {
+		t.Errorf("IsForbidden() = false, want true for 403")
+	}
+}
+
+func TestIsConflict_True(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/contacts/conflict", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusConflict)
+		w.Write([]byte(`{"type":"error.list","errors":[{"code":"conflict","message":"conflict"}]}`))
+	})
+
+	req, _ := client.NewRequest("GET", "contacts/conflict", nil)
+	_, err := client.Do(context.Background(), req, nil)
+
+	if !IsConflict(err) {
+		t.Errorf("IsConflict() = false, want true for 409")
+	}
+}
+
+func TestIsUnprocessableEntity_True(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/contacts/invalid", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(422)
+		w.Write([]byte(`{"type":"error.list","errors":[{"code":"parameter_invalid","message":"invalid"}]}`))
+	})
+
+	req, _ := client.NewRequest("GET", "contacts/invalid", nil)
+	_, err := client.Do(context.Background(), req, nil)
+
+	if !IsUnprocessableEntity(err) {
+		t.Errorf("IsUnprocessableEntity() = false, want true for 422")
+	}
+}
+
+func TestIsServerError_True(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/contacts/error", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"type":"error.list","errors":[{"code":"server_error","message":"internal error"}]}`))
+	})
+
+	req, _ := client.NewRequest("GET", "contacts/error", nil)
+	_, err := client.Do(context.Background(), req, nil)
+
+	if !IsServerError(err) {
+		t.Errorf("IsServerError() = false, want true for 500")
+	}
+}
+
+func TestIsRateLimited_RateLimitInfo(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/contacts/ratelimit", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("X-RateLimit-Limit", "100")
+		w.Header().Set("X-RateLimit-Remaining", "0")
+		w.Header().Set("X-RateLimit-Reset", "1711584000")
+		w.Header().Set("Retry-After", "30")
+		w.WriteHeader(http.StatusTooManyRequests)
+		w.Write([]byte(`{"type":"error.list","errors":[{"code":"rate_limit_exceeded","message":"rate limit exceeded"}]}`))
+	})
+
+	req, _ := client.NewRequest("GET", "contacts/ratelimit", nil)
+	_, err := client.Do(context.Background(), req, nil)
+
+	if !IsRateLimited(err) {
+		t.Fatal("IsRateLimited() = false, want true")
+	}
+
+	var errResp *ErrorResponse
+	if !errors.As(err, &errResp) {
+		t.Fatalf("expected *ErrorResponse, got %T", err)
+	}
+	if errResp.RateLimit == nil {
+		t.Fatal("expected non-nil RateLimit on 429 response with rate limit headers")
+	}
+	if errResp.RateLimit.Limit != 100 {
+		t.Errorf("RateLimit.Limit = %d, want 100", errResp.RateLimit.Limit)
+	}
+	if errResp.RateLimit.Remaining != 0 {
+		t.Errorf("RateLimit.Remaining = %d, want 0", errResp.RateLimit.Remaining)
+	}
+	if errResp.RateLimit.RetryAfter != 30*1e9 { // 30 seconds in nanoseconds
+		t.Errorf("RateLimit.RetryAfter = %v, want 30s", errResp.RateLimit.RetryAfter)
+	}
+}
+
+func TestHasErrorCode_Integration(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/contacts/hascode", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(422)
+		w.Write([]byte(`{"type":"error.list","errors":[{"code":"parameter_invalid","message":"email is required"}]}`))
+	})
+
+	req, _ := client.NewRequest("GET", "contacts/hascode", nil)
+	_, err := client.Do(context.Background(), req, nil)
+
+	var errResp *ErrorResponse
+	if !errors.As(err, &errResp) {
+		t.Fatalf("expected *ErrorResponse, got %T", err)
+	}
+	if !errResp.HasErrorCode(ErrParameterInvalid) {
+		t.Error("HasErrorCode(ErrParameterInvalid) = false, want true")
+	}
+	if errResp.HasErrorCode(ErrConflict) {
+		t.Error("HasErrorCode(ErrConflict) = true, want false")
+	}
+}
+
 func TestCheckResponse_NonJSONBody(t *testing.T) {
 	client, mux, teardown := setup()
 	defer teardown()
