@@ -91,16 +91,16 @@ Companies use scroll-based pagination via `client.Companies().Scroll(ctx, scroll
 ## Search
 
 ```go
-// Single filter
+// Single filter — using typed operator constants
 result, err := client.Contacts().Search(ctx, &intercom.SearchRequest{
-    Query: intercom.SingleFilterOf("email", "=", "alice@example.com"),
+    Query: intercom.SingleFilterOf("email", intercom.OpEquals, "alice@example.com"),
 })
 
 // Compound filter
 result, err = client.Contacts().Search(ctx, &intercom.SearchRequest{
     Query: intercom.And(
-        intercom.SingleFilterOf("role", "=", "user"),
-        intercom.SingleFilterOf("email", "~", "example.com"),
+        intercom.SingleFilterOf("role", intercom.OpEquals, "user"),
+        intercom.SingleFilterOf("email", intercom.OpContains, "example.com"),
     ),
 })
 ```

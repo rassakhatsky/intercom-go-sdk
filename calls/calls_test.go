@@ -567,6 +567,30 @@ func TestParseGetTranscriptResult_ValidBody(t *testing.T) {
 
 // --- ParseGetRecordingURLResult Tests ---
 
+func TestParseGetRecordingURLResult_NilResult(t *testing.T) {
+	_, err := calls.ParseGetRecordingURLResult(nil)
+	if err == nil {
+		t.Fatal("Expected error for nil result, got nil")
+	}
+	if !strings.Contains(err.Error(), "nil result") {
+		t.Errorf("Error should mention nil result, got: %s", err.Error())
+	}
+}
+
+func TestParseGetRecordingURLResult_RedirectMissingLocation(t *testing.T) {
+	r := &api.Result{
+		StatusCode: http.StatusFound,
+		Header:     http.Header{},
+	}
+	_, err := calls.ParseGetRecordingURLResult(r)
+	if err == nil {
+		t.Fatal("Expected error for redirect without Location header, got nil")
+	}
+	if !strings.Contains(err.Error(), "missing Location header") {
+		t.Errorf("Error should mention missing Location header, got: %s", err.Error())
+	}
+}
+
 func TestParseGetRecordingURLResult_UnexpectedStatus(t *testing.T) {
 	r := &api.Result{
 		StatusCode: http.StatusOK,

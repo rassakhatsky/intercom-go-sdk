@@ -90,6 +90,9 @@ func ParseSearchResult(r *api.Result) (*List, error) { return api.Decode[List](r
 // ParseGetRecordingURLResult extracts the recording URL from a redirect Result.
 // Returns the Location header for 302/301 responses, or an error for unexpected status codes.
 func ParseGetRecordingURLResult(r *api.Result) (string, error) {
+	if r == nil {
+		return "", fmt.Errorf("intercom: nil result")
+	}
 	if r.StatusCode == http.StatusFound || r.StatusCode == http.StatusMovedPermanently {
 		loc := r.Header.Get("Location")
 		if loc == "" {
