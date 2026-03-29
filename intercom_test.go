@@ -299,5 +299,55 @@ func TestAddQueryOptions_NonStruct(t *testing.T) {
 	}
 }
 
+func TestClient_AllAccessorsNonNil(t *testing.T) {
+	c := NewClient("tok")
+
+	accessors := []struct {
+		name string
+		val  any
+	}{
+		{"AIContent", c.AIContent()},
+		{"FinVoice", c.FinVoice()},
+		{"Segments", c.Segments()},
+		{"Tags", c.Tags()},
+		{"ExportReporting", c.ExportReporting()},
+		{"DataExport", c.DataExport()},
+		{"News", c.News()},
+		{"Messages", c.Messages()},
+		{"Emails", c.Emails()},
+		{"SubscriptionTypes", c.SubscriptionTypes()},
+		{"Brands", c.Brands()},
+		{"IPAllowlist", c.IPAllowlist()},
+		{"CustomChannelEvents", c.CustomChannelEvents()},
+		{"Jobs", c.Jobs()},
+		{"Notes", c.Notes()},
+		{"DataEvents", c.DataEvents()},
+		{"DataAttributes", c.DataAttributes()},
+		{"CustomObjects", c.CustomObjects()},
+		{"Companies", c.Companies()},
+		{"Admins", c.Admins()},
+		{"Teams", c.Teams()},
+		{"AwayStatusReasons", c.AwayStatusReasons()},
+		{"Calls", c.Calls()},
+		{"PhoneCallRedirects", c.PhoneCallRedirects()},
+		{"HelpCenter", c.HelpCenter()},
+		{"Articles", c.Articles()},
+		{"InternalArticles", c.InternalArticles()},
+		{"Contacts", c.Contacts()},
+		{"Visitors", c.Visitors()},
+		{"Conversations", c.Conversations()},
+		{"Tickets", c.Tickets()},
+		{"TicketTypes", c.TicketTypes()},
+		{"TicketStates", c.TicketStates()},
+		{"Workflows", c.Workflows()},
+	}
+
+	for _, a := range accessors {
+		if a.val == nil {
+			t.Errorf("%s() returned nil, want non-nil service", a.name)
+		}
+	}
+}
+
 // Ensure *slog.Logger satisfies the Logger interface at compile time.
 var _ Logger = slog.Default()

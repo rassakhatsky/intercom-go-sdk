@@ -52,8 +52,8 @@ Address critical and important issues identified during comprehensive PR review 
 - [x] run tests — must pass before next task
 
 ### Task 4: Add test coverage for root package accessor methods
-- [ ] write test: `TestClient_AllAccessorsNonNil` in `intercom_test.go` — create `NewClient("tok")`, assert every accessor (`Contacts()`, `Tags()`, `Admins()`, etc.) returns non-nil
-- [ ] run tests — must pass before next task
+- [x] write test: `TestClient_AllAccessorsNonNil` in `intercom_test.go` — create `NewClient("tok")`, assert every accessor (`Contacts()`, `Tags()`, `Admins()`, etc.) returns non-nil
+- [x] run tests — must pass before next task
 
 ### Task 5: Add test coverage for `DoRawNoRedirect` and `DoDownload`
 - [ ] write test: `TestClient_DoRawNoRedirect_302` in `do_raw_test.go` — verify 302 response is returned as result (redirect not followed)
