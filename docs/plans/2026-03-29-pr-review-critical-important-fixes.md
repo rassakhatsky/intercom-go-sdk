@@ -51,9 +51,9 @@ Address 2 critical and 8 important findings from the comprehensive PR review of 
 - [x] run tests — must pass before next task
 
 ### Task 4: Fix incomplete status predicate lists in comments (Important #10)
-- [ ] update `ResultError` doc comment in `internal/api/errors.go:82-83` to reference all predicates or use general phrase
-- [ ] update `Do` method doc comment in `intercom.go:442-445` to reference all predicates or use general phrase
-- [ ] run tests — must pass before next task (no code changes, but verify nothing broke)
+- [x] update `ResultError` doc comment in `internal/api/errors.go:82-83` to reference all predicates or use general phrase
+- [x] update `Do` method doc comment in `intercom.go:442-445` to reference all predicates or use general phrase
+- [x] run tests — must pass before next task (no code changes, but verify nothing broke)
 
 ### Task 5: Fix misleading comments in `aliases.go` and `doc.go` (Important #9, #16)
 - [ ] update `doc.go:33`: change `"="` to `intercom.OpEquals` in the search example

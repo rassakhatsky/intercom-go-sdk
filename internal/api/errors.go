@@ -82,8 +82,8 @@ func (e *ErrorResponse) HasErrorCode(code ErrorCode) bool {
 	return false
 }
 
-// ResultError converts Result.Error into an *ErrorResponse, preserving
-// compatibility with IsNotFound, IsRateLimited, and IsUnauthorized.
+// ResultError converts Result.Error into an *ErrorResponse suitable for
+// inspection with status predicates (IsNotFound, IsBadRequest, etc.).
 func ResultError(r *Result) error {
 	if r == nil || r.Error == nil {
 		return nil

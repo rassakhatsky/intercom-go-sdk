@@ -445,8 +445,8 @@ func (c *Client) DoDownload(ctx context.Context, req *http.Request, w io.Writer)
 
 // Do sends an API request and returns the API response. The JSON response
 // body is decoded into v if v is non-nil. API errors (4xx/5xx) are returned
-// as *ErrorResponse errors, preserving compatibility with IsNotFound,
-// IsRateLimited, and IsUnauthorized.
+// as *ErrorResponse errors suitable for inspection with status predicates
+// (IsNotFound, IsBadRequest, etc.).
 func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*Response, error) {
 	result, err := c.DoRaw(ctx, req)
 	if err != nil {
