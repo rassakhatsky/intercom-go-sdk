@@ -71,10 +71,10 @@
 - [x] run tests (`go test ./calls/...`) - must pass before next task
 
 ### Task 7: Add `Filter` operator constants
-- [ ] Define typed operator constants in `internal/api/search.go` (e.g., `OpEquals = "="`, `OpNotEquals = "!="`, `OpContains = "~"`, `OpAND = "AND"`, `OpOR = "OR"`, etc.)
-- [ ] Update `SingleFilterOf`, `And`, `Or` to use the constants internally
-- [ ] Update existing tests to use constants where applicable
-- [ ] run tests (`go test ./internal/api/...`) - must pass before next task
+- [x] Define typed operator constants in `internal/api/search.go` (e.g., `OpEquals = "="`, `OpNotEquals = "!="`, `OpContains = "~"`, `OpAND = "AND"`, `OpOR = "OR"`, etc.)
+- [x] Update `SingleFilterOf`, `And`, `Or` to use the constants internally
+- [x] Update existing tests to use constants where applicable
+- [x] run tests (`go test ./internal/api/...`) - must pass before next task
 
 ### Task 8: Verify acceptance criteria
 - [ ] verify all 7 important issues from PR review are addressed

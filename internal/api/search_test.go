@@ -5,8 +5,61 @@ import (
 	"testing"
 )
 
+func TestOperatorConstants(t *testing.T) {
+	tests := []struct {
+		name string
+		op   Operator
+		want string
+	}{
+		{"Equals", OpEquals, "="},
+		{"NotEquals", OpNotEquals, "!="},
+		{"GreaterThan", OpGreaterThan, ">"},
+		{"LessThan", OpLessThan, "<"},
+		{"Contains", OpContains, "~"},
+		{"NotContains", OpNotContains, "!~"},
+		{"In", OpIn, "IN"},
+		{"NotIn", OpNotIn, "NIN"},
+		{"Starts", OpStarts, "^"},
+		{"Ends", OpEnds, "$"},
+		{"AND", OpAND, "AND"},
+		{"OR", OpOR, "OR"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.op != tt.want {
+				t.Errorf("Op%s = %q, want %q", tt.name, tt.op, tt.want)
+			}
+		})
+	}
+}
+
+func TestOperatorConstants_InFilter(t *testing.T) {
+	f := SingleFilterOf("role", OpIn, []string{"admin", "user"})
+
+	data, err := json.Marshal(f)
+	if err != nil {
+		t.Fatalf("Marshal error: %v", err)
+	}
+
+	var got map[string]any
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("Unmarshal error: %v", err)
+	}
+
+	if got["operator"] != "IN" {
+		t.Errorf("operator = %v, want IN", got["operator"])
+	}
+	values, ok := got["value"].([]any)
+	if !ok {
+		t.Fatalf("value should be array, got %T", got["value"])
+	}
+	if len(values) != 2 {
+		t.Errorf("value length = %d, want 2", len(values))
+	}
+}
+
 func TestSingleFilterOf(t *testing.T) {
-	f := SingleFilterOf("created_at", ">", "1306054154")
+	f := SingleFilterOf("created_at", OpGreaterThan, "1306054154")
 
 	data, err := json.Marshal(f)
 	if err != nil {
@@ -35,7 +88,7 @@ func TestSingleFilterOf(t *testing.T) {
 }
 
 func TestSingleFilterOf_IntValue(t *testing.T) {
-	f := SingleFilterOf("created_at", ">", 1306054154)
+	f := SingleFilterOf("created_at", OpGreaterThan, 1306054154)
 
 	data, err := json.Marshal(f)
 	if err != nil {
@@ -55,8 +108,8 @@ func TestSingleFilterOf_IntValue(t *testing.T) {
 
 func TestAnd(t *testing.T) {
 	f := And(
-		SingleFilterOf("created_at", ">", "1306054154"),
-		SingleFilterOf("created_at", "<", "1609459200"),
+		SingleFilterOf("created_at", OpGreaterThan, "1306054154"),
+		SingleFilterOf("created_at", OpLessThan, "1609459200"),
 	)
 
 	data, err := json.Marshal(f)
@@ -89,8 +142,8 @@ func TestAnd(t *testing.T) {
 
 func TestOr(t *testing.T) {
 	f := Or(
-		SingleFilterOf("email", "=", "alice@example.com"),
-		SingleFilterOf("email", "=", "bob@example.com"),
+		SingleFilterOf("email", OpEquals, "alice@example.com"),
+		SingleFilterOf("email", OpEquals, "bob@example.com"),
 	)
 
 	data, err := json.Marshal(f)
@@ -119,10 +172,10 @@ func TestOr(t *testing.T) {
 func TestNestedAndOr(t *testing.T) {
 	f := And(
 		Or(
-			SingleFilterOf("email", "=", "alice@example.com"),
-			SingleFilterOf("email", "=", "bob@example.com"),
+			SingleFilterOf("email", OpEquals, "alice@example.com"),
+			SingleFilterOf("email", OpEquals, "bob@example.com"),
 		),
-		SingleFilterOf("created_at", ">", "1306054154"),
+		SingleFilterOf("created_at", OpGreaterThan, "1306054154"),
 	)
 
 	data, err := json.Marshal(f)
@@ -158,7 +211,7 @@ func TestNestedAndOr(t *testing.T) {
 func TestSearchRequest_MarshalJSON(t *testing.T) {
 	sr := &SearchRequest{
 		Query: And(
-			SingleFilterOf("created_at", ">", "1306054154"),
+			SingleFilterOf("created_at", OpGreaterThan, "1306054154"),
 		),
 		Pagination: &SearchPagination{
 			PerPage:       5,
@@ -200,7 +253,7 @@ func TestSearchRequest_MarshalJSON(t *testing.T) {
 
 func TestSearchRequest_NoPagination(t *testing.T) {
 	sr := &SearchRequest{
-		Query: SingleFilterOf("email", "=", "test@example.com"),
+		Query: SingleFilterOf("email", OpEquals, "test@example.com"),
 	}
 
 	data, err := json.Marshal(sr)

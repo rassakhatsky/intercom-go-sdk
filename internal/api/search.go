@@ -1,5 +1,28 @@
 package api
 
+// Operator represents a filter operator for Intercom search queries.
+type Operator = string
+
+// Filter operators for single field filters.
+const (
+	OpEquals      Operator = "="
+	OpNotEquals   Operator = "!="
+	OpGreaterThan Operator = ">"
+	OpLessThan    Operator = "<"
+	OpContains    Operator = "~"
+	OpNotContains Operator = "!~"
+	OpIn          Operator = "IN"
+	OpNotIn       Operator = "NIN"
+	OpStarts      Operator = "^"
+	OpEnds        Operator = "$"
+)
+
+// Compound filter operators.
+const (
+	OpAND Operator = "AND"
+	OpOR  Operator = "OR"
+)
+
 // SearchRequest represents a request body for Intercom's search endpoints.
 type SearchRequest struct {
 	Query      *Filter           `json:"query"`
@@ -34,7 +57,7 @@ func SingleFilterOf(field, operator string, value any) *Filter {
 // And creates a compound filter that requires all sub-filters to match.
 func And(filters ...*Filter) *Filter {
 	return &Filter{
-		Operator: "AND",
+		Operator: OpAND,
 		Value:    filters,
 	}
 }
@@ -42,7 +65,7 @@ func And(filters ...*Filter) *Filter {
 // Or creates a compound filter that requires any sub-filter to match.
 func Or(filters ...*Filter) *Filter {
 	return &Filter{
-		Operator: "OR",
+		Operator: OpOR,
 		Value:    filters,
 	}
 }
