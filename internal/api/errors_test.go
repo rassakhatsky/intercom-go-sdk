@@ -9,7 +9,7 @@ import (
 
 func TestErrorResponse_ErrorFormat(t *testing.T) {
 	err := &ErrorResponse{
-		Response: &http.Response{StatusCode: 422},
+		StatusCode: 422,
 		Errors: []ErrorDetail{
 			{Code: "parameter_invalid", Message: "email is required"},
 		},
@@ -24,8 +24,8 @@ func TestErrorResponse_ErrorFormat(t *testing.T) {
 
 func TestErrorResponse_ErrorFormat_NoErrors(t *testing.T) {
 	err := &ErrorResponse{
-		Response: &http.Response{StatusCode: 500},
-		Errors:   nil,
+		StatusCode: 500,
+		Errors:     nil,
 	}
 
 	got := err.Error()
@@ -37,8 +37,8 @@ func TestErrorResponse_ErrorFormat_NoErrors(t *testing.T) {
 
 func TestErrorResponse_ErrorFormat_RawBody(t *testing.T) {
 	err := &ErrorResponse{
-		Response: &http.Response{StatusCode: 502},
-		RawBody:  "Bad Gateway",
+		StatusCode: 502,
+		RawBody:    "Bad Gateway",
 	}
 
 	got := err.Error()
@@ -55,6 +55,59 @@ func TestErrorResponse_ErrorFormat_NoResponse(t *testing.T) {
 	want := "unknown API error"
 	if got != want {
 		t.Errorf("Error() = %q, want %q", got, want)
+	}
+}
+
+func TestErrorResponse_ResponseMeta(t *testing.T) {
+	h := http.Header{}
+	h.Set("X-Request-Id", "abc-123")
+	h.Set("Content-Type", "application/json")
+
+	errResp := &ErrorResponse{
+		StatusCode: 404,
+		Headers:    h,
+		Errors:     []ErrorDetail{{Code: "not_found", Message: "not found"}},
+	}
+
+	if errResp.StatusCode != 404 {
+		t.Errorf("StatusCode = %d, want 404", errResp.StatusCode)
+	}
+	if got := errResp.Headers.Get("X-Request-Id"); got != "abc-123" {
+		t.Errorf("Headers[X-Request-Id] = %q, want %q", got, "abc-123")
+	}
+	if got := errResp.Headers.Get("Content-Type"); got != "application/json" {
+		t.Errorf("Headers[Content-Type] = %q, want %q", got, "application/json")
+	}
+}
+
+func TestResultError_PopulatesResponseMeta(t *testing.T) {
+	h := http.Header{}
+	h.Set("X-Request-Id", "req-789")
+
+	r := &Result{
+		StatusCode: http.StatusNotFound,
+		Header:     h,
+		Error: &ErrorResult{
+			Type:   "error.list",
+			Code:   "not_found",
+			Errors: []ErrorDetail{{Code: "not_found", Message: "not found"}},
+		},
+	}
+
+	err := ResultError(r)
+	if err == nil {
+		t.Fatal("expected non-nil error")
+	}
+
+	var errResp *ErrorResponse
+	if !errors.As(err, &errResp) {
+		t.Fatalf("expected *ErrorResponse, got %T", err)
+	}
+	if errResp.StatusCode != 404 {
+		t.Errorf("StatusCode = %d, want 404", errResp.StatusCode)
+	}
+	if got := errResp.Headers.Get("X-Request-Id"); got != "req-789" {
+		t.Errorf("Headers[X-Request-Id] = %q, want %q", got, "req-789")
 	}
 }
 
@@ -390,8 +443,8 @@ func TestResultError_NonRateLimited_NoRateLimitInfo(t *testing.T) {
 
 func TestIsBadRequest(t *testing.T) {
 	err := &ErrorResponse{
-		Response: &http.Response{StatusCode: 400},
-		Errors:   []ErrorDetail{{Code: "client_error", Message: "bad request"}},
+		StatusCode: 400,
+		Errors:     []ErrorDetail{{Code: "client_error", Message: "bad request"}},
 	}
 	if !IsBadRequest(err) {
 		t.Error("IsBadRequest() = false, want true")
@@ -409,8 +462,8 @@ func TestIsBadRequest_FalseForOther(t *testing.T) {
 
 func TestIsForbidden(t *testing.T) {
 	err := &ErrorResponse{
-		Response: &http.Response{StatusCode: 403},
-		Errors:   []ErrorDetail{{Code: "action_forbidden", Message: "forbidden"}},
+		StatusCode: 403,
+		Errors:     []ErrorDetail{{Code: "action_forbidden", Message: "forbidden"}},
 	}
 	if !IsForbidden(err) {
 		t.Error("IsForbidden() = false, want true")
@@ -428,8 +481,8 @@ func TestIsForbidden_FalseForOther(t *testing.T) {
 
 func TestIsConflict(t *testing.T) {
 	err := &ErrorResponse{
-		Response: &http.Response{StatusCode: 409},
-		Errors:   []ErrorDetail{{Code: "conflict", Message: "conflict"}},
+		StatusCode: 409,
+		Errors:     []ErrorDetail{{Code: "conflict", Message: "conflict"}},
 	}
 	if !IsConflict(err) {
 		t.Error("IsConflict() = false, want true")
@@ -447,8 +500,8 @@ func TestIsConflict_FalseForOther(t *testing.T) {
 
 func TestIsUnprocessableEntity(t *testing.T) {
 	err := &ErrorResponse{
-		Response: &http.Response{StatusCode: 422},
-		Errors:   []ErrorDetail{{Code: "parameter_invalid", Message: "invalid"}},
+		StatusCode: 422,
+		Errors:     []ErrorDetail{{Code: "parameter_invalid", Message: "invalid"}},
 	}
 	if !IsUnprocessableEntity(err) {
 		t.Error("IsUnprocessableEntity() = false, want true")
@@ -468,8 +521,8 @@ func TestIsServerError(t *testing.T) {
 	codes := []int{500, 502, 503, 504, 599}
 	for _, code := range codes {
 		err := &ErrorResponse{
-			Response: &http.Response{StatusCode: code},
-			Errors:   []ErrorDetail{{Code: "server_error", Message: "server error"}},
+			StatusCode: code,
+			Errors:     []ErrorDetail{{Code: "server_error", Message: "server error"}},
 		}
 		if !IsServerError(err) {
 			t.Errorf("IsServerError() = false for status %d, want true", code)
@@ -481,8 +534,8 @@ func TestIsServerError_FalseForClientErrors(t *testing.T) {
 	codes := []int{400, 401, 403, 404, 422, 429, 499, 600}
 	for _, code := range codes {
 		err := &ErrorResponse{
-			Response: &http.Response{StatusCode: code},
-			Errors:   []ErrorDetail{{Code: "client_error", Message: "client error"}},
+			StatusCode: code,
+			Errors:     []ErrorDetail{{Code: "client_error", Message: "client error"}},
 		}
 		if IsServerError(err) {
 			t.Errorf("IsServerError() = true for status %d, want false", code)
@@ -530,8 +583,8 @@ func TestHasErrorCode(t *testing.T) {
 		{
 			name: "matches first error",
 			resp: &ErrorResponse{
-				Response: &http.Response{StatusCode: 422},
-				Errors:   []ErrorDetail{{Code: ErrParameterInvalid, Message: "bad"}},
+				StatusCode: 422,
+				Errors:     []ErrorDetail{{Code: ErrParameterInvalid, Message: "bad"}},
 			},
 			code: ErrParameterInvalid,
 			want: true,
@@ -539,7 +592,7 @@ func TestHasErrorCode(t *testing.T) {
 		{
 			name: "matches second error",
 			resp: &ErrorResponse{
-				Response: &http.Response{StatusCode: 422},
+				StatusCode: 422,
 				Errors: []ErrorDetail{
 					{Code: ErrClientError, Message: "first"},
 					{Code: ErrParameterNotFound, Message: "second"},
@@ -551,8 +604,8 @@ func TestHasErrorCode(t *testing.T) {
 		{
 			name: "no match",
 			resp: &ErrorResponse{
-				Response: &http.Response{StatusCode: 409},
-				Errors:   []ErrorDetail{{Code: ErrConflict, Message: "conflict"}},
+				StatusCode: 409,
+				Errors:     []ErrorDetail{{Code: ErrConflict, Message: "conflict"}},
 			},
 			code: ErrParameterInvalid,
 			want: false,
@@ -560,8 +613,8 @@ func TestHasErrorCode(t *testing.T) {
 		{
 			name: "empty errors slice",
 			resp: &ErrorResponse{
-				Response: &http.Response{StatusCode: 500},
-				Errors:   nil,
+				StatusCode: 500,
+				Errors:     nil,
 			},
 			code: ErrServerError,
 			want: false,

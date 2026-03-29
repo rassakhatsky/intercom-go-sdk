@@ -43,13 +43,13 @@ Address critical and important issues identified during comprehensive PR review 
 - [x] run tests — must pass before next task
 
 ### Task 3: Replace synthetic `*http.Response` in `ErrorResponse`
-- [ ] write test: `TestErrorResponse_ResponseMeta` in `internal/api/errors_test.go` — verify `ErrorResponse` exposes `StatusCode` and `Header` without nil-body `*http.Response`
-- [ ] add `StatusCode int` and `Headers http.Header` fields to `ErrorResponse` in `internal/api/errors.go`
-- [ ] remove `Response *http.Response` field from `ErrorResponse`
-- [ ] update `ResultError` to populate the new fields instead of creating synthetic `*http.Response`
-- [ ] update `Error()` method and status predicate functions (`IsNotFound`, `IsBadRequest`, etc.) to use new fields
-- [ ] update all tests referencing `ErrorResponse.Response` to use new fields
-- [ ] run tests — must pass before next task
+- [x] write test: `TestErrorResponse_ResponseMeta` in `internal/api/errors_test.go` — verify `ErrorResponse` exposes `StatusCode` and `Header` without nil-body `*http.Response`
+- [x] add `StatusCode int` and `Headers http.Header` fields to `ErrorResponse` in `internal/api/errors.go`
+- [x] remove `Response *http.Response` field from `ErrorResponse`
+- [x] update `ResultError` to populate the new fields instead of creating synthetic `*http.Response`
+- [x] update `Error()` method and status predicate functions (`IsNotFound`, `IsBadRequest`, etc.) to use new fields
+- [x] update all tests referencing `ErrorResponse.Response` to use new fields
+- [x] run tests — must pass before next task
 
 ### Task 4: Add test coverage for root package accessor methods
 - [ ] write test: `TestClient_AllAccessorsNonNil` in `intercom_test.go` — create `NewClient("tok")`, assert every accessor (`Contacts()`, `Tags()`, `Admins()`, etc.) returns non-nil

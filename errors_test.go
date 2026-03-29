@@ -53,7 +53,7 @@ func TestCheckResponse_ParsesErrorList(t *testing.T) {
 
 func TestErrorResponse_ErrorFormat(t *testing.T) {
 	err := &ErrorResponse{
-		Response: &http.Response{StatusCode: 422},
+		StatusCode: 422,
 		Errors: []ErrorDetail{
 			{Code: "parameter_invalid", Message: "email is required"},
 		},
@@ -68,8 +68,8 @@ func TestErrorResponse_ErrorFormat(t *testing.T) {
 
 func TestErrorResponse_ErrorFormat_NoErrors(t *testing.T) {
 	err := &ErrorResponse{
-		Response: &http.Response{StatusCode: 500},
-		Errors:   nil,
+		StatusCode: 500,
+		Errors:     nil,
 	}
 
 	got := err.Error()

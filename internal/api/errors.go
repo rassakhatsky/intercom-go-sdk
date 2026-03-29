@@ -46,12 +46,13 @@ type RateLimitInfo struct {
 
 // ErrorResponse represents an error response from the Intercom API.
 type ErrorResponse struct {
-	Response  *http.Response `json:"-"`
-	Type      string         `json:"type"`
-	RequestID string         `json:"request_id,omitempty"`
-	Errors    []ErrorDetail  `json:"errors"`
-	RawBody   string         `json:"-"`
-	RateLimit *RateLimitInfo `json:"-"`
+	StatusCode int            `json:"-"`
+	Headers    http.Header    `json:"-"`
+	Type       string         `json:"type"`
+	RequestID  string         `json:"request_id,omitempty"`
+	Errors     []ErrorDetail  `json:"errors"`
+	RawBody    string         `json:"-"`
+	RateLimit  *RateLimitInfo `json:"-"`
 }
 
 // Error returns a human-readable description of the API error.
@@ -59,11 +60,11 @@ func (e *ErrorResponse) Error() string {
 	if len(e.Errors) > 0 {
 		return fmt.Sprintf("%s: %s", e.Errors[0].Code, e.Errors[0].Message)
 	}
-	if e.Response != nil {
+	if e.StatusCode != 0 {
 		if e.RawBody != "" {
-			return fmt.Sprintf("HTTP %d: %s", e.Response.StatusCode, e.RawBody)
+			return fmt.Sprintf("HTTP %d: %s", e.StatusCode, e.RawBody)
 		}
-		return fmt.Sprintf("HTTP %d", e.Response.StatusCode)
+		return fmt.Sprintf("HTTP %d", e.StatusCode)
 	}
 	return "unknown API error"
 }
@@ -85,10 +86,11 @@ func ResultError(r *Result) error {
 		return nil
 	}
 	errResp := &ErrorResponse{
-		Response:  &http.Response{StatusCode: r.StatusCode, Header: r.Header},
-		Type:      r.Error.Type,
-		RequestID: r.Error.RequestID,
-		Errors:    r.Error.Errors,
+		StatusCode: r.StatusCode,
+		Headers:    r.Header,
+		Type:       r.Error.Type,
+		RequestID:  r.Error.RequestID,
+		Errors:     r.Error.Errors,
 	}
 	if len(r.Error.Errors) == 0 && r.Error.Message != "" {
 		errResp.RawBody = r.Error.Message
@@ -165,16 +167,16 @@ func IsUnprocessableEntity(err error) bool {
 // IsServerError returns true if the error is an Intercom 5xx response.
 func IsServerError(err error) bool {
 	var errResp *ErrorResponse
-	if errors.As(err, &errResp) && errResp.Response != nil {
-		return errResp.Response.StatusCode >= 500 && errResp.Response.StatusCode < 600
+	if errors.As(err, &errResp) {
+		return errResp.StatusCode >= 500 && errResp.StatusCode < 600
 	}
 	return false
 }
 
 func hasStatusCode(err error, code int) bool {
 	var errResp *ErrorResponse
-	if errors.As(err, &errResp) && errResp.Response != nil {
-		return errResp.Response.StatusCode == code
+	if errors.As(err, &errResp) {
+		return errResp.StatusCode == code
 	}
 	return false
 }
