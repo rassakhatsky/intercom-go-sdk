@@ -112,18 +112,20 @@ func (tc *testCaller) DoDownload(ctx context.Context, req *http.Request, w io.Wr
 	return err
 }
 
-var sharedCaller *testCaller
-
 func setup() (svc *ai.ContentService, mux *http.ServeMux, teardown func()) {
 	mux = http.NewServeMux()
 	server := httptest.NewServer(mux)
-	sharedCaller = &testCaller{baseURL: server.URL, client: server.Client()}
-	svc = ai.NewContentService(sharedCaller)
+	caller := &testCaller{baseURL: server.URL, client: server.Client()}
+	svc = ai.NewContentService(caller)
 	return svc, mux, server.Close
 }
 
-func setupVoice() *ai.VoiceService {
-	return ai.NewVoiceService(sharedCaller)
+func setupVoice() (svc *ai.VoiceService, mux *http.ServeMux, teardown func()) {
+	mux = http.NewServeMux()
+	server := httptest.NewServer(mux)
+	caller := &testCaller{baseURL: server.URL, client: server.Client()}
+	svc = ai.NewVoiceService(caller)
+	return svc, mux, server.Close
 }
 
 func testMethod(t *testing.T, r *http.Request, want string) {

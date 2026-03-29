@@ -81,9 +81,10 @@ make fix         # go vet + gofmt -l
 
 ## Testing Patterns
 
-Each sub-package has its own `testutil_test.go` with a `setup()` helper:
+Each sub-package embeds test helpers (`testCaller`, `setup`, `testMethod`, `testHeader`) inline in its `*_test.go` files. The `ai/` package is the exception, using a dedicated `testutil_test.go`. The root package also has a `testutil_test.go`.
+
 ```go
-client, mux, teardown := setup()
+svc, mux, teardown := setup()
 defer teardown()
 mux.HandleFunc("/path", func(w http.ResponseWriter, r *http.Request) { ... })
 ```

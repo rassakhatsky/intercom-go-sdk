@@ -12,9 +12,8 @@ import (
 )
 
 func TestVoiceService_Register(t *testing.T) {
-	_, mux, teardown := setup()
+	svc, mux, teardown := setupVoice()
 	defer teardown()
-	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/register", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
@@ -64,9 +63,8 @@ func TestVoiceService_Register(t *testing.T) {
 }
 
 func TestVoiceService_Collect(t *testing.T) {
-	_, mux, teardown := setup()
+	svc, mux, teardown := setupVoice()
 	defer teardown()
-	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/collect/42", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -101,9 +99,8 @@ func TestVoiceService_Collect(t *testing.T) {
 }
 
 func TestVoiceService_Collect_NotFound(t *testing.T) {
-	_, mux, teardown := setup()
+	svc, mux, teardown := setupVoice()
 	defer teardown()
-	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/collect/999", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -121,9 +118,8 @@ func TestVoiceService_Collect_NotFound(t *testing.T) {
 }
 
 func TestVoiceService_GetByExternalID(t *testing.T) {
-	_, mux, teardown := setup()
+	svc, mux, teardown := setupVoice()
 	defer teardown()
-	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/external_id/ext_call_1", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -147,9 +143,8 @@ func TestVoiceService_GetByExternalID(t *testing.T) {
 }
 
 func TestVoiceService_GetByConversation(t *testing.T) {
-	_, mux, teardown := setup()
+	svc, mux, teardown := setupVoice()
 	defer teardown()
-	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/conversation/conv_456", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -173,9 +168,8 @@ func TestVoiceService_GetByConversation(t *testing.T) {
 }
 
 func TestVoiceService_GetByPhoneNumber(t *testing.T) {
-	_, mux, teardown := setup()
+	svc, mux, teardown := setupVoice()
 	defer teardown()
-	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/phone_number/+15551234567", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -199,9 +193,8 @@ func TestVoiceService_GetByPhoneNumber(t *testing.T) {
 // --- Raw Methods ---
 
 func TestVoiceService_RegisterRaw_Success(t *testing.T) {
-	_, mux, teardown := setup()
+	svc, mux, teardown := setupVoice()
 	defer teardown()
-	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/register", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
@@ -239,9 +232,8 @@ func TestVoiceService_RegisterRaw_Success(t *testing.T) {
 }
 
 func TestVoiceService_CollectRaw_Success(t *testing.T) {
-	_, mux, teardown := setup()
+	svc, mux, teardown := setupVoice()
 	defer teardown()
-	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/collect/42", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -267,9 +259,8 @@ func TestVoiceService_CollectRaw_Success(t *testing.T) {
 }
 
 func TestVoiceService_CollectRaw_NotFound(t *testing.T) {
-	_, mux, teardown := setup()
+	svc, mux, teardown := setupVoice()
 	defer teardown()
-	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/collect/999", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -293,9 +284,8 @@ func TestVoiceService_CollectRaw_NotFound(t *testing.T) {
 }
 
 func TestVoiceService_GetByExternalIDRaw_Success(t *testing.T) {
-	_, mux, teardown := setup()
+	svc, mux, teardown := setupVoice()
 	defer teardown()
-	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/external_id/ext_call_1", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -321,9 +311,8 @@ func TestVoiceService_GetByExternalIDRaw_Success(t *testing.T) {
 }
 
 func TestVoiceService_GetByConversationRaw_Success(t *testing.T) {
-	_, mux, teardown := setup()
+	svc, mux, teardown := setupVoice()
 	defer teardown()
-	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/conversation/conv_456", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
@@ -359,9 +348,8 @@ func TestVoiceService_GetByConversationRaw_Success(t *testing.T) {
 }
 
 func TestVoiceService_GetByPhoneNumberRaw_Success(t *testing.T) {
-	_, mux, teardown := setup()
+	svc, mux, teardown := setupVoice()
 	defer teardown()
-	svc := setupVoice()
 
 	mux.HandleFunc("/fin_voice/phone_number/+15551234567", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodGet)
