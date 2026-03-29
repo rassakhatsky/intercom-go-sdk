@@ -1,6 +1,7 @@
 package intercom
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -170,44 +171,48 @@ func TestDecode_Success(t *testing.T) {
 	}
 }
 
-func TestDecode_EmptyBodyNon204(t *testing.T) {
+func TestDecode_EmptyBodyNon2xx(t *testing.T) {
 	type contact struct {
 		ID string `json:"id"`
 	}
 
 	r := &Result{
-		StatusCode: 200,
+		StatusCode: 400,
 		Body:       nil,
 	}
 
 	got, err := Decode[contact](r)
 	if err == nil {
-		t.Fatal("expected error for empty body on non-204, got nil")
+		t.Fatal("expected error for empty body on non-2xx, got nil")
 	}
 	if got != nil {
 		t.Errorf("got = %v, want nil on error", got)
 	}
 }
 
-func TestDecode_EmptyBody204(t *testing.T) {
+func TestDecode_EmptyBody2xx(t *testing.T) {
 	type contact struct {
 		ID string `json:"id"`
 	}
 
-	r := &Result{
-		StatusCode: http.StatusNoContent,
-		Body:       nil,
-	}
+	for _, code := range []int{200, 202, 204} {
+		t.Run(fmt.Sprintf("HTTP_%d", code), func(t *testing.T) {
+			r := &Result{
+				StatusCode: code,
+				Body:       nil,
+			}
 
-	got, err := Decode[contact](r)
-	if err != nil {
-		t.Fatalf("Decode returned error: %v", err)
-	}
-	if got == nil {
-		t.Fatal("Decode returned nil, want zero-value pointer")
-	}
-	if got.ID != "" {
-		t.Errorf("ID = %q, want empty", got.ID)
+			got, err := Decode[contact](r)
+			if err != nil {
+				t.Fatalf("Decode returned error: %v", err)
+			}
+			if got == nil {
+				t.Fatal("Decode returned nil, want zero-value pointer")
+			}
+			if got.ID != "" {
+				t.Errorf("ID = %q, want empty", got.ID)
+			}
+		})
 	}
 }
 

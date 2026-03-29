@@ -75,7 +75,7 @@ make fix         # go vet + gofmt -l
 **Raw results** (`internal/api/result.go`):
 - `Result` — non-generic struct: `StatusCode int`, `Header http.Header`, `URL string`, `Body []byte`, `Error *ErrorResult`
 - `ErrorResult` — typed API error with Code, Message, Errors; implements `Error() string`
-- `Decode[T any](r *Result) (*T, error)` — generic helper that JSON-unmarshals `Result.Body` into `*T`; returns zero-value `*T` for 204 No Content; returns error on empty body for non-204 responses
+- `Decode[T any](r *Result) (*T, error)` — generic helper that JSON-unmarshals `Result.Body` into `*T`; returns zero-value `*T` for any 2xx response with empty body; returns error on empty body for non-2xx responses
 - `BuildResult(resp *http.Response, body []byte) *Result` — constructs a `Result` from an HTTP response
 - Error contract: `(nil, err)` for transport/IO failures only; `(result, nil)` for any completed HTTP request (including 4xx/5xx)
 - API errors (4xx/5xx) populate `Result.Error`; use `ResultError(r)` to convert to `*ErrorResponse` for predicate checks
