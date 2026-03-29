@@ -178,3 +178,59 @@ func TestIsUnauthorized_FalseForOther(t *testing.T) {
 		t.Error("IsUnauthorized() = true for non-ErrorResponse")
 	}
 }
+
+func TestErrorCodeConstants(t *testing.T) {
+	tests := []struct {
+		constant ErrorCode
+		want     string
+	}{
+		{ErrServerError, "server_error"},
+		{ErrClientError, "client_error"},
+		{ErrTypeMismatch, "type_mismatch"},
+		{ErrParameterNotFound, "parameter_not_found"},
+		{ErrParameterInvalid, "parameter_invalid"},
+		{ErrActionForbidden, "action_forbidden"},
+		{ErrConflict, "conflict"},
+		{ErrAPIPlanRestricted, "api_plan_restricted"},
+		{ErrRateLimitExceeded, "rate_limit_exceeded"},
+		{ErrUnsupported, "unsupported"},
+		{ErrTokenRevoked, "token_revoked"},
+		{ErrTokenBlocked, "token_blocked"},
+		{ErrTokenNotFound, "token_not_found"},
+		{ErrTokenUnauthorized, "token_unauthorized"},
+		{ErrTokenExpired, "token_expired"},
+		{ErrMissingAuth, "missing_authorization"},
+		{ErrRetryAfter, "retry_after"},
+		{ErrJobClosed, "job_closed"},
+		{ErrNotRestorable, "not_restorable"},
+		{ErrTeamNotFound, "team_not_found"},
+		{ErrTeamUnavailable, "team_unavailable"},
+		{ErrAdminNotFound, "admin_not_found"},
+	}
+
+	for _, tt := range tests {
+		if string(tt.constant) != tt.want {
+			t.Errorf("ErrorCode constant %q != %q", tt.constant, tt.want)
+		}
+	}
+
+	// Verify we have exactly 22 constants by checking all are distinct
+	seen := make(map[ErrorCode]bool)
+	for _, tt := range tests {
+		if seen[tt.constant] {
+			t.Errorf("duplicate ErrorCode constant: %q", tt.constant)
+		}
+		seen[tt.constant] = true
+	}
+	if len(seen) != 22 {
+		t.Errorf("expected 22 error code constants, got %d", len(seen))
+	}
+}
+
+func TestErrorCode_IsStringType(t *testing.T) {
+	// ErrorCode should be usable as a string
+	var code ErrorCode = "test_code"
+	if string(code) != "test_code" {
+		t.Errorf("ErrorCode string conversion failed")
+	}
+}

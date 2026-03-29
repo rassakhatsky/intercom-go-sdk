@@ -21,6 +21,33 @@ type Empty = api.Empty
 
 // Error types
 type ErrorResponse = api.ErrorResponse
+type ErrorCode = api.ErrorCode
+
+// Error code constants — re-exported from internal/api for consumer convenience.
+const (
+	ErrServerError       = api.ErrServerError
+	ErrClientError       = api.ErrClientError
+	ErrTypeMismatch      = api.ErrTypeMismatch
+	ErrParameterNotFound = api.ErrParameterNotFound
+	ErrParameterInvalid  = api.ErrParameterInvalid
+	ErrActionForbidden   = api.ErrActionForbidden
+	ErrConflict          = api.ErrConflict
+	ErrAPIPlanRestricted = api.ErrAPIPlanRestricted
+	ErrRateLimitExceeded = api.ErrRateLimitExceeded
+	ErrUnsupported       = api.ErrUnsupported
+	ErrTokenRevoked      = api.ErrTokenRevoked
+	ErrTokenBlocked      = api.ErrTokenBlocked
+	ErrTokenNotFound     = api.ErrTokenNotFound
+	ErrTokenUnauthorized = api.ErrTokenUnauthorized
+	ErrTokenExpired      = api.ErrTokenExpired
+	ErrMissingAuth       = api.ErrMissingAuth
+	ErrRetryAfter        = api.ErrRetryAfter
+	ErrJobClosed         = api.ErrJobClosed
+	ErrNotRestorable     = api.ErrNotRestorable
+	ErrTeamNotFound      = api.ErrTeamNotFound
+	ErrTeamUnavailable   = api.ErrTeamUnavailable
+	ErrAdminNotFound     = api.ErrAdminNotFound
+)
 
 // Shared domain types
 type TagRef = api.TagRef

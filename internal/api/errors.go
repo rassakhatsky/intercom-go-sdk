@@ -6,6 +6,34 @@ import (
 	"net/http"
 )
 
+// ErrorCode represents an Intercom API error code.
+type ErrorCode string
+
+const (
+	ErrServerError       ErrorCode = "server_error"
+	ErrClientError       ErrorCode = "client_error"
+	ErrTypeMismatch      ErrorCode = "type_mismatch"
+	ErrParameterNotFound ErrorCode = "parameter_not_found"
+	ErrParameterInvalid  ErrorCode = "parameter_invalid"
+	ErrActionForbidden   ErrorCode = "action_forbidden"
+	ErrConflict          ErrorCode = "conflict"
+	ErrAPIPlanRestricted ErrorCode = "api_plan_restricted"
+	ErrRateLimitExceeded ErrorCode = "rate_limit_exceeded"
+	ErrUnsupported       ErrorCode = "unsupported"
+	ErrTokenRevoked      ErrorCode = "token_revoked"
+	ErrTokenBlocked      ErrorCode = "token_blocked"
+	ErrTokenNotFound     ErrorCode = "token_not_found"
+	ErrTokenUnauthorized ErrorCode = "token_unauthorized"
+	ErrTokenExpired      ErrorCode = "token_expired"
+	ErrMissingAuth       ErrorCode = "missing_authorization"
+	ErrRetryAfter        ErrorCode = "retry_after"
+	ErrJobClosed         ErrorCode = "job_closed"
+	ErrNotRestorable     ErrorCode = "not_restorable"
+	ErrTeamNotFound      ErrorCode = "team_not_found"
+	ErrTeamUnavailable   ErrorCode = "team_unavailable"
+	ErrAdminNotFound     ErrorCode = "admin_not_found"
+)
+
 // ErrorResponse represents an error response from the Intercom API.
 type ErrorResponse struct {
 	Response  *http.Response `json:"-"`
