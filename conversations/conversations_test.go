@@ -542,17 +542,18 @@ func TestService_Snooze(t *testing.T) {
 		if body.MessageType != "snoozed" {
 			t.Errorf("ManageParts body message_type = %v, want snoozed", body.MessageType)
 		}
-		if body.SnoozedUntil != 1734541187 {
+		if body.SnoozedUntil == nil || *body.SnoozedUntil != 1734541187 {
 			t.Errorf("ManageParts body snoozed_until = %v, want 1734541187", body.SnoozedUntil)
 		}
 		fmt.Fprint(w, `{"type":"conversation","id":"123","state":"snoozed","snoozed_until":1734541187}`)
 	})
 
 	ctx := context.Background()
+	snoozeUntil := int64(1734541187)
 	conv, err := svc.Snooze(ctx, "123", &conversations.ManageRequest{
 		MessageType:  "snoozed",
 		AdminID:      "admin-1",
-		SnoozedUntil: 1734541187,
+		SnoozedUntil: &snoozeUntil,
 	})
 	if err != nil {
 		t.Fatalf("Snooze returned error: %v", err)
@@ -1131,10 +1132,11 @@ func TestService_SnoozeRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
+	snoozeUntil := int64(1734541187)
 	result, err := svc.SnoozeRaw(ctx, "123", &conversations.ManageRequest{
 		MessageType:  "snoozed",
 		AdminID:      "admin-1",
-		SnoozedUntil: 1734541187,
+		SnoozedUntil: &snoozeUntil,
 	})
 	if err != nil {
 		t.Fatalf("SnoozeRaw returned error: %v", err)

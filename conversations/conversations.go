@@ -80,16 +80,8 @@ type Contact struct {
 
 // TagList is the list of tags on a conversation.
 type TagList struct {
-	Type string   `json:"type"`
-	Tags []TagRef `json:"tags"`
-}
-
-// TagRef is a tag reference within a conversation.
-type TagRef struct {
-	Type      string `json:"type"`
-	ID        string `json:"id"`
-	Name      string `json:"name,omitempty"`
-	AppliedAt int64  `json:"applied_at,omitempty"`
+	Type string       `json:"type"`
+	Tags []api.TagRef `json:"tags"`
 }
 
 // PartList holds the list of conversation parts.
@@ -197,7 +189,7 @@ type ManageRequest struct {
 	AdminID      string `json:"admin_id"`
 	Body         string `json:"body,omitempty"`
 	AssigneeID   string `json:"assignee_id,omitempty"`
-	SnoozedUntil int64  `json:"snoozed_until,omitempty"`
+	SnoozedUntil *int64 `json:"snoozed_until,omitempty"`
 }
 
 // ConvertRequest is the body for converting a conversation to a ticket.

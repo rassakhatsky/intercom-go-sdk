@@ -241,7 +241,9 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 type Caller interface {
     NewRequest(method, urlStr string, body any) (*http.Request, error)
     DoRaw(ctx context.Context, req *http.Request) (*Result, error)
+    DoRawNoRedirect(ctx context.Context, req *http.Request) (*Result, error)
     Do(ctx context.Context, req *http.Request, v any) (*Response, error)
+    DoDownload(ctx context.Context, req *http.Request, w io.Writer) error
 }
 ```
 
@@ -283,6 +285,7 @@ func NewService(c api.Caller) *Service {
 | `messaging` | messages, emails, subscription_types | messages.go, emails.go, subscriptions.go |
 | `export` | data_export, export_reporting | data.go, reporting.go |
 | `settings` | brands, ip_allowlist, custom_channel_events, jobs, notes | brands.go, ipallowlist.go, channelevents.go, jobs.go, notes.go |
+| `workflows` | workflows | workflows.go |
 
 ## Post-Completion
 
