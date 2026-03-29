@@ -94,6 +94,20 @@ func TestDecode_NoContent(t *testing.T) {
 	}
 }
 
+func TestDecode_NilResult(t *testing.T) {
+	type contact struct {
+		ID string `json:"id"`
+	}
+
+	got, err := Decode[contact](nil)
+	if err == nil {
+		t.Fatal("expected error for nil result, got nil")
+	}
+	if got != nil {
+		t.Errorf("got = %v, want nil on error", got)
+	}
+}
+
 func TestDecode_MalformedJSON(t *testing.T) {
 	r := &Result{
 		StatusCode: 200,

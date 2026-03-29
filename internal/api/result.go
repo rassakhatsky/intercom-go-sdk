@@ -48,6 +48,9 @@ type Empty struct{}
 // For 2xx responses with an empty body, it returns a zero-value T.
 // For non-2xx responses with an empty body, it returns an error.
 func Decode[T any](r *Result) (*T, error) {
+	if r == nil {
+		return nil, fmt.Errorf("cannot decode nil result")
+	}
 	if len(r.Body) == 0 {
 		if r.StatusCode >= 200 && r.StatusCode < 300 {
 			return new(T), nil

@@ -61,9 +61,9 @@
 - [x] run tests (`go test ./calls/...`) - must pass before next task
 
 ### Task 5: Add nil guard to `Decode[T]`
-- [ ] Add nil check for `r` parameter in `internal/api/result.go:50` — return error for nil input
-- [ ] Write test for `Decode[T]` with nil `*Result` — verify error returned (not panic)
-- [ ] run tests (`go test ./internal/api/...`) - must pass before next task
+- [x] Add nil check for `r` parameter in `internal/api/result.go:50` — return error for nil input
+- [x] Write test for `Decode[T]` with nil `*Result` — verify error returned (not panic)
+- [x] run tests (`go test ./internal/api/...`) - must pass before next task
 
 ### Task 6: Improve `ParseGetRecordingURLResult` error message
 - [ ] Include response body and status code in error message for unexpected status codes in `calls/calls.go:92-101`
