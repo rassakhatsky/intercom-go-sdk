@@ -67,7 +67,7 @@ make fix         # go vet + gofmt -l
 - Constructed via `SingleFilterOf`, `And`, `Or` helpers
 
 **Error handling** (`internal/api/errors.go`):
-- `ErrorResponse` wraps API errors; `ResultError` converts `Result.Error` into `*ErrorResponse`
+- `ErrorResponse` wraps API errors with `StatusCode int` and `Headers http.Header` fields (no synthetic `*http.Response`); `ResultError` converts `Result.Error` into `*ErrorResponse` (nil-safe: returns nil for nil input)
 - Status predicates: `IsNotFound` (404), `IsRateLimited` (429), `IsUnauthorized` (401), `IsBadRequest` (400), `IsForbidden` (403), `IsConflict` (409), `IsUnprocessableEntity` (422), `IsServerError` (5xx)
 - `ErrorCode` typed constants (e.g., `ErrParameterInvalid`, `ErrRateLimitExceeded`, `ErrTokenRevoked`); `ErrorResponse.HasErrorCode(code)` matches against the `Errors` slice
 - `RateLimitInfo` (Limit, Remaining, Reset, RetryAfter) — auto-parsed from headers on 429 responses, available via `ErrorResponse.RateLimit`
@@ -75,7 +75,7 @@ make fix         # go vet + gofmt -l
 **Raw results** (`internal/api/result.go`):
 - `Result` — non-generic struct: `StatusCode int`, `Header http.Header`, `URL string`, `Body []byte`, `Error *ErrorResult`
 - `ErrorResult` — typed API error with Code, Message, Errors; implements `Error() string`
-- `Decode[T any](r *Result) (*T, error)` — generic helper that JSON-unmarshals `Result.Body` into `*T`
+- `Decode[T any](r *Result) (*T, error)` — generic helper that JSON-unmarshals `Result.Body` into `*T`; returns zero-value `*T` for 204 No Content; returns error on empty body for non-204 responses
 - `BuildResult(resp *http.Response, body []byte) *Result` — constructs a `Result` from an HTTP response
 - Error contract: `(nil, err)` for transport/IO failures only; `(result, nil)` for any completed HTTP request (including 4xx/5xx)
 - API errors (4xx/5xx) populate `Result.Error`; use `ResultError(r)` to convert to `*ErrorResponse` for predicate checks
