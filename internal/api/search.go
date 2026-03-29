@@ -39,9 +39,9 @@ type SearchPagination struct {
 // Use SingleFilterOf, And, and Or to construct filters.
 type Filter struct {
 	// Single filter fields
-	Field    string `json:"field,omitempty"`
+	Field    string   `json:"field,omitempty"`
 	Operator Operator `json:"operator"`
-	Value    any    `json:"value"`
+	Value    any      `json:"value"`
 }
 
 // SingleFilterOf creates a filter that matches a single field.

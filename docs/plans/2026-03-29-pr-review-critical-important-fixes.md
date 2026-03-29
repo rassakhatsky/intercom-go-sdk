@@ -56,10 +56,10 @@ Address 2 critical and 8 important findings from the comprehensive PR review of 
 - [x] run tests — must pass before next task (no code changes, but verify nothing broke)
 
 ### Task 5: Fix misleading comments in `aliases.go` and `doc.go` (Important #9, #16)
-- [ ] update `doc.go:33`: change `"="` to `intercom.OpEquals` in the search example
-- [ ] update `aliases.go:65`: rewrite "backward compat" comment to explain actual purpose
-- [ ] update `aliases.go:136`: rewrite "for root services" comment to explain actual purpose
-- [ ] run tests — must pass before next task
+- [x] update `doc.go:33`: change `"="` to `intercom.OpEquals` in the search example
+- [x] update `aliases.go:65`: rewrite "backward compat" comment to explain actual purpose
+- [x] update `aliases.go:136`: rewrite "for root services" comment to explain actual purpose
+- [x] run tests — must pass before next task
 
 ### Task 6: Verify acceptance criteria
 - [ ] verify all critical issues addressed: `Operator` type safety, `Decode[T]` empty body

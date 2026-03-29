@@ -62,7 +62,8 @@ type SegmentListResult = api.SegmentListResult
 type ArticleContent = api.ArticleContent
 type ArticleTranslatedContent = api.ArticleTranslatedContent
 
-// Tag sub-package aliases (for backward compat while other root services still reference these)
+// Tag sub-package aliases re-export tags types so consumers can use
+// intercom.Tag, intercom.TagList, etc. without importing the tags package.
 type Tag = tags.Tag
 type TagList = tags.List
 type CreateOrUpdateTagRequest = tags.CreateOrUpdateRequest
@@ -133,7 +134,8 @@ var (
 	ParseVisitorConvertResult            = contacts.ParseVisitorConvertResult
 )
 
-// Messaging sub-package aliases (for root services that reference these types)
+// Messaging sub-package aliases re-export messaging types so consumers can use
+// intercom.Message, intercom.SubscriptionType, etc. without importing the messaging package.
 type SubscriptionType = messaging.SubscriptionType
 type Translation = messaging.Translation
 type SubscriptionTypeList = messaging.SubscriptionTypeList

@@ -30,7 +30,7 @@
 //
 //	// Search contacts with filters
 //	result, err := client.Contacts().Search(ctx, &intercom.SearchRequest{
-//	    Query: intercom.SingleFilterOf("email", "=", "alice@example.com"),
+//	    Query: intercom.SingleFilterOf("email", intercom.OpEquals, "alice@example.com"),
 //	})
 //
 // Every service method has a Raw companion that returns a *Result with
