@@ -102,6 +102,12 @@ func ParseGetRecordingURLResult(r *api.Result) (string, error) {
 
 // ParseGetTranscriptResult extracts the plain text transcript from a Result.
 func ParseGetTranscriptResult(r *api.Result) (string, error) {
+	if r == nil {
+		return "", fmt.Errorf("intercom: nil result")
+	}
+	if len(r.Body) == 0 {
+		return "", fmt.Errorf("intercom: empty transcript body")
+	}
 	return string(r.Body), nil
 }
 

@@ -530,6 +530,40 @@ func TestService_GetTranscriptRaw_Success(t *testing.T) {
 	}
 }
 
+// --- ParseGetTranscriptResult Tests ---
+
+func TestParseGetTranscriptResult_Nil(t *testing.T) {
+	_, err := calls.ParseGetTranscriptResult(nil)
+	if err == nil {
+		t.Fatal("Expected error for nil result, got nil")
+	}
+	if got := err.Error(); got != "intercom: nil result" {
+		t.Errorf("Error = %q, want %q", got, "intercom: nil result")
+	}
+}
+
+func TestParseGetTranscriptResult_EmptyBody(t *testing.T) {
+	r := &api.Result{StatusCode: 200, Body: []byte{}}
+	_, err := calls.ParseGetTranscriptResult(r)
+	if err == nil {
+		t.Fatal("Expected error for empty body, got nil")
+	}
+	if got := err.Error(); got != "intercom: empty transcript body" {
+		t.Errorf("Error = %q, want %q", got, "intercom: empty transcript body")
+	}
+}
+
+func TestParseGetTranscriptResult_ValidBody(t *testing.T) {
+	r := &api.Result{StatusCode: 200, Body: []byte("Agent: Hello\nCustomer: Hi")}
+	transcript, err := calls.ParseGetTranscriptResult(r)
+	if err != nil {
+		t.Fatalf("ParseGetTranscriptResult returned error: %v", err)
+	}
+	if transcript != "Agent: Hello\nCustomer: Hi" {
+		t.Errorf("Transcript = %q, want %q", transcript, "Agent: Hello\nCustomer: Hi")
+	}
+}
+
 // --- Phone Call Redirects Tests ---
 
 func TestRedirectsService_Create(t *testing.T) {

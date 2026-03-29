@@ -53,12 +53,12 @@
 - [x] run tests (`go test ./internal/api/...`) - must pass before next task
 
 ### Task 4: Add validation to `ParseGetTranscriptResult`
-- [ ] Add nil guard for `r` parameter in `calls/calls.go:104-106`
-- [ ] Add empty body check — return error for empty transcript
-- [ ] Write test for `ParseGetTranscriptResult` with nil `*Result` — verify error returned
-- [ ] Write test for `ParseGetTranscriptResult` with empty body — verify error returned
-- [ ] Write test for `ParseGetTranscriptResult` with valid body — verify transcript returned
-- [ ] run tests (`go test ./calls/...`) - must pass before next task
+- [x] Add nil guard for `r` parameter in `calls/calls.go:104-106`
+- [x] Add empty body check — return error for empty transcript
+- [x] Write test for `ParseGetTranscriptResult` with nil `*Result` — verify error returned
+- [x] Write test for `ParseGetTranscriptResult` with empty body — verify error returned
+- [x] Write test for `ParseGetTranscriptResult` with valid body — verify transcript returned
+- [x] run tests (`go test ./calls/...`) - must pass before next task
 
 ### Task 5: Add nil guard to `Decode[T]`
 - [ ] Add nil check for `r` parameter in `internal/api/result.go:50` — return error for nil input
