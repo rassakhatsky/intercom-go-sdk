@@ -1,7 +1,9 @@
 package intercom
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 	"testing"
@@ -157,6 +159,99 @@ func TestClientDoRaw_NoContent(t *testing.T) {
 	}
 	if len(result.Body) != 0 {
 		t.Errorf("Body = %q, want empty", string(result.Body))
+	}
+}
+
+// Tests for Client.DoRawNoRedirect
+
+func TestClient_DoRawNoRedirect_302(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/download/123", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodGet)
+		w.Header().Set("Location", "https://cdn.example.com/file.csv")
+		w.WriteHeader(http.StatusFound)
+	})
+
+	req, err := client.NewRequest(http.MethodGet, "download/123", nil)
+	if err != nil {
+		t.Fatalf("NewRequest error: %v", err)
+	}
+
+	result, err := client.DoRawNoRedirect(context.Background(), req)
+	if err != nil {
+		t.Fatalf("DoRawNoRedirect returned Go error: %v", err)
+	}
+
+	if result.StatusCode != http.StatusFound {
+		t.Errorf("StatusCode = %d, want %d", result.StatusCode, http.StatusFound)
+	}
+	if got := result.Header.Get("Location"); got != "https://cdn.example.com/file.csv" {
+		t.Errorf("Location header = %q, want %q", got, "https://cdn.example.com/file.csv")
+	}
+}
+
+// Tests for Client.DoDownload
+
+func TestClient_DoDownload_Success(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	csvBody := "id,name\n1,Alice\n2,Bob\n"
+	mux.HandleFunc("/export/download/abc", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodGet)
+		w.Header().Set("Content-Type", "text/csv")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(csvBody))
+	})
+
+	req, err := client.NewRequest(http.MethodGet, "export/download/abc", nil)
+	if err != nil {
+		t.Fatalf("NewRequest error: %v", err)
+	}
+
+	var buf bytes.Buffer
+	err = client.DoDownload(context.Background(), req, &buf)
+	if err != nil {
+		t.Fatalf("DoDownload returned error: %v", err)
+	}
+
+	if got := buf.String(); got != csvBody {
+		t.Errorf("downloaded body = %q, want %q", got, csvBody)
+	}
+}
+
+func TestClient_DoDownload_Error(t *testing.T) {
+	client, mux, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/export/download/bad", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(`{"type":"error.list","request_id":"req-dl","errors":[{"code":"not_found","message":"Export not found"}]}`))
+	})
+
+	req, err := client.NewRequest(http.MethodGet, "export/download/bad", nil)
+	if err != nil {
+		t.Fatalf("NewRequest error: %v", err)
+	}
+
+	var buf bytes.Buffer
+	err = client.DoDownload(context.Background(), req, &buf)
+	if err == nil {
+		t.Fatal("DoDownload returned nil error, want error for 404")
+	}
+
+	var errResp *ErrorResponse
+	if !errors.As(err, &errResp) {
+		t.Fatalf("error type = %T, want *ErrorResponse", err)
+	}
+	if errResp.StatusCode != http.StatusNotFound {
+		t.Errorf("ErrorResponse.StatusCode = %d, want %d", errResp.StatusCode, http.StatusNotFound)
+	}
+	if !IsNotFound(err) {
+		t.Error("IsNotFound(err) = false, want true")
 	}
 }
 

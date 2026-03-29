@@ -56,10 +56,10 @@ Address critical and important issues identified during comprehensive PR review 
 - [x] run tests — must pass before next task
 
 ### Task 5: Add test coverage for `DoRawNoRedirect` and `DoDownload`
-- [ ] write test: `TestClient_DoRawNoRedirect_302` in `do_raw_test.go` — verify 302 response is returned as result (redirect not followed)
-- [ ] write test: `TestClient_DoDownload_Success` — verify response body is streamed to writer
-- [ ] write test: `TestClient_DoDownload_Error` — verify 4xx returns proper error
-- [ ] run tests — must pass before next task
+- [x] write test: `TestClient_DoRawNoRedirect_302` in `do_raw_test.go` — verify 302 response is returned as result (redirect not followed)
+- [x] write test: `TestClient_DoDownload_Success` — verify response body is streamed to writer
+- [x] write test: `TestClient_DoDownload_Error` — verify 4xx returns proper error
+- [x] run tests — must pass before next task
 
 ### Task 6: Add test coverage for new error alias wrappers
 - [ ] write test: `TestErrorAliases` in `errors_test.go` (root package) — verify `IsBadRequest`, `IsForbidden`, `IsConflict`, `IsUnprocessableEntity`, `IsServerError` delegate correctly
