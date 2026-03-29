@@ -159,6 +159,13 @@ func TestResultError_500_NonJSON(t *testing.T) {
 	}
 }
 
+func TestResultError_NilResult(t *testing.T) {
+	err := ResultError(nil)
+	if err != nil {
+		t.Errorf("expected nil error for nil Result, got %v", err)
+	}
+}
+
 func TestResultError_NilError(t *testing.T) {
 	r := &Result{StatusCode: http.StatusOK}
 
