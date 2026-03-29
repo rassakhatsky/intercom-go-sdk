@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"testing"
+	"time"
 )
 
 func TestErrorResponse_ErrorFormat(t *testing.T) {
@@ -224,6 +225,150 @@ func TestErrorCodeConstants(t *testing.T) {
 	}
 	if len(seen) != 22 {
 		t.Errorf("expected 22 error code constants, got %d", len(seen))
+	}
+}
+
+func TestParseRateLimitInfo_AllHeaders(t *testing.T) {
+	h := http.Header{}
+	h.Set("X-RateLimit-Limit", "100")
+	h.Set("X-RateLimit-Remaining", "42")
+	h.Set("X-RateLimit-Reset", "1711584000") // 2024-03-28T00:00:00Z
+	h.Set("Retry-After", "30")
+
+	info := parseRateLimitInfo(h)
+	if info == nil {
+		t.Fatal("expected non-nil RateLimitInfo")
+	}
+	if info.Limit != 100 {
+		t.Errorf("Limit = %d, want 100", info.Limit)
+	}
+	if info.Remaining != 42 {
+		t.Errorf("Remaining = %d, want 42", info.Remaining)
+	}
+	wantReset := time.Unix(1711584000, 0)
+	if !info.Reset.Equal(wantReset) {
+		t.Errorf("Reset = %v, want %v", info.Reset, wantReset)
+	}
+	if info.RetryAfter != 30*time.Second {
+		t.Errorf("RetryAfter = %v, want %v", info.RetryAfter, 30*time.Second)
+	}
+}
+
+func TestParseRateLimitInfo_PartialHeaders(t *testing.T) {
+	h := http.Header{}
+	h.Set("X-RateLimit-Limit", "200")
+	// Missing: Remaining, Reset, Retry-After
+
+	info := parseRateLimitInfo(h)
+	if info == nil {
+		t.Fatal("expected non-nil RateLimitInfo when at least one header is present")
+	}
+	if info.Limit != 200 {
+		t.Errorf("Limit = %d, want 200", info.Limit)
+	}
+	if info.Remaining != 0 {
+		t.Errorf("Remaining = %d, want 0", info.Remaining)
+	}
+	if !info.Reset.IsZero() {
+		t.Errorf("Reset = %v, want zero", info.Reset)
+	}
+	if info.RetryAfter != 0 {
+		t.Errorf("RetryAfter = %v, want 0", info.RetryAfter)
+	}
+}
+
+func TestParseRateLimitInfo_NoHeaders(t *testing.T) {
+	h := http.Header{}
+
+	info := parseRateLimitInfo(h)
+	if info != nil {
+		t.Errorf("expected nil RateLimitInfo when no rate limit headers present, got %+v", info)
+	}
+}
+
+func TestParseRateLimitInfo_InvalidValues(t *testing.T) {
+	h := http.Header{}
+	h.Set("X-RateLimit-Limit", "not-a-number")
+	h.Set("X-RateLimit-Remaining", "abc")
+	h.Set("X-RateLimit-Reset", "xyz")
+	h.Set("Retry-After", "bad")
+
+	info := parseRateLimitInfo(h)
+	if info == nil {
+		t.Fatal("expected non-nil RateLimitInfo when headers are present (even invalid)")
+	}
+	// Invalid values should result in zero values, not panics
+	if info.Limit != 0 {
+		t.Errorf("Limit = %d, want 0 for invalid header", info.Limit)
+	}
+	if info.Remaining != 0 {
+		t.Errorf("Remaining = %d, want 0 for invalid header", info.Remaining)
+	}
+	if !info.Reset.IsZero() {
+		t.Errorf("Reset should be zero for invalid header")
+	}
+	if info.RetryAfter != 0 {
+		t.Errorf("RetryAfter should be zero for invalid header")
+	}
+}
+
+func TestResultError_429_WithRateLimitInfo(t *testing.T) {
+	h := http.Header{}
+	h.Set("X-RateLimit-Limit", "100")
+	h.Set("X-RateLimit-Remaining", "0")
+	h.Set("X-RateLimit-Reset", "1711584000")
+	h.Set("Retry-After", "15")
+
+	r := &Result{
+		StatusCode: http.StatusTooManyRequests,
+		Header:     h,
+		Error: &ErrorResult{
+			Type:   "error.list",
+			Code:   "rate_limit_exceeded",
+			Errors: []ErrorDetail{{Code: "rate_limit_exceeded", Message: "rate limit exceeded"}},
+		},
+	}
+
+	err := ResultError(r)
+	if err == nil {
+		t.Fatal("expected non-nil error")
+	}
+
+	var errResp *ErrorResponse
+	if !errors.As(err, &errResp) {
+		t.Fatalf("expected *ErrorResponse, got %T", err)
+	}
+	if errResp.RateLimit == nil {
+		t.Fatal("expected non-nil RateLimit on 429 response")
+	}
+	if errResp.RateLimit.Limit != 100 {
+		t.Errorf("RateLimit.Limit = %d, want 100", errResp.RateLimit.Limit)
+	}
+	if errResp.RateLimit.Remaining != 0 {
+		t.Errorf("RateLimit.Remaining = %d, want 0", errResp.RateLimit.Remaining)
+	}
+	if errResp.RateLimit.RetryAfter != 15*time.Second {
+		t.Errorf("RateLimit.RetryAfter = %v, want %v", errResp.RateLimit.RetryAfter, 15*time.Second)
+	}
+}
+
+func TestResultError_NonRateLimited_NoRateLimitInfo(t *testing.T) {
+	r := &Result{
+		StatusCode: http.StatusNotFound,
+		Error: &ErrorResult{
+			Type:   "error.list",
+			Code:   "not_found",
+			Errors: []ErrorDetail{{Code: "not_found", Message: "not found"}},
+		},
+	}
+
+	err := ResultError(r)
+	var errResp *ErrorResponse
+	if !errors.As(err, &errResp) {
+		t.Fatalf("expected *ErrorResponse, got %T", err)
+	}
+	if errResp.RateLimit != nil {
+		t.Errorf("expected nil RateLimit for non-429 response, got %+v", errResp.RateLimit)
 	}
 }
 

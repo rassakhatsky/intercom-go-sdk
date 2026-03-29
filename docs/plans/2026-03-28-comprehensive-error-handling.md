@@ -48,13 +48,13 @@
 `server_error`, `client_error`, `type_mismatch`, `parameter_not_found`, `parameter_invalid`, `action_forbidden`, `conflict`, `api_plan_restricted`, `rate_limit_exceeded`, `unsupported`, `token_revoked`, `token_blocked`, `token_not_found`, `token_unauthorized`, `token_expired`, `missing_authorization`, `retry_after`, `job_closed`, `not_restorable`, `team_not_found`, `team_unavailable`, `admin_not_found`
 
 ### Task 2: Add RateLimitInfo type and populate on 429 responses
-- [ ] Write tests in `internal/api/errors_test.go` for `RateLimitInfo` parsing from response headers (success cases with all headers, partial headers, missing headers)
-- [ ] Write tests verifying `ErrorResponse.RateLimit` is populated when status is 429 and nil otherwise
-- [ ] Define `RateLimitInfo` struct in `internal/api/errors.go` with fields: `Limit int`, `Remaining int`, `Reset time.Time`, `RetryAfter time.Duration`
-- [ ] Add helper `parseRateLimitInfo(h http.Header) *RateLimitInfo` in `internal/api/errors.go`
-- [ ] Update `ResultError()` to call `parseRateLimitInfo` when status code is 429
-- [ ] Add `RateLimitInfo` type alias in `aliases.go`
-- [ ] Run tests — must pass before next task
+- [x] Write tests in `internal/api/errors_test.go` for `RateLimitInfo` parsing from response headers (success cases with all headers, partial headers, missing headers)
+- [x] Write tests verifying `ErrorResponse.RateLimit` is populated when status is 429 and nil otherwise
+- [x] Define `RateLimitInfo` struct in `internal/api/errors.go` with fields: `Limit int`, `Remaining int`, `Reset time.Time`, `RetryAfter time.Duration`
+- [x] Add helper `parseRateLimitInfo(h http.Header) *RateLimitInfo` in `internal/api/errors.go`
+- [x] Update `ResultError()` to call `parseRateLimitInfo` when status code is 429
+- [x] Add `RateLimitInfo` type alias in `aliases.go`
+- [x] Run tests — must pass before next task
 
 **Rate limit headers to parse:**
 - `X-RateLimit-Limit` → `Limit` (int)

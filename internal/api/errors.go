@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 // ErrorCode represents an Intercom API error code.
@@ -34,6 +36,14 @@ const (
 	ErrAdminNotFound     ErrorCode = "admin_not_found"
 )
 
+// RateLimitInfo contains rate limit metadata parsed from HTTP response headers.
+type RateLimitInfo struct {
+	Limit      int           // X-RateLimit-Limit: total requests allowed per window
+	Remaining  int           // X-RateLimit-Remaining: requests remaining in current window
+	Reset      time.Time     // X-RateLimit-Reset: when the rate limit window resets (Unix timestamp)
+	RetryAfter time.Duration // Retry-After: how long to wait before retrying
+}
+
 // ErrorResponse represents an error response from the Intercom API.
 type ErrorResponse struct {
 	Response  *http.Response `json:"-"`
@@ -41,6 +51,7 @@ type ErrorResponse struct {
 	RequestID string         `json:"request_id,omitempty"`
 	Errors    []ErrorDetail  `json:"errors"`
 	RawBody   string         `json:"-"`
+	RateLimit *RateLimitInfo `json:"-"`
 }
 
 // Error returns a human-readable description of the API error.
@@ -72,7 +83,38 @@ func ResultError(r *Result) error {
 	if len(r.Error.Errors) == 0 && r.Error.Message != "" {
 		errResp.RawBody = r.Error.Message
 	}
+	if r.StatusCode == http.StatusTooManyRequests && r.Header != nil {
+		errResp.RateLimit = parseRateLimitInfo(r.Header)
+	}
 	return errResp
+}
+
+// parseRateLimitInfo extracts rate limit metadata from HTTP response headers.
+// Returns nil if none of the rate limit headers are present.
+func parseRateLimitInfo(h http.Header) *RateLimitInfo {
+	limit := h.Get("X-RateLimit-Limit")
+	remaining := h.Get("X-RateLimit-Remaining")
+	reset := h.Get("X-RateLimit-Reset")
+	retryAfter := h.Get("Retry-After")
+
+	if limit == "" && remaining == "" && reset == "" && retryAfter == "" {
+		return nil
+	}
+
+	info := &RateLimitInfo{}
+	if v, err := strconv.Atoi(limit); err == nil {
+		info.Limit = v
+	}
+	if v, err := strconv.Atoi(remaining); err == nil {
+		info.Remaining = v
+	}
+	if v, err := strconv.ParseInt(reset, 10, 64); err == nil {
+		info.Reset = time.Unix(v, 0)
+	}
+	if v, err := strconv.Atoi(retryAfter); err == nil {
+		info.RetryAfter = time.Duration(v) * time.Second
+	}
+	return info
 }
 
 // IsNotFound returns true if the error is an Intercom 404 response.

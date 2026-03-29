@@ -22,6 +22,7 @@ type Empty = api.Empty
 // Error types
 type ErrorResponse = api.ErrorResponse
 type ErrorCode = api.ErrorCode
+type RateLimitInfo = api.RateLimitInfo
 
 // Error code constants — re-exported from internal/api for consumer convenience.
 const (
