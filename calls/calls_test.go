@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/rassakhatsky/intercom-go-sdk/calls"
@@ -561,6 +562,32 @@ func TestParseGetTranscriptResult_ValidBody(t *testing.T) {
 	}
 	if transcript != "Agent: Hello\nCustomer: Hi" {
 		t.Errorf("Transcript = %q, want %q", transcript, "Agent: Hello\nCustomer: Hi")
+	}
+}
+
+// --- ParseGetRecordingURLResult Tests ---
+
+func TestParseGetRecordingURLResult_UnexpectedStatus(t *testing.T) {
+	r := &api.Result{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{},
+		Body:       []byte(`{"type":"error","message":"recording not available"}`),
+	}
+	_, err := calls.ParseGetRecordingURLResult(r)
+	if err == nil {
+		t.Fatal("Expected error for 200 status, got nil")
+	}
+	errMsg := err.Error()
+	if got := errMsg; got == "" {
+		t.Fatal("Error message is empty")
+	}
+	// Verify error includes status code
+	if !strings.Contains(errMsg, "200") {
+		t.Errorf("Error should contain status code 200, got: %s", errMsg)
+	}
+	// Verify error includes body content
+	if !strings.Contains(errMsg, "recording not available") {
+		t.Errorf("Error should contain body content, got: %s", errMsg)
 	}
 }
 

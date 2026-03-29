@@ -97,7 +97,11 @@ func ParseGetRecordingURLResult(r *api.Result) (string, error) {
 		}
 		return loc, nil
 	}
-	return "", fmt.Errorf("intercom: expected redirect for recording URL, got %d", r.StatusCode)
+	body := string(r.Body)
+	if len(body) > 512 {
+		body = body[:512]
+	}
+	return "", fmt.Errorf("intercom: expected redirect for recording URL, got status %d: %s", r.StatusCode, body)
 }
 
 // ParseGetTranscriptResult extracts the plain text transcript from a Result.

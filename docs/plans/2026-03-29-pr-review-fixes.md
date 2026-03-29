@@ -66,9 +66,9 @@
 - [x] run tests (`go test ./internal/api/...`) - must pass before next task
 
 ### Task 6: Improve `ParseGetRecordingURLResult` error message
-- [ ] Include response body and status code in error message for unexpected status codes in `calls/calls.go:92-101`
-- [ ] Write test for `ParseGetRecordingURLResult` with 200 status — verify error includes body context
-- [ ] run tests (`go test ./calls/...`) - must pass before next task
+- [x] Include response body and status code in error message for unexpected status codes in `calls/calls.go:92-101`
+- [x] Write test for `ParseGetRecordingURLResult` with 200 status — verify error includes body context
+- [x] run tests (`go test ./calls/...`) - must pass before next task
 
 ### Task 7: Add `Filter` operator constants
 - [ ] Define typed operator constants in `internal/api/search.go` (e.g., `OpEquals = "="`, `OpNotEquals = "!="`, `OpContains = "~"`, `OpAND = "AND"`, `OpOR = "OR"`, etc.)
