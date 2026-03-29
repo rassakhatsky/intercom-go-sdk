@@ -77,17 +77,17 @@ type UpdateAttributeRequest struct {
 
 // --- Parse Functions ---
 
-// ParseListResult decodes a Result into an AttributeList.
+// ParseAttributeListResult decodes a Result into an AttributeList.
 func ParseAttributeListResult(r *api.Result) (*AttributeList, error) {
 	return api.Decode[AttributeList](r)
 }
 
-// ParseCreateResult decodes a Result into an Attribute.
+// ParseAttributeCreateResult decodes a Result into an Attribute.
 func ParseAttributeCreateResult(r *api.Result) (*Attribute, error) {
 	return api.Decode[Attribute](r)
 }
 
-// ParseUpdateResult decodes a Result into an Attribute.
+// ParseAttributeUpdateResult decodes a Result into an Attribute.
 func ParseAttributeUpdateResult(r *api.Result) (*Attribute, error) {
 	return api.Decode[Attribute](r)
 }

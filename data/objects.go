@@ -49,27 +49,27 @@ type CreateOrUpdateObjectRequest struct {
 
 // --- Parse Functions ---
 
-// ParseGetResult decodes a Result into an ObjectInstance.
+// ParseObjectGetResult decodes a Result into an ObjectInstance.
 func ParseObjectGetResult(r *api.Result) (*ObjectInstance, error) {
 	return api.Decode[ObjectInstance](r)
 }
 
-// ParseGetByExternalIDResult decodes a Result into an ObjectInstance.
+// ParseObjectGetByExternalIDResult decodes a Result into an ObjectInstance.
 func ParseObjectGetByExternalIDResult(r *api.Result) (*ObjectInstance, error) {
 	return api.Decode[ObjectInstance](r)
 }
 
-// ParseCreateOrUpdateResult decodes a Result into an ObjectInstance.
+// ParseObjectCreateOrUpdateResult decodes a Result into an ObjectInstance.
 func ParseObjectCreateOrUpdateResult(r *api.Result) (*ObjectInstance, error) {
 	return api.Decode[ObjectInstance](r)
 }
 
-// ParseDeleteResult decodes a Result into an ObjectInstanceDeleted.
+// ParseObjectDeleteResult decodes a Result into an ObjectInstanceDeleted.
 func ParseObjectDeleteResult(r *api.Result) (*ObjectInstanceDeleted, error) {
 	return api.Decode[ObjectInstanceDeleted](r)
 }
 
-// ParseDeleteByExternalIDResult decodes a Result into an ObjectInstanceDeleted.
+// ParseObjectDeleteByExternalIDResult decodes a Result into an ObjectInstanceDeleted.
 func ParseObjectDeleteByExternalIDResult(r *api.Result) (*ObjectInstanceDeleted, error) {
 	return api.Decode[ObjectInstanceDeleted](r)
 }

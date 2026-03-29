@@ -41,11 +41,11 @@
 - [x] run tests (`go test ./data/... ./export/... ./workflows/...`) - must pass before next task
 
 ### Task 2: Fix comment-code mismatches
-- [ ] Fix `ai/voice.go:88-90` — change "external reference ID" to "Intercom ID" in `Collect` comment
-- [ ] Fix `data/attributes.go:80,85,90` — align Parse function comment prefixes with actual function names (`ParseAttributeListResult`, `ParseAttributeCreateResult`, `ParseAttributeUpdateResult`)
-- [ ] Fix `data/objects.go:52-73` — align Parse function comment prefixes with actual function names (`ParseObjectGetResult`, `ParseObjectGetByExternalIDResult`, etc.)
-- [ ] Fix `messaging/subscriptions.go:36` — change `ParseListResult` to `ParseSubscriptionListResult` in comment
-- [ ] run tests (`go test ./ai/... ./data/... ./messaging/...`) - must pass before next task
+- [x] Fix `ai/voice.go:88-90` — change "external reference ID" to "Intercom ID" in `Collect` comment
+- [x] Fix `data/attributes.go:80,85,90` — align Parse function comment prefixes with actual function names (`ParseAttributeListResult`, `ParseAttributeCreateResult`, `ParseAttributeUpdateResult`)
+- [x] Fix `data/objects.go:52-73` — align Parse function comment prefixes with actual function names (`ParseObjectGetResult`, `ParseObjectGetByExternalIDResult`, etc.)
+- [x] Fix `messaging/subscriptions.go:36` — change `ParseListResult` to `ParseSubscriptionListResult` in comment
+- [x] run tests (`go test ./ai/... ./data/... ./messaging/...`) - must pass before next task
 
 ### Task 3: Add nil guard in `BuildResult`
 - [ ] Add nil check for `resp.Request` and `resp.Request.URL` in `internal/api/result.go:70` before accessing `resp.Request.URL.String()`

@@ -32,7 +32,7 @@ type SubscriptionTypeList struct {
 
 // --- Parse Functions ---
 
-// ParseListResult decodes a Result into a SubscriptionTypeList.
+// ParseSubscriptionListResult decodes a Result into a SubscriptionTypeList.
 func ParseSubscriptionListResult(r *api.Result) (*SubscriptionTypeList, error) {
 	return api.Decode[SubscriptionTypeList](r)
 }

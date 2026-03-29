@@ -85,7 +85,7 @@ func (s *VoiceService) Register(ctx context.Context, req *RegisterCallRequest) (
 	return ParseRegisterResult(result)
 }
 
-// Collect retrieves a Fin Voice call by its external reference ID.
+// Collect retrieves a Fin Voice call by its Intercom ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/calls/collectfinvoicecallbyid
 func (s *VoiceService) Collect(ctx context.Context, id int) (*CallResponse, error) {
