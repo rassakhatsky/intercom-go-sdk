@@ -2,8 +2,10 @@ package intercom_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	intercom "github.com/rassakhatsky/intercom-go-sdk"
 )
@@ -64,4 +66,66 @@ func ExampleContactsService_SearchRaw() {
 	}
 	fmt.Printf("Found %d contacts\n", len(page.Data))
 	fmt.Printf("Rate limit remaining: %s\n", result.Header.Get("X-RateLimit-Remaining"))
+}
+
+// ExampleIsRateLimited demonstrates handling rate-limited responses
+// with parsed rate limit metadata.
+func ExampleIsRateLimited() {
+	client := intercom.NewClient("your-bearer-token")
+	ctx := context.Background()
+
+	_, err := client.Contacts().Get(ctx, "contact-id")
+	if intercom.IsRateLimited(err) {
+		var apiErr *intercom.ErrorResponse
+		if errors.As(err, &apiErr) && apiErr.RateLimit != nil {
+			fmt.Printf("Rate limited. Limit: %d, Remaining: %d\n",
+				apiErr.RateLimit.Limit, apiErr.RateLimit.Remaining)
+			fmt.Printf("Retry after: %v\n", apiErr.RateLimit.RetryAfter)
+			fmt.Printf("Window resets at: %v\n", apiErr.RateLimit.Reset)
+			time.Sleep(apiErr.RateLimit.RetryAfter)
+		}
+	}
+}
+
+// ExampleErrorResponse_HasErrorCode demonstrates matching specific
+// Intercom API error codes returned in error responses.
+func ExampleErrorResponse_HasErrorCode() {
+	client := intercom.NewClient("your-bearer-token")
+	ctx := context.Background()
+
+	_, err := client.Contacts().Get(ctx, "contact-id")
+	if err != nil {
+		var apiErr *intercom.ErrorResponse
+		if errors.As(err, &apiErr) {
+			switch {
+			case apiErr.HasErrorCode(intercom.ErrParameterInvalid):
+				fmt.Println("Invalid parameter:", apiErr.Error())
+			case apiErr.HasErrorCode(intercom.ErrTokenUnauthorized):
+				fmt.Println("Token is unauthorized, check your API key")
+			case apiErr.HasErrorCode(intercom.ErrRateLimitExceeded):
+				fmt.Println("Rate limit exceeded, back off and retry")
+			default:
+				fmt.Println("API error:", apiErr.Error())
+			}
+		} else {
+			log.Fatal(err) // transport error
+		}
+	}
+}
+
+// ExampleIsServerError demonstrates checking for server-side errors
+// to implement retry logic.
+func ExampleIsServerError() {
+	client := intercom.NewClient("your-bearer-token")
+	ctx := context.Background()
+
+	_, err := client.Contacts().Get(ctx, "contact-id")
+	if intercom.IsServerError(err) {
+		fmt.Println("Server error, retrying...")
+		// implement retry with backoff
+	} else if intercom.IsNotFound(err) {
+		fmt.Println("Contact not found")
+	} else if err != nil {
+		log.Fatal(err)
+	}
 }

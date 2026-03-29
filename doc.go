@@ -61,8 +61,37 @@
 // cancellation and timeout control.
 //
 // Error responses from the Intercom API are returned as *ErrorResponse values.
-// Helper functions IsNotFound, IsRateLimited, and IsUnauthorized can be used
-// to check for common error types.
+// Helper functions check for common HTTP status codes:
+//
+//	intercom.IsNotFound(err)            // 404
+//	intercom.IsRateLimited(err)         // 429
+//	intercom.IsUnauthorized(err)        // 401
+//	intercom.IsBadRequest(err)          // 400
+//	intercom.IsForbidden(err)           // 403
+//	intercom.IsConflict(err)            // 409
+//	intercom.IsUnprocessableEntity(err) // 422
+//	intercom.IsServerError(err)         // 5xx
+//
+// For rate-limited responses (429), the ErrorResponse includes parsed
+// rate limit headers:
+//
+//	if intercom.IsRateLimited(err) {
+//	    var apiErr *intercom.ErrorResponse
+//	    if errors.As(err, &apiErr) && apiErr.RateLimit != nil {
+//	        fmt.Printf("Retry after %v\n", apiErr.RateLimit.RetryAfter)
+//	        time.Sleep(apiErr.RateLimit.RetryAfter)
+//	    }
+//	}
+//
+// Intercom API error codes can be matched using HasErrorCode and the
+// predefined ErrorCode constants:
+//
+//	var apiErr *intercom.ErrorResponse
+//	if errors.As(err, &apiErr) {
+//	    if apiErr.HasErrorCode(intercom.ErrParameterInvalid) {
+//	        // handle invalid parameter
+//	    }
+//	}
 //
 // Core types (Result, Iter, Filter, ErrorResponse, ListOptions) are
 // re-exported as type aliases in this root package so consumers do not need

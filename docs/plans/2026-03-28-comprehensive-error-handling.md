@@ -89,8 +89,8 @@
 - [x] Run format check (`gofmt -l .`)
 
 ### Task 6: [Final] Update documentation
-- [ ] Update `doc.go` with examples showing new error code constants and RateLimitInfo usage
-- [ ] Update `example_test.go` with runnable examples for rate limit handling and error code matching
+- [x] Update `doc.go` with examples showing new error code constants and RateLimitInfo usage
+- [x] Update `example_test.go` with runnable examples for rate limit handling and error code matching
 
 ## Technical Details
 
