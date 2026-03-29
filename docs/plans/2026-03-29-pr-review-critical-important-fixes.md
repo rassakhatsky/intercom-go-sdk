@@ -62,11 +62,11 @@ Address 2 critical and 8 important findings from the comprehensive PR review of 
 - [x] run tests — must pass before next task
 
 ### Task 6: Verify acceptance criteria
-- [ ] verify all critical issues addressed: `Operator` type safety, `Decode[T]` empty body
-- [ ] verify all important issues addressed: nil guard, token validation, comment fixes, `SingleFilterOf` signature
-- [ ] run full test suite (`go test ./...`)
-- [ ] run linter (`go vet ./...`)
-- [ ] run format check (`gofmt -l .`)
+- [x] verify all critical issues addressed: `Operator` type safety, `Decode[T]` empty body
+- [x] verify all important issues addressed: nil guard, token validation, comment fixes, `SingleFilterOf` signature
+- [x] run full test suite (`go test ./...`)
+- [x] run linter (`go vet ./...`)
+- [x] run format check (`gofmt -l .`)
 
 ### Task 7: Update documentation
 - [ ] update CLAUDE.md if any conventions changed (e.g., `Operator` is now a defined type)
