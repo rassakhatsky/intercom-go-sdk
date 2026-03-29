@@ -22,14 +22,14 @@ func NewObjectsService(c api.Caller) *ObjectsService {
 
 // ObjectInstance represents an Intercom custom object instance.
 type ObjectInstance struct {
-	ID                string            `json:"id"`
-	ExternalID        string            `json:"external_id,omitempty"`
-	Type              string            `json:"type,omitempty"`
-	ExternalCreatedAt *int64            `json:"external_created_at,omitempty"`
-	ExternalUpdatedAt *int64            `json:"external_updated_at,omitempty"`
-	CreatedAt         int64             `json:"created_at,omitempty"`
-	UpdatedAt         int64             `json:"updated_at,omitempty"`
-	CustomAttributes  map[string]string `json:"custom_attributes,omitempty"`
+	ID                string         `json:"id"`
+	ExternalID        string         `json:"external_id,omitempty"`
+	Type              string         `json:"type,omitempty"`
+	ExternalCreatedAt *int64         `json:"external_created_at,omitempty"`
+	ExternalUpdatedAt *int64         `json:"external_updated_at,omitempty"`
+	CreatedAt         int64          `json:"created_at,omitempty"`
+	UpdatedAt         int64          `json:"updated_at,omitempty"`
+	CustomAttributes  map[string]any `json:"custom_attributes,omitempty"`
 }
 
 // ObjectInstanceDeleted represents the response from deleting a custom object instance.
@@ -41,10 +41,10 @@ type ObjectInstanceDeleted struct {
 
 // CreateOrUpdateObjectRequest represents a request to create or update a custom object instance.
 type CreateOrUpdateObjectRequest struct {
-	ExternalID        string            `json:"external_id,omitempty"`
-	ExternalCreatedAt *int64            `json:"external_created_at,omitempty"`
-	ExternalUpdatedAt *int64            `json:"external_updated_at,omitempty"`
-	CustomAttributes  map[string]string `json:"custom_attributes,omitempty"`
+	ExternalID        string         `json:"external_id,omitempty"`
+	ExternalCreatedAt *int64         `json:"external_created_at,omitempty"`
+	ExternalUpdatedAt *int64         `json:"external_updated_at,omitempty"`
+	CustomAttributes  map[string]any `json:"custom_attributes,omitempty"`
 }
 
 // --- Parse Functions ---

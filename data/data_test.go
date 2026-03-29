@@ -1266,7 +1266,7 @@ func TestObjectsService_CreateOrUpdate(t *testing.T) {
 	ctx := context.Background()
 	obj, err := svc.CreateOrUpdate(ctx, "Order", &data.CreateOrUpdateObjectRequest{
 		ExternalID:       "ext_456",
-		CustomAttributes: map[string]string{"status": "new"},
+		CustomAttributes: map[string]any{"status": "new"},
 	})
 	if err != nil {
 		t.Fatalf("CreateOrUpdate returned error: %v", err)
@@ -1398,7 +1398,7 @@ func TestObjectsService_CreateOrUpdateRaw_Success(t *testing.T) {
 	ctx := context.Background()
 	result, err := svc.CreateOrUpdateRaw(ctx, "Order", &data.CreateOrUpdateObjectRequest{
 		ExternalID:       "ext_456",
-		CustomAttributes: map[string]string{"status": "new"},
+		CustomAttributes: map[string]any{"status": "new"},
 	})
 	if err != nil {
 		t.Fatalf("CreateOrUpdateRaw returned error: %v", err)
