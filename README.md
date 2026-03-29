@@ -7,6 +7,10 @@ Go SDK for the [Intercom REST API](https://developers.intercom.com/docs/referenc
 - Generic auto-pagination iterator
 - Search filter builder
 
+## Requirements
+
+Go 1.26.1 or later.
+
 ## Installation
 
 ```
@@ -74,6 +78,12 @@ if err := iter.Err(); err != nil {
 
 // Or collect all at once
 contacts, err := client.Contacts().ListAll(ctx, &intercom.ListOptions{PerPage: 50}).Collect()
+
+// Callback-based iteration
+err := client.Contacts().ListAll(ctx, nil).ForEach(func(c contacts.Contact) error {
+    fmt.Println(c.Name)
+    return nil // return non-nil error to stop early
+})
 ```
 
 Companies use scroll-based pagination via `client.Companies().Scroll(ctx, scrollParam)`.
@@ -112,7 +122,7 @@ if err != nil {
 }
 ```
 
-Additional status helpers: `IsBadRequest` (400), `IsForbidden` (403), `IsConflict` (409), `IsUnprocessableEntity` (422).
+Additional status helpers: `IsUnauthorized` (401), `IsBadRequest` (400), `IsForbidden` (403), `IsConflict` (409), `IsUnprocessableEntity` (422).
 
 ### Rate Limit Details
 
@@ -157,6 +167,9 @@ if result.Error != nil {
     return
 }
 contact, err := contacts.ParseGetResult(result)
+
+// Or use the generic Decode helper
+contact, err = intercom.Decode[contacts.Contact](result)
 ```
 
 ## Sub-Packages
