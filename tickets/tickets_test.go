@@ -336,7 +336,7 @@ func TestService_Search(t *testing.T) {
 
 	ctx := context.Background()
 	result, err := svc.Search(ctx, &api.SearchRequest{
-		Query:      api.And(api.SingleFilterOf("open", "=", "true")),
+		Query:      api.And(api.SingleFilterOf("open", api.OpEquals, "true")),
 		Pagination: &api.SearchPagination{PerPage: 20},
 	})
 	if err != nil {
@@ -710,7 +710,7 @@ func TestService_SearchRaw(t *testing.T) {
 
 	ctx := context.Background()
 	result, err := svc.SearchRaw(ctx, &api.SearchRequest{
-		Query: api.And(api.SingleFilterOf("open", "=", "true")),
+		Query: api.And(api.SingleFilterOf("open", api.OpEquals, "true")),
 	})
 	if err != nil {
 		t.Fatalf("SearchRaw returned error: %v", err)
@@ -849,7 +849,7 @@ func TestService_Search_RateLimit(t *testing.T) {
 
 	ctx := context.Background()
 	_, err := svc.Search(ctx, &api.SearchRequest{
-		Query: api.And(api.SingleFilterOf("open", "=", "true")),
+		Query: api.And(api.SingleFilterOf("open", api.OpEquals, "true")),
 	})
 	if err == nil {
 		t.Fatal("Expected error, got nil")

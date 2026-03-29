@@ -49,7 +49,7 @@ func ExampleContactsService_SearchRaw() {
 	ctx := context.Background()
 
 	result, err := client.Contacts().SearchRaw(ctx, &intercom.SearchRequest{
-		Query: intercom.SingleFilterOf("email", "=", "alice@example.com"),
+		Query: intercom.SingleFilterOf("email", intercom.OpEquals, "alice@example.com"),
 	})
 	if err != nil {
 		log.Fatal(err)

@@ -1,7 +1,7 @@
 package api
 
 // Operator represents a filter operator for Intercom search queries.
-type Operator = string
+type Operator string
 
 // Filter operators for single field filters.
 const (
@@ -40,13 +40,13 @@ type SearchPagination struct {
 type Filter struct {
 	// Single filter fields
 	Field    string `json:"field,omitempty"`
-	Operator string `json:"operator"`
+	Operator Operator `json:"operator"`
 	Value    any    `json:"value"`
 }
 
 // SingleFilterOf creates a filter that matches a single field.
 // The value can be a string, int, or slice for IN/NIN operators.
-func SingleFilterOf(field, operator string, value any) *Filter {
+func SingleFilterOf(field string, operator Operator, value any) *Filter {
 	return &Filter{
 		Field:    field,
 		Operator: operator,

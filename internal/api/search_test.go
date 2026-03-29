@@ -26,10 +26,24 @@ func TestOperatorConstants(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.op != tt.want {
+			if string(tt.op) != tt.want {
 				t.Errorf("Op%s = %q, want %q", tt.name, tt.op, tt.want)
 			}
 		})
+	}
+}
+
+func TestOperator_IsDefinedType(t *testing.T) {
+	// Verify Operator is a defined type (not an alias) by checking
+	// that string(op) round-trips correctly.
+	op := OpEquals
+	s := string(op)
+	if s != "=" {
+		t.Errorf("string(OpEquals) = %q, want %q", s, "=")
+	}
+	roundTripped := Operator(s)
+	if roundTripped != OpEquals {
+		t.Errorf("Operator(%q) = %q, want %q", s, roundTripped, OpEquals)
 	}
 }
 

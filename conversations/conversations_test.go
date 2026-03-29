@@ -387,7 +387,7 @@ func TestService_Search(t *testing.T) {
 
 	ctx := context.Background()
 	result, err := svc.Search(ctx, &api.SearchRequest{
-		Query:      api.And(api.SingleFilterOf("created_at", ">", "1306054154")),
+		Query:      api.And(api.SingleFilterOf("created_at", api.OpGreaterThan, "1306054154")),
 		Pagination: &api.SearchPagination{PerPage: 5},
 	})
 	if err != nil {
@@ -1023,7 +1023,7 @@ func TestService_SearchRaw(t *testing.T) {
 
 	ctx := context.Background()
 	result, err := svc.SearchRaw(ctx, &api.SearchRequest{
-		Query:      api.And(api.SingleFilterOf("created_at", ">", "1306054154")),
+		Query:      api.And(api.SingleFilterOf("created_at", api.OpGreaterThan, "1306054154")),
 		Pagination: &api.SearchPagination{PerPage: 5},
 	})
 	if err != nil {

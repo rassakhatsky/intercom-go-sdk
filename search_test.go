@@ -6,7 +6,7 @@ import (
 )
 
 func TestSingleFilterOf(t *testing.T) {
-	f := SingleFilterOf("created_at", ">", "1306054154")
+	f := SingleFilterOf("created_at", OpGreaterThan, "1306054154")
 
 	data, err := json.Marshal(f)
 	if err != nil {
@@ -35,7 +35,7 @@ func TestSingleFilterOf(t *testing.T) {
 }
 
 func TestSingleFilterOf_IntValue(t *testing.T) {
-	f := SingleFilterOf("created_at", ">", 1306054154)
+	f := SingleFilterOf("created_at", OpGreaterThan, 1306054154)
 
 	data, err := json.Marshal(f)
 	if err != nil {
@@ -55,8 +55,8 @@ func TestSingleFilterOf_IntValue(t *testing.T) {
 
 func TestAnd(t *testing.T) {
 	f := And(
-		SingleFilterOf("created_at", ">", "1306054154"),
-		SingleFilterOf("created_at", "<", "1609459200"),
+		SingleFilterOf("created_at", OpGreaterThan, "1306054154"),
+		SingleFilterOf("created_at", OpLessThan, "1609459200"),
 	)
 
 	data, err := json.Marshal(f)
@@ -89,8 +89,8 @@ func TestAnd(t *testing.T) {
 
 func TestOr(t *testing.T) {
 	f := Or(
-		SingleFilterOf("email", "=", "alice@example.com"),
-		SingleFilterOf("email", "=", "bob@example.com"),
+		SingleFilterOf("email", OpEquals, "alice@example.com"),
+		SingleFilterOf("email", OpEquals, "bob@example.com"),
 	)
 
 	data, err := json.Marshal(f)
@@ -119,10 +119,10 @@ func TestOr(t *testing.T) {
 func TestNestedAndOr(t *testing.T) {
 	f := And(
 		Or(
-			SingleFilterOf("email", "=", "alice@example.com"),
-			SingleFilterOf("email", "=", "bob@example.com"),
+			SingleFilterOf("email", OpEquals, "alice@example.com"),
+			SingleFilterOf("email", OpEquals, "bob@example.com"),
 		),
-		SingleFilterOf("created_at", ">", "1306054154"),
+		SingleFilterOf("created_at", OpGreaterThan, "1306054154"),
 	)
 
 	data, err := json.Marshal(f)
@@ -158,7 +158,7 @@ func TestNestedAndOr(t *testing.T) {
 func TestSearchRequest_MarshalJSON(t *testing.T) {
 	sr := &SearchRequest{
 		Query: And(
-			SingleFilterOf("created_at", ">", "1306054154"),
+			SingleFilterOf("created_at", OpGreaterThan, "1306054154"),
 		),
 		Pagination: &SearchPagination{
 			PerPage:       5,
@@ -200,7 +200,7 @@ func TestSearchRequest_MarshalJSON(t *testing.T) {
 
 func TestSearchRequest_NoPagination(t *testing.T) {
 	sr := &SearchRequest{
-		Query: SingleFilterOf("email", "=", "test@example.com"),
+		Query: SingleFilterOf("email", OpEquals, "test@example.com"),
 	}
 
 	data, err := json.Marshal(sr)

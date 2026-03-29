@@ -216,7 +216,7 @@ func IsUnprocessableEntity(err error) bool { return api.IsUnprocessableEntity(er
 func IsServerError(err error) bool { return api.IsServerError(err) }
 
 // SingleFilterOf creates a filter that matches a single field.
-func SingleFilterOf(field, operator string, value any) *Filter {
+func SingleFilterOf(field string, operator Operator, value any) *Filter {
 	return api.SingleFilterOf(field, operator, value)
 }
 
