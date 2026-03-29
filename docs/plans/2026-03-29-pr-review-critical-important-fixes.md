@@ -39,9 +39,9 @@ Address 2 critical and 8 important findings from the comprehensive PR review of 
 - [x] run tests — must pass before next task
 
 ### Task 2: Add nil receiver guard to `ErrorResponse.Error()` (Important #4)
-- [ ] write test in `internal/api/errors_test.go`: call `Error()` on nil `*ErrorResponse`, expect non-panic return
-- [ ] add nil receiver check at top of `ErrorResponse.Error()` in `internal/api/errors.go:59`
-- [ ] run tests — must pass before next task
+- [x] write test in `internal/api/errors_test.go`: call `Error()` on nil `*ErrorResponse`, expect non-panic return
+- [x] add nil receiver check at top of `ErrorResponse.Error()` in `internal/api/errors.go:59`
+- [x] run tests — must pass before next task
 
 ### Task 3: Validate non-empty token in `NewClient` (Important #6)
 - [ ] write test in `intercom_test.go`: `NewClient("")` should panic with descriptive message

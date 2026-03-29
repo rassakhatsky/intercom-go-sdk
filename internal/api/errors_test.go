@@ -48,6 +48,15 @@ func TestErrorResponse_ErrorFormat_RawBody(t *testing.T) {
 	}
 }
 
+func TestErrorResponse_ErrorFormat_NilReceiver(t *testing.T) {
+	var err *ErrorResponse
+	got := err.Error()
+	want := "unknown API error"
+	if got != want {
+		t.Errorf("Error() on nil receiver = %q, want %q", got, want)
+	}
+}
+
 func TestErrorResponse_ErrorFormat_NoResponse(t *testing.T) {
 	err := &ErrorResponse{}
 

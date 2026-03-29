@@ -57,6 +57,9 @@ type ErrorResponse struct {
 
 // Error returns a human-readable description of the API error.
 func (e *ErrorResponse) Error() string {
+	if e == nil {
+		return "unknown API error"
+	}
 	if len(e.Errors) > 0 {
 		return fmt.Sprintf("%s: %s", e.Errors[0].Code, e.Errors[0].Message)
 	}
