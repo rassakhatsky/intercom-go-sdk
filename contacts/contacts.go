@@ -298,7 +298,7 @@ func ParseAddTagResult(r *api.Result) (*api.TagRef, error) { return api.Decode[a
 // ParseRemoveTagResult decodes a Result into a TagRef.
 func ParseRemoveTagResult(r *api.Result) (*api.TagRef, error) { return api.Decode[api.TagRef](r) }
 
-// ParseListTagsResult decodes a Result into a api.TagList.
+// ParseListTagsResult decodes a Result into an api.TagList.
 func ParseListTagsResult(r *api.Result) (*api.TagList, error) {
 	return api.Decode[api.TagList](r)
 }

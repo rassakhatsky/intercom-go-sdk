@@ -117,7 +117,7 @@ func (s *EventsService) Create(ctx context.Context, body *CreateEventRequest) er
 
 // List returns data events for a user or lead.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/lisdataevents
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/listdataevents
 func (s *EventsService) List(ctx context.Context, opts *ListOptions) (*SummaryResponse, error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
@@ -158,7 +158,7 @@ func (s *EventsService) CreateRaw(ctx context.Context, body *CreateEventRequest)
 
 // ListRaw returns data events for a user or lead with the full HTTP result.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/lisdataevents
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-events/listdataevents
 func (s *EventsService) ListRaw(ctx context.Context, opts *ListOptions) (*api.Result, error) {
 	path, err := api.AddQueryOptions("events", opts)
 	if err != nil {

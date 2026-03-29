@@ -66,10 +66,10 @@ Address critical and important issues identified during comprehensive PR review 
 - [x] run tests — must pass before next task
 
 ### Task 7: Fix documentation issues
-- [ ] fix `export/data.go:46` — change comment from `ParseGetStatusResult` to `ParseDataGetStatusResult`
-- [ ] fix `data/events.go:161` — change `lisdataevents` to `listdataevents` in See URL (verify against OpenAPI spec first)
-- [ ] fix `contacts/contacts.go:301` — change "a api.TagList" to "an api.TagList"
-- [ ] run tests — must pass before next task
+- [x] fix `export/data.go:46` — change comment from `ParseGetStatusResult` to `ParseDataGetStatusResult`
+- [x] fix `data/events.go:161` — change `lisdataevents` to `listdataevents` in See URL (verify against OpenAPI spec first)
+- [x] fix `contacts/contacts.go:301` — change "a api.TagList" to "an api.TagList"
+- [x] run tests — must pass before next task
 
 ### Task 8: Add concurrency safety doc to `Iter[T]`
 - [ ] add doc comment to `Iter[T]` type in `internal/api/pagination.go` noting it is not safe for concurrent use

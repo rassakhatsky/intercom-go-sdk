@@ -42,7 +42,7 @@ func ParseCreateResult(r *api.Result) (*DataExport, error) {
 	return api.Decode[DataExport](r)
 }
 
-// ParseGetStatusResult decodes a Result into a DataExport.
+// ParseDataGetStatusResult decodes a Result into a DataExport.
 func ParseDataGetStatusResult(r *api.Result) (*DataExport, error) {
 	return api.Decode[DataExport](r)
 }
