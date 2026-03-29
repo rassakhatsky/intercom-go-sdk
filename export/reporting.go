@@ -79,7 +79,7 @@ func ParseGetDatasetsResult(r *api.Result) (*DatasetsResponse, error) {
 
 // Enqueue starts a new reporting data export job.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/paths/~1export~1reporting_data~1enqueue/post
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/enqueuereportingdataexport
 func (s *ReportingService) Enqueue(ctx context.Context, body *EnqueueRequest) (*Job, error) {
 	result, err := s.EnqueueRaw(ctx, body)
 	if err != nil {
@@ -93,7 +93,7 @@ func (s *ReportingService) Enqueue(ctx context.Context, body *EnqueueRequest) (*
 
 // GetStatus retrieves the status of a reporting data export job.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/paths/~1export~1reporting_data~1{job_identifier}/get
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/getreportingdataexport
 func (s *ReportingService) GetStatus(ctx context.Context, jobIdentifier string) (*Job, error) {
 	result, err := s.GetStatusRaw(ctx, jobIdentifier)
 	if err != nil {
@@ -107,7 +107,7 @@ func (s *ReportingService) GetStatus(ctx context.Context, jobIdentifier string) 
 
 // GetDatasets returns the list of available reporting datasets and their attributes.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/paths/~1export~1reporting_data~1get_datasets/get
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/getreportingdatasets
 func (s *ReportingService) GetDatasets(ctx context.Context) ([]Dataset, error) {
 	result, err := s.GetDatasetsRaw(ctx)
 	if err != nil {
@@ -127,7 +127,7 @@ func (s *ReportingService) GetDatasets(ctx context.Context) ([]Dataset, error) {
 
 // EnqueueRaw starts a new reporting data export job and returns the full HTTP result.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/paths/~1export~1reporting_data~1enqueue/post
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/enqueuereportingdataexport
 func (s *ReportingService) EnqueueRaw(ctx context.Context, body *EnqueueRequest) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, "export/reporting_data/enqueue", body)
 	if err != nil {
@@ -138,7 +138,7 @@ func (s *ReportingService) EnqueueRaw(ctx context.Context, body *EnqueueRequest)
 
 // GetStatusRaw retrieves the status of a reporting data export job with the full HTTP result.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/paths/~1export~1reporting_data~1{job_identifier}/get
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/getreportingdataexport
 func (s *ReportingService) GetStatusRaw(ctx context.Context, jobIdentifier string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("export/reporting_data/%s", url.PathEscape(jobIdentifier)), nil)
 	if err != nil {
@@ -149,7 +149,7 @@ func (s *ReportingService) GetStatusRaw(ctx context.Context, jobIdentifier strin
 
 // GetDatasetsRaw returns the list of available reporting datasets with the full HTTP result.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/paths/~1export~1reporting_data~1get_datasets/get
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/getreportingdatasets
 func (s *ReportingService) GetDatasetsRaw(ctx context.Context) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, "export/reporting_data/get_datasets", nil)
 	if err != nil {
@@ -160,7 +160,7 @@ func (s *ReportingService) GetDatasetsRaw(ctx context.Context) (*api.Result, err
 
 // Download writes the reporting export data to w. The data is typically CSV.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/paths/~1download~1reporting_data~1{job_identifier}/get
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/export/downloadreportingdataexport
 func (s *ReportingService) Download(ctx context.Context, jobIdentifier string, w io.Writer) error {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("download/reporting_data/%s", url.PathEscape(jobIdentifier)), nil)
 	if err != nil {

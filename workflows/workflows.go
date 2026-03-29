@@ -57,7 +57,7 @@ func ParseExportResult(r *api.Result) (*Export, error) {
 
 // Export retrieves the complete workflow configuration by its ID.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/Workflows/exportWorkflow
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/workflows/exportworkflow
 func (s *Service) Export(ctx context.Context, id string) (*Export, error) {
 	result, err := s.ExportRaw(ctx, id)
 	if err != nil {
@@ -74,7 +74,7 @@ func (s *Service) Export(ctx context.Context, id string) (*Export, error) {
 // ExportRaw retrieves the complete workflow configuration by its ID
 // and returns the full HTTP result.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/Workflows/exportWorkflow
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/workflows/exportworkflow
 func (s *Service) ExportRaw(ctx context.Context, id string) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodGet, fmt.Sprintf("export/workflows/%s", url.PathEscape(id)), nil)
 	if err != nil {

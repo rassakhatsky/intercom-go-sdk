@@ -96,7 +96,7 @@ func ParseAttributeUpdateResult(r *api.Result) (*Attribute, error) {
 
 // List returns all data attributes for the workspace.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/lisdataattributes
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/listdataattributes
 func (s *AttributesService) List(ctx context.Context, opts *ListAttributesOptions) (*AttributeList, error) {
 	result, err := s.ListRaw(ctx, opts)
 	if err != nil {
@@ -140,7 +140,7 @@ func (s *AttributesService) Update(ctx context.Context, id int, body *UpdateAttr
 
 // ListRaw returns all data attributes for the workspace with the full HTTP result.
 //
-// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/lisdataattributes
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/data-attributes/listdataattributes
 func (s *AttributesService) ListRaw(ctx context.Context, opts *ListAttributesOptions) (*api.Result, error) {
 	path, err := api.AddQueryOptions("data_attributes", opts)
 	if err != nil {
