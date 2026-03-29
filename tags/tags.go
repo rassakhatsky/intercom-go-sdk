@@ -21,19 +21,10 @@ func NewService(c api.Caller) *Service {
 }
 
 // Tag represents an Intercom tag.
-type Tag struct {
-	Type      string        `json:"type"`
-	ID        string        `json:"id"`
-	Name      string        `json:"name"`
-	AppliedAt *int64        `json:"applied_at,omitempty"`
-	AppliedBy *api.AdminRef `json:"applied_by,omitempty"`
-}
+type Tag = api.Tag
 
 // List represents a list of tags.
-type List struct {
-	Type string `json:"type"`
-	Data []Tag  `json:"data"`
-}
+type List = api.TagList
 
 // CreateOrUpdateRequest represents the request body for creating or updating a tag.
 type CreateOrUpdateRequest struct {

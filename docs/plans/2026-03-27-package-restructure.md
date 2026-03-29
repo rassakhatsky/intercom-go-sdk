@@ -219,15 +219,15 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] run tests: `go test ./...`
 
 ### Task 25: Verify acceptance criteria
-- [ ] verify all 33 services accessible via accessor methods
-- [ ] verify all types are in their correct sub-packages
-- [ ] verify `internal/api` types are properly re-exported as aliases in root
-- [ ] verify no cross-service imports between sub-packages
-- [ ] run full test suite: `go test ./...`
-- [ ] run race detector: `go test -race ./...`
-- [ ] run linter: `go vet ./...`
-- [ ] run format check: `gofmt -l .`
-- [ ] verify test coverage: `go test -coverprofile=coverage.out ./...`
+- [x] verify all 33 services accessible via accessor methods (34 found including workflows)
+- [x] verify all types are in their correct sub-packages
+- [x] verify `internal/api` types are properly re-exported as aliases in root
+- [x] verify no cross-service imports between sub-packages (fixed contacts importing from messaging/tags by lifting shared types to internal/api)
+- [x] run full test suite: `go test ./...`
+- [x] run race detector: `go test -race ./...`
+- [x] run linter: `go vet ./...`
+- [x] run format check: `gofmt -l .`
+- [x] verify test coverage: `go test -coverprofile=coverage.out ./...`
 
 ### Task 26: [Final] Update documentation
 - [ ] update `README.md` with new import paths and usage examples

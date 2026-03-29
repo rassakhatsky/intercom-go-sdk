@@ -19,22 +19,10 @@ func NewSubscriptionsService(c api.Caller) *SubscriptionsService {
 }
 
 // SubscriptionType represents a subscription type in Intercom.
-type SubscriptionType struct {
-	Type               string        `json:"type"`
-	ID                 string        `json:"id"`
-	State              string        `json:"state,omitempty"`
-	ConsentType        string        `json:"consent_type,omitempty"`
-	DefaultTranslation *Translation  `json:"default_translation,omitempty"`
-	Translations       []Translation `json:"translations,omitempty"`
-	ContentTypes       []string      `json:"content_types,omitempty"`
-}
+type SubscriptionType = api.SubscriptionType
 
 // Translation represents a localised version of a subscription type.
-type Translation struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Locale      string `json:"locale"`
-}
+type Translation = api.Translation
 
 // SubscriptionTypeList represents the response from listing subscription types.
 type SubscriptionTypeList struct {

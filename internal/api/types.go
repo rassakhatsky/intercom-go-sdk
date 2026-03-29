@@ -71,6 +71,43 @@ type SegmentListResult struct {
 	Data []SegmentRef `json:"data"`
 }
 
+// Tag represents an Intercom tag (full representation).
+// It is shared across tags and contacts services.
+type Tag struct {
+	Type      string    `json:"type"`
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	AppliedAt *int64    `json:"applied_at,omitempty"`
+	AppliedBy *AdminRef `json:"applied_by,omitempty"`
+}
+
+// TagList represents a list of tags.
+// It is shared across tags and contacts services.
+type TagList struct {
+	Type string `json:"type"`
+	Data []Tag  `json:"data"`
+}
+
+// SubscriptionType represents a subscription type in Intercom.
+// It is shared across messaging and contacts services.
+type SubscriptionType struct {
+	Type               string        `json:"type"`
+	ID                 string        `json:"id"`
+	State              string        `json:"state,omitempty"`
+	ConsentType        string        `json:"consent_type,omitempty"`
+	DefaultTranslation *Translation  `json:"default_translation,omitempty"`
+	Translations       []Translation `json:"translations,omitempty"`
+	ContentTypes       []string      `json:"content_types,omitempty"`
+}
+
+// Translation represents a localised version of a subscription type.
+// It is shared across messaging and contacts services.
+type Translation struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Locale      string `json:"locale"`
+}
+
 // ArticleContent represents translated content for a single locale.
 // It is shared across articles and help center services.
 type ArticleContent struct {

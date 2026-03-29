@@ -7,8 +7,6 @@ import (
 	"net/url"
 
 	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
-	"github.com/rassakhatsky/intercom-go-sdk/messaging"
-	"github.com/rassakhatsky/intercom-go-sdk/tags"
 )
 
 // Service handles communication with the contact related methods
@@ -200,8 +198,8 @@ type CreateNoteRequest struct {
 
 // SubscriptionListResult is the response for listing subscriptions for a contact.
 type SubscriptionListResult struct {
-	Type string                       `json:"type"`
-	Data []messaging.SubscriptionType `json:"data"`
+	Type string                 `json:"type"`
+	Data []api.SubscriptionType `json:"data"`
 }
 
 // AddSubscriptionRequest represents the body for adding a subscription to a contact.
@@ -285,13 +283,13 @@ func ParseListSubscriptionsResult(r *api.Result) (*SubscriptionListResult, error
 }
 
 // ParseAddSubscriptionResult decodes a Result into a SubscriptionType.
-func ParseAddSubscriptionResult(r *api.Result) (*messaging.SubscriptionType, error) {
-	return api.Decode[messaging.SubscriptionType](r)
+func ParseAddSubscriptionResult(r *api.Result) (*api.SubscriptionType, error) {
+	return api.Decode[api.SubscriptionType](r)
 }
 
 // ParseRemoveSubscriptionResult decodes a Result into a SubscriptionType.
-func ParseRemoveSubscriptionResult(r *api.Result) (*messaging.SubscriptionType, error) {
-	return api.Decode[messaging.SubscriptionType](r)
+func ParseRemoveSubscriptionResult(r *api.Result) (*api.SubscriptionType, error) {
+	return api.Decode[api.SubscriptionType](r)
 }
 
 // ParseAddTagResult decodes a Result into a TagRef.
@@ -300,9 +298,9 @@ func ParseAddTagResult(r *api.Result) (*api.TagRef, error) { return api.Decode[a
 // ParseRemoveTagResult decodes a Result into a TagRef.
 func ParseRemoveTagResult(r *api.Result) (*api.TagRef, error) { return api.Decode[api.TagRef](r) }
 
-// ParseListTagsResult decodes a Result into a tags.List.
-func ParseListTagsResult(r *api.Result) (*tags.List, error) {
-	return api.Decode[tags.List](r)
+// ParseListTagsResult decodes a Result into a api.TagList.
+func ParseListTagsResult(r *api.Result) (*api.TagList, error) {
+	return api.Decode[api.TagList](r)
 }
 
 // --- Regular Methods ---
@@ -568,7 +566,7 @@ func (s *Service) ListSubscriptions(ctx context.Context, contactID string) (*Sub
 // AddSubscription adds a subscription to a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/attachsubscriptiontypetocontact
-func (s *Service) AddSubscription(ctx context.Context, contactID string, body *AddSubscriptionRequest) (*messaging.SubscriptionType, error) {
+func (s *Service) AddSubscription(ctx context.Context, contactID string, body *AddSubscriptionRequest) (*api.SubscriptionType, error) {
 	result, err := s.AddSubscriptionRaw(ctx, contactID, body)
 	if err != nil {
 		return nil, err
@@ -582,7 +580,7 @@ func (s *Service) AddSubscription(ctx context.Context, contactID string, body *A
 // RemoveSubscription removes a subscription from a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/subscription-types/detachsubscriptiontypetocontact
-func (s *Service) RemoveSubscription(ctx context.Context, contactID, subscriptionID string) (*messaging.SubscriptionType, error) {
+func (s *Service) RemoveSubscription(ctx context.Context, contactID, subscriptionID string) (*api.SubscriptionType, error) {
 	result, err := s.RemoveSubscriptionRaw(ctx, contactID, subscriptionID)
 	if err != nil {
 		return nil, err
@@ -624,7 +622,7 @@ func (s *Service) RemoveTag(ctx context.Context, contactID, tagID string) (*api.
 // ListTags returns the tags attached to a contact.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/contacts/listtagsforacontact
-func (s *Service) ListTags(ctx context.Context, contactID string) (*tags.List, error) {
+func (s *Service) ListTags(ctx context.Context, contactID string) (*api.TagList, error) {
 	result, err := s.ListTagsRaw(ctx, contactID)
 	if err != nil {
 		return nil, err
