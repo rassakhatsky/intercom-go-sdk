@@ -1,5 +1,8 @@
 // Package intercom provides a Go client for the Intercom API v2.15.
 //
+// Services are organized into domain-scoped sub-packages (contacts, tickets,
+// tags, etc.) and accessed via accessor methods on the Client.
+//
 // Usage:
 //
 //	client := intercom.NewClient("your-bearer-token")
@@ -20,7 +23,7 @@
 //	contacts, err := client.Contacts().ListAll(ctx, nil).Collect()
 //
 //	// Iterate with a callback using ForEach
-//	err = client.Contacts().ListAll(ctx, nil).ForEach(func(c intercom.Contact) error {
+//	err = client.Contacts().ListAll(ctx, nil).ForEach(func(c contacts.Contact) error {
 //	    fmt.Println(c.Name)
 //	    return nil
 //	})
@@ -41,7 +44,7 @@
 //	if result.Error != nil {
 //	    fmt.Printf("API error %d: %s\n", result.StatusCode, result.Error.Error())
 //	} else {
-//	    contact, _ := intercom.ParseContactGetResult(result)
+//	    contact, _ := contacts.ParseGetResult(result)
 //	    fmt.Println(contact.Name)
 //	    fmt.Println(result.Header.Get("X-RateLimit-Remaining"))
 //	}
@@ -60,4 +63,9 @@
 // Error responses from the Intercom API are returned as *ErrorResponse values.
 // Helper functions IsNotFound, IsRateLimited, and IsUnauthorized can be used
 // to check for common error types.
+//
+// Core types (Result, Iter, Filter, ErrorResponse, ListOptions) are
+// re-exported as type aliases in this root package so consumers do not need
+// to import internal/api directly. Sub-package-specific types (request/response
+// structs, domain models) are imported from their respective packages.
 package intercom

@@ -230,9 +230,9 @@ Full design spec: `docs/superpowers/specs/2026-03-27-package-restructure-design.
 - [x] verify test coverage: `go test -coverprofile=coverage.out ./...`
 
 ### Task 26: [Final] Update documentation
-- [ ] update `README.md` with new import paths and usage examples
-- [ ] update `CLAUDE.md` with new architecture, conventions, and "Adding a New Service" instructions
-- [ ] update `doc.go` package documentation
+- [x] update `README.md` with new import paths and usage examples
+- [x] update `CLAUDE.md` with new architecture, conventions, and "Adding a New Service" instructions
+- [x] update `doc.go` package documentation
 
 ## Technical Details
 
