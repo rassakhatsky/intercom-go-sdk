@@ -79,14 +79,14 @@
 - [x] Run tests — must pass before next task
 
 ### Task 5: Verify acceptance criteria
-- [ ] Verify all 22 error code constants are defined and documented
-- [ ] Verify `RateLimitInfo` is populated on 429 responses with correct header parsing
-- [ ] Verify all 5 new status helpers work correctly
-- [ ] Verify `HasErrorCode` method works for matching specific Intercom error codes
-- [ ] Verify backward compatibility — no existing public API changed in breaking way
-- [ ] Run full test suite (`go test ./...`)
-- [ ] Run linter (`go vet ./...`)
-- [ ] Run format check (`gofmt -l .`)
+- [x] Verify all 22 error code constants are defined and documented
+- [x] Verify `RateLimitInfo` is populated on 429 responses with correct header parsing
+- [x] Verify all 5 new status helpers work correctly
+- [x] Verify `HasErrorCode` method works for matching specific Intercom error codes
+- [x] Verify backward compatibility — no existing public API changed in breaking way
+- [x] Run full test suite (`go test ./...`)
+- [x] Run linter (`go vet ./...`)
+- [x] Run format check (`gofmt -l .`)
 
 ### Task 6: [Final] Update documentation
 - [ ] Update `doc.go` with examples showing new error code constants and RateLimitInfo usage
