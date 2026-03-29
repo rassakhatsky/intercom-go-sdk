@@ -37,10 +37,10 @@ Address critical and important issues identified during comprehensive PR review 
 - [x] run tests — must pass before next task
 
 ### Task 2: Handle empty body in `Decode[T]` for non-204 responses
-- [ ] write test: `TestDecode_EmptyBodyNon204` in `internal/api/result_test.go` — create `Result{StatusCode: 200, Body: nil}`, call `Decode[SomeStruct]`, assert error is returned (not zero-value struct)
-- [ ] write test: `TestDecode_EmptyBody204` — confirm 204 still returns zero-value struct (no regression)
-- [ ] update `Decode[T]` in `internal/api/result.go:48` to return error on empty body when status is not 204
-- [ ] run tests — must pass before next task
+- [x] write test: `TestDecode_EmptyBodyNon204` in `internal/api/result_test.go` — create `Result{StatusCode: 200, Body: nil}`, call `Decode[SomeStruct]`, assert error is returned (not zero-value struct)
+- [x] write test: `TestDecode_EmptyBody204` — confirm 204 still returns zero-value struct (no regression)
+- [x] update `Decode[T]` in `internal/api/result.go:48` to return error on empty body when status is not 204
+- [x] run tests — must pass before next task
 
 ### Task 3: Replace synthetic `*http.Response` in `ErrorResponse`
 - [ ] write test: `TestErrorResponse_ResponseMeta` in `internal/api/errors_test.go` — verify `ErrorResponse` exposes `StatusCode` and `Header` without nil-body `*http.Response`

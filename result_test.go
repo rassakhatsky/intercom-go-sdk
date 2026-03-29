@@ -170,14 +170,33 @@ func TestDecode_Success(t *testing.T) {
 	}
 }
 
-func TestDecode_EmptyBody(t *testing.T) {
+func TestDecode_EmptyBodyNon204(t *testing.T) {
+	type contact struct {
+		ID string `json:"id"`
+	}
+
 	r := &Result{
 		StatusCode: 200,
 		Body:       nil,
 	}
 
+	got, err := Decode[contact](r)
+	if err == nil {
+		t.Fatal("expected error for empty body on non-204, got nil")
+	}
+	if got != nil {
+		t.Errorf("got = %v, want nil on error", got)
+	}
+}
+
+func TestDecode_EmptyBody204(t *testing.T) {
 	type contact struct {
 		ID string `json:"id"`
+	}
+
+	r := &Result{
+		StatusCode: http.StatusNoContent,
+		Body:       nil,
 	}
 
 	got, err := Decode[contact](r)

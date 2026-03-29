@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -44,10 +45,14 @@ func (e *ErrorResult) Error() string {
 type Empty struct{}
 
 // Decode unmarshals the JSON body of a Result into a value of type T.
-// For 204 No Content or empty bodies, it returns a zero-value T.
+// For 204 No Content, it returns a zero-value T.
+// For other status codes with an empty body, it returns an error.
 func Decode[T any](r *Result) (*T, error) {
-	if r.StatusCode == http.StatusNoContent || len(r.Body) == 0 {
+	if r.StatusCode == http.StatusNoContent {
 		return new(T), nil
+	}
+	if len(r.Body) == 0 {
+		return nil, fmt.Errorf("unexpected empty response body (HTTP %d)", r.StatusCode)
 	}
 	var data T
 	if err := json.Unmarshal(r.Body, &data); err != nil {
