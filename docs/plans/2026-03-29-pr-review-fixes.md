@@ -77,11 +77,11 @@
 - [x] run tests (`go test ./internal/api/...`) - must pass before next task
 
 ### Task 8: Verify acceptance criteria
-- [ ] verify all 7 important issues from PR review are addressed
-- [ ] verify suggestions (nil guards, operator constants, error messages) are implemented
-- [ ] run full test suite (`go test ./...`)
-- [ ] run linter (`go vet ./...` && `gofmt -l .`)
-- [ ] verify no new test failures introduced
+- [x] verify all 7 important issues from PR review are addressed
+- [x] verify suggestions (nil guards, operator constants, error messages) are implemented
+- [x] run full test suite (`go test ./...`)
+- [x] run linter (`go vet ./...` && `gofmt -l .`)
+- [x] verify no new test failures introduced
 
 ### Task 9: [Final] Update documentation
 - [ ] update CLAUDE.md if operator constants or new conventions were added
