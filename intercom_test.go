@@ -349,5 +349,44 @@ func TestClient_AllAccessorsNonNil(t *testing.T) {
 	}
 }
 
+func TestNewClient_EmptyToken_Panics(t *testing.T) {
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Fatal("expected panic for empty token, got none")
+		}
+		msg, ok := r.(string)
+		if !ok {
+			t.Fatalf("expected string panic, got %T: %v", r, r)
+		}
+		if !strings.Contains(msg, "token") {
+			t.Errorf("panic message = %q, want it to mention 'token'", msg)
+		}
+	}()
+	NewClient("")
+}
+
+func TestNewClient_WhitespaceToken_Panics(t *testing.T) {
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Fatal("expected panic for whitespace-only token, got none")
+		}
+	}()
+	NewClient("   ")
+}
+
+func TestNewClient_ValidToken_NoPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("unexpected panic for valid token: %v", r)
+		}
+	}()
+	c := NewClient("valid-token")
+	if c == nil {
+		t.Fatal("expected non-nil client")
+	}
+}
+
 // Ensure *slog.Logger satisfies the Logger interface at compile time.
 var _ Logger = slog.Default()

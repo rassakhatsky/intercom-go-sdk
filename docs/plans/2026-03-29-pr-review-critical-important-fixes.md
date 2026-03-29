@@ -44,11 +44,11 @@ Address 2 critical and 8 important findings from the comprehensive PR review of 
 - [x] run tests — must pass before next task
 
 ### Task 3: Validate non-empty token in `NewClient` (Important #6)
-- [ ] write test in `intercom_test.go`: `NewClient("")` should panic with descriptive message
-- [ ] write test in `intercom_test.go`: `NewClient("   ")` (whitespace-only) should panic
-- [ ] write test in `intercom_test.go`: `NewClient("valid-token")` should not panic
-- [ ] add `strings.TrimSpace(token) == ""` panic check at top of `NewClient` in `intercom.go:110`
-- [ ] run tests — must pass before next task
+- [x] write test in `intercom_test.go`: `NewClient("")` should panic with descriptive message
+- [x] write test in `intercom_test.go`: `NewClient("   ")` (whitespace-only) should panic
+- [x] write test in `intercom_test.go`: `NewClient("valid-token")` should not panic
+- [x] add `strings.TrimSpace(token) == ""` panic check at top of `NewClient` in `intercom.go:110`
+- [x] run tests — must pass before next task
 
 ### Task 4: Fix incomplete status predicate lists in comments (Important #10)
 - [ ] update `ResultError` doc comment in `internal/api/errors.go:82-83` to reference all predicates or use general phrase

@@ -107,7 +107,11 @@ func WithBaseURL(u string) ClientOption {
 }
 
 // NewClient creates a new Intercom API client.
+// It panics if token is empty or contains only whitespace.
 func NewClient(token string, opts ...ClientOption) *Client {
+	if strings.TrimSpace(token) == "" {
+		panic("intercom: NewClient requires a non-empty token")
+	}
 	c := &Client{
 		token:      token,
 		baseURL:    defaultBaseURL,
