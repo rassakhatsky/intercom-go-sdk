@@ -66,7 +66,7 @@ type CreateItemRequest struct {
 	Body                string               `json:"body,omitempty"`
 	SenderID            int                  `json:"sender_id"`
 	State               string               `json:"state,omitempty"`
-	DeliverSilently     bool                 `json:"deliver_silently,omitempty"`
+	DeliverSilently     *bool                `json:"deliver_silently,omitempty"`
 	Labels              []string             `json:"labels,omitempty"`
 	Reactions           []string             `json:"reactions,omitempty"`
 	NewsfeedAssignments []NewsfeedAssignment `json:"newsfeed_assignments,omitempty"`

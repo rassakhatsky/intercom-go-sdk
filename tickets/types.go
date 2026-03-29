@@ -97,13 +97,13 @@ type CreateTypeAttributeRequest struct {
 	Name                        string `json:"name"`
 	Description                 string `json:"description"`
 	DataType                    string `json:"data_type"`
-	RequiredToCreate            bool   `json:"required_to_create,omitempty"`
-	RequiredToCreateForContacts bool   `json:"required_to_create_for_contacts,omitempty"`
-	VisibleOnCreate             bool   `json:"visible_on_create,omitempty"`
-	VisibleToContacts           bool   `json:"visible_to_contacts,omitempty"`
-	Multiline                   bool   `json:"multiline,omitempty"`
+	RequiredToCreate            *bool  `json:"required_to_create,omitempty"`
+	RequiredToCreateForContacts *bool  `json:"required_to_create_for_contacts,omitempty"`
+	VisibleOnCreate             *bool  `json:"visible_on_create,omitempty"`
+	VisibleToContacts           *bool  `json:"visible_to_contacts,omitempty"`
+	Multiline                   *bool  `json:"multiline,omitempty"`
 	ListItems                   string `json:"list_items,omitempty"`
-	AllowMultipleValues         bool   `json:"allow_multiple_values,omitempty"`
+	AllowMultipleValues         *bool  `json:"allow_multiple_values,omitempty"`
 }
 
 // UpdateTypeAttributeRequest represents the body for updating a ticket type attribute.

@@ -297,7 +297,7 @@ func TestService_CreateItem(t *testing.T) {
 		if body.State != "live" {
 			t.Errorf("State = %v, want live", body.State)
 		}
-		if !body.DeliverSilently {
+		if body.DeliverSilently == nil || !*body.DeliverSilently {
 			t.Errorf("DeliverSilently = %v, want true", body.DeliverSilently)
 		}
 		if len(body.Labels) != 2 {
@@ -323,12 +323,13 @@ func TestService_CreateItem(t *testing.T) {
 	})
 
 	ctx := context.Background()
+	boolTrue := true
 	item, err := svc.CreateItem(ctx, &news.CreateItemRequest{
 		Title:           "Halloween is here!",
 		Body:            "<p>New costumes</p>",
 		SenderID:        123,
 		State:           "live",
-		DeliverSilently: true,
+		DeliverSilently: &boolTrue,
 		Labels:          []string{"Product", "Update"},
 		Reactions:       []string{"😆", "😅"},
 		NewsfeedAssignments: []news.NewsfeedAssignment{

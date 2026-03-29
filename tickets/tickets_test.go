@@ -1149,11 +1149,11 @@ func TestTypesService_CreateAttribute(t *testing.T) {
 		if body.DataType != "list" {
 			t.Errorf("CreateAttribute body data_type = %v, want list", body.DataType)
 		}
-		if !body.RequiredToCreate {
-			t.Error("CreateAttribute body required_to_create = false, want true")
+		if body.RequiredToCreate == nil || !*body.RequiredToCreate {
+			t.Error("CreateAttribute body required_to_create = false/nil, want true")
 		}
-		if !body.VisibleOnCreate {
-			t.Error("CreateAttribute body visible_on_create = false, want true")
+		if body.VisibleOnCreate == nil || !*body.VisibleOnCreate {
+			t.Error("CreateAttribute body visible_on_create = false/nil, want true")
 		}
 		fmt.Fprint(w, `{
 			"type":"ticket_type_attribute",
@@ -1174,12 +1174,13 @@ func TestTypesService_CreateAttribute(t *testing.T) {
 	})
 
 	ctx := context.Background()
+	boolTrue := true
 	attr, err := svc.CreateAttribute(ctx, "tt-1", &tickets.CreateTypeAttributeRequest{
 		Name:             "Priority",
 		Description:      "Bug priority level",
 		DataType:         "list",
-		RequiredToCreate: true,
-		VisibleOnCreate:  true,
+		RequiredToCreate: &boolTrue,
+		VisibleOnCreate:  &boolTrue,
 	})
 	if err != nil {
 		t.Fatalf("CreateAttribute returned error: %v", err)
