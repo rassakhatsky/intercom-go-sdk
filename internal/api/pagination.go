@@ -40,6 +40,7 @@ type PagedResult[T any] struct {
 type PageFetcher[T any] func(ctx context.Context, opts *ListOptions) (*PagedResult[T], error)
 
 // Iter provides lazy iteration over paginated results.
+// It is not safe for concurrent use.
 type Iter[T any] struct {
 	ctx     context.Context
 	fetcher PageFetcher[T]

@@ -72,8 +72,8 @@ Address critical and important issues identified during comprehensive PR review 
 - [x] run tests — must pass before next task
 
 ### Task 8: Add concurrency safety doc to `Iter[T]`
-- [ ] add doc comment to `Iter[T]` type in `internal/api/pagination.go` noting it is not safe for concurrent use
-- [ ] run tests — must pass before next task
+- [x] add doc comment to `Iter[T]` type in `internal/api/pagination.go` noting it is not safe for concurrent use
+- [x] run tests — must pass before next task
 
 ### Task 9: Verify acceptance criteria
 - [ ] verify all requirements from Overview are implemented
