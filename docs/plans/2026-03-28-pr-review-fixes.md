@@ -76,11 +76,11 @@ Address critical and important issues identified during comprehensive PR review 
 - [x] run tests — must pass before next task
 
 ### Task 9: Verify acceptance criteria
-- [ ] verify all requirements from Overview are implemented
-- [ ] verify edge cases are handled
-- [ ] run full test suite (`go test ./...`)
-- [ ] run linter (`go vet ./...` and `gofmt -l .`) — all issues must be fixed
-- [ ] verify no regressions in existing tests
+- [x] verify all requirements from Overview are implemented
+- [x] verify edge cases are handled
+- [x] run full test suite (`go test ./...`)
+- [x] run linter (`go vet ./...` and `gofmt -l .`) — all issues must be fixed
+- [x] verify no regressions in existing tests
 
 ### Task 10: [Final] Update documentation
 - [ ] update CLAUDE.md if any architectural patterns changed (e.g., `ErrorResponse` field rename)
