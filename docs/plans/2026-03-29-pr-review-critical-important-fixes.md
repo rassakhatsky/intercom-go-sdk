@@ -69,5 +69,5 @@ Address 2 critical and 8 important findings from the comprehensive PR review of 
 - [x] run format check (`gofmt -l .`)
 
 ### Task 7: Update documentation
-- [ ] update CLAUDE.md if any conventions changed (e.g., `Operator` is now a defined type)
-- [ ] update `internal/api/search.go` Filter doc comment to explain `Value` union type (scalar vs `[]*Filter`)
+- [x] update CLAUDE.md if any conventions changed (e.g., `Operator` is now a defined type)
+- [x] update `internal/api/search.go` Filter doc comment to explain `Value` union type (scalar vs `[]*Filter`)

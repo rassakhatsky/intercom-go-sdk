@@ -37,8 +37,11 @@ type SearchPagination struct {
 
 // Filter represents either a single field filter or a compound (AND/OR) filter.
 // Use SingleFilterOf, And, and Or to construct filters.
+//
+// Value holds a scalar (string, int) for single field filters, a slice for
+// IN/NIN operators, or []*Filter for compound (AND/OR) filters. Callers should
+// use the constructor functions rather than setting Value directly.
 type Filter struct {
-	// Single filter fields
 	Field    string   `json:"field,omitempty"`
 	Operator Operator `json:"operator"`
 	Value    any      `json:"value"`
