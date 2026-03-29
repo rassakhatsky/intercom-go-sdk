@@ -62,8 +62,8 @@ Address critical and important issues identified during comprehensive PR review 
 - [x] run tests — must pass before next task
 
 ### Task 6: Add test coverage for new error alias wrappers
-- [ ] write test: `TestErrorAliases` in `errors_test.go` (root package) — verify `IsBadRequest`, `IsForbidden`, `IsConflict`, `IsUnprocessableEntity`, `IsServerError` delegate correctly
-- [ ] run tests — must pass before next task
+- [x] write test: `TestErrorAliases` in `errors_test.go` (root package) — verify `IsBadRequest`, `IsForbidden`, `IsConflict`, `IsUnprocessableEntity`, `IsServerError` delegate correctly
+- [x] run tests — must pass before next task
 
 ### Task 7: Fix documentation issues
 - [ ] fix `export/data.go:46` — change comment from `ParseGetStatusResult` to `ParseDataGetStatusResult`

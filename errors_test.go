@@ -473,3 +473,54 @@ func TestResultError_NilError(t *testing.T) {
 		t.Errorf("expected nil error for result without Error, got %v", err)
 	}
 }
+
+func TestErrorAliases(t *testing.T) {
+	tests := []struct {
+		name       string
+		statusCode int
+		predicate  func(error) bool
+		wantTrue   bool
+	}{
+		{"IsBadRequest/400", 400, IsBadRequest, true},
+		{"IsBadRequest/404", 404, IsBadRequest, false},
+		{"IsForbidden/403", 403, IsForbidden, true},
+		{"IsForbidden/401", 401, IsForbidden, false},
+		{"IsConflict/409", 409, IsConflict, true},
+		{"IsConflict/400", 400, IsConflict, false},
+		{"IsUnprocessableEntity/422", 422, IsUnprocessableEntity, true},
+		{"IsUnprocessableEntity/400", 400, IsUnprocessableEntity, false},
+		{"IsServerError/500", 500, IsServerError, true},
+		{"IsServerError/502", 502, IsServerError, true},
+		{"IsServerError/599", 599, IsServerError, true},
+		{"IsServerError/400", 400, IsServerError, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := &ErrorResponse{StatusCode: tt.statusCode}
+			if got := tt.predicate(err); got != tt.wantTrue {
+				t.Errorf("%s = %v, want %v", tt.name, got, tt.wantTrue)
+			}
+		})
+	}
+
+	// All predicates return false for nil and non-ErrorResponse errors.
+	predicates := []struct {
+		name string
+		fn   func(error) bool
+	}{
+		{"IsBadRequest", IsBadRequest},
+		{"IsForbidden", IsForbidden},
+		{"IsConflict", IsConflict},
+		{"IsUnprocessableEntity", IsUnprocessableEntity},
+		{"IsServerError", IsServerError},
+	}
+	for _, p := range predicates {
+		if p.fn(nil) {
+			t.Errorf("%s(nil) = true, want false", p.name)
+		}
+		if p.fn(errors.New("random")) {
+			t.Errorf("%s(non-ErrorResponse) = true, want false", p.name)
+		}
+	}
+}
