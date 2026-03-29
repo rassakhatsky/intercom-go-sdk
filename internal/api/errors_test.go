@@ -490,3 +490,73 @@ func TestErrorCode_IsStringType(t *testing.T) {
 		t.Errorf("ErrorCode string conversion failed")
 	}
 }
+
+func TestErrorDetail_Code_IsErrorCode(t *testing.T) {
+	// ErrorDetail.Code should be typed as ErrorCode
+	detail := ErrorDetail{Code: ErrParameterInvalid, Message: "bad param"}
+	if detail.Code != ErrParameterInvalid {
+		t.Errorf("ErrorDetail.Code = %q, want %q", detail.Code, ErrParameterInvalid)
+	}
+	// Should also accept plain string values (backward compat)
+	detail2 := ErrorDetail{Code: "custom_code", Message: "custom"}
+	if string(detail2.Code) != "custom_code" {
+		t.Errorf("ErrorDetail.Code string assignment failed")
+	}
+}
+
+func TestHasErrorCode(t *testing.T) {
+	tests := []struct {
+		name string
+		resp *ErrorResponse
+		code ErrorCode
+		want bool
+	}{
+		{
+			name: "matches first error",
+			resp: &ErrorResponse{
+				Response: &http.Response{StatusCode: 422},
+				Errors:   []ErrorDetail{{Code: ErrParameterInvalid, Message: "bad"}},
+			},
+			code: ErrParameterInvalid,
+			want: true,
+		},
+		{
+			name: "matches second error",
+			resp: &ErrorResponse{
+				Response: &http.Response{StatusCode: 422},
+				Errors: []ErrorDetail{
+					{Code: ErrClientError, Message: "first"},
+					{Code: ErrParameterNotFound, Message: "second"},
+				},
+			},
+			code: ErrParameterNotFound,
+			want: true,
+		},
+		{
+			name: "no match",
+			resp: &ErrorResponse{
+				Response: &http.Response{StatusCode: 409},
+				Errors:   []ErrorDetail{{Code: ErrConflict, Message: "conflict"}},
+			},
+			code: ErrParameterInvalid,
+			want: false,
+		},
+		{
+			name: "empty errors slice",
+			resp: &ErrorResponse{
+				Response: &http.Response{StatusCode: 500},
+				Errors:   nil,
+			},
+			code: ErrServerError,
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.resp.HasErrorCode(tt.code); got != tt.want {
+				t.Errorf("HasErrorCode(%q) = %v, want %v", tt.code, got, tt.want)
+			}
+		})
+	}
+}

@@ -18,21 +18,21 @@ type Result struct {
 type ErrorResult struct {
 	Type      string        `json:"type"`
 	RequestID string        `json:"request_id,omitempty"`
-	Code      string        `json:"-"`
+	Code      ErrorCode     `json:"-"`
 	Message   string        `json:"-"`
 	Errors    []ErrorDetail `json:"errors"`
 }
 
 // ErrorDetail represents a single error within an API error response.
 type ErrorDetail struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
+	Code    ErrorCode `json:"code"`
+	Message string    `json:"message"`
 }
 
 // Error returns a human-readable description of the API error.
 func (e *ErrorResult) Error() string {
 	if e.Code != "" {
-		return e.Code + ": " + e.Message
+		return string(e.Code) + ": " + e.Message
 	}
 	if e.Message != "" {
 		return e.Message

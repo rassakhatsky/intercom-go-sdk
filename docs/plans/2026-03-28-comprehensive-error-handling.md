@@ -72,11 +72,11 @@
 - [x] Run tests — must pass before next task
 
 ### Task 4: Add ErrorCode field to ErrorDetail and matching helper
-- [ ] Write tests for `ErrorResponse.HasErrorCode(code ErrorCode) bool` — matches against any error in the Errors slice
-- [ ] Write tests for `ErrorDetail.Code` being typed as `ErrorCode` (or a helper that accepts `ErrorCode`)
-- [ ] Update `ErrorDetail.Code` field type from `string` to `ErrorCode` in `internal/api/result.go` (backward compatible since `ErrorCode` is `type ErrorCode string`)
-- [ ] Add `HasErrorCode(code ErrorCode) bool` method to `ErrorResponse`
-- [ ] Run tests — must pass before next task
+- [x] Write tests for `ErrorResponse.HasErrorCode(code ErrorCode) bool` — matches against any error in the Errors slice
+- [x] Write tests for `ErrorDetail.Code` being typed as `ErrorCode` (or a helper that accepts `ErrorCode`)
+- [x] Update `ErrorDetail.Code` field type from `string` to `ErrorCode` in `internal/api/result.go` (backward compatible since `ErrorCode` is `type ErrorCode string`)
+- [x] Add `HasErrorCode(code ErrorCode) bool` method to `ErrorResponse`
+- [x] Run tests — must pass before next task
 
 ### Task 5: Verify acceptance criteria
 - [ ] Verify all 22 error code constants are defined and documented

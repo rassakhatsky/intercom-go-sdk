@@ -68,6 +68,16 @@ func (e *ErrorResponse) Error() string {
 	return "unknown API error"
 }
 
+// HasErrorCode reports whether any error in the Errors slice matches the given code.
+func (e *ErrorResponse) HasErrorCode(code ErrorCode) bool {
+	for _, detail := range e.Errors {
+		if detail.Code == code {
+			return true
+		}
+	}
+	return false
+}
+
 // ResultError converts Result.Error into an *ErrorResponse, preserving
 // compatibility with IsNotFound, IsRateLimited, and IsUnauthorized.
 func ResultError(r *Result) error {
