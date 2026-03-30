@@ -37,7 +37,7 @@ make fix         # go vet + gofmt -l
 **Internal API** (`internal/api/`):
 - `Caller` interface: `NewRequest`, `DoRaw`, `DoRawNoRedirect`, `Do`, `DoDownload` — abstracts HTTP operations for sub-packages
 - Shared types: `Result`, `ErrorResult`, `ErrorResponse`, `PagedResult[T]`, `Iter[T]`, `Filter`, `ListOptions`, etc.
-- Cross-service domain types: `TagRef`, `AdminRef`, `ContactRef`, `ContactRefList`, `Note`, `SegmentRef`, `Author`, `Part`, `LinkedObjectList`, `Deleted`, `TagRefList`, etc.
+- Cross-service domain types: `TagRef`, `AdminRef`, `ContactRef`, `ContactRefList`, `NoteAuthor`, `Note`, `NoteListResult`, `SegmentRef`, `SegmentListResult`, `Tag`, `TagList`, `TagRefList`, `Author`, `Part`, `LinkedObjectList`, `Deleted`, `SubscriptionType`, `Translation`, `ArticleContent`, `ArticleTranslatedContent`
 - Sub-packages import `internal/api` for the `Caller` interface and shared types; they never import each other
 
 **Root package** (`intercom`):

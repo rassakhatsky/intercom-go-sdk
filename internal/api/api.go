@@ -16,7 +16,7 @@ type Caller interface {
 	DoDownload(ctx context.Context, req *http.Request, w io.Writer) error
 }
 
-// Response wraps a Result to provide additional API-specific data.
+// Response wraps a Result returned by the Do method.
 type Response struct {
 	*Result
 }

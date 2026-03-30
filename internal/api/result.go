@@ -62,7 +62,7 @@ func Decode[T any](r *Result) (*T, error) {
 	}
 	var data T
 	if err := json.Unmarshal(r.Body, &data); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decode response from %s (HTTP %d): %w", r.URL, r.StatusCode, err)
 	}
 	return &data, nil
 }

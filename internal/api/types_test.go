@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 )
 
@@ -32,7 +33,7 @@ func TestAuthor_OmitEmpty(t *testing.T) {
 		t.Fatalf("marshal: %v", err)
 	}
 	s := string(data)
-	if contains(s, "name") || contains(s, "email") {
+	if strings.Contains(s, "name") || strings.Contains(s, "email") {
 		t.Fatalf("expected name/email omitted, got %s", s)
 	}
 }
@@ -72,6 +73,12 @@ func TestLinkedObjectList_JSONRoundTrip(t *testing.T) {
 	if len(got.Data) != 2 {
 		t.Fatalf("expected 2 data items, got %d", len(got.Data))
 	}
+	if s, ok := got.Data[0].(string); !ok || s != "ticket_1" {
+		t.Fatalf("expected Data[0]=%q, got %v", "ticket_1", got.Data[0])
+	}
+	if n, ok := got.Data[1].(float64); !ok || n != 42 {
+		t.Fatalf("expected Data[1]=42, got %v", got.Data[1])
+	}
 }
 
 func TestLinkedObjectList_EmptyData(t *testing.T) {
@@ -85,17 +92,25 @@ func TestLinkedObjectList_EmptyData(t *testing.T) {
 	}
 }
 
-func TestLinkedObjectList_OmitEmpty(t *testing.T) {
-	// Zero-value LinkedObjectList should still marshal required fields
+func TestLinkedObjectList_ZeroValueMarshal(t *testing.T) {
+	// Zero-value LinkedObjectList: data is null (nil slice), total_count=0 and has_more=false present
 	l := LinkedObjectList{Type: "list"}
 	data, err := json.Marshal(l)
 	if err != nil {
 		t.Fatalf("marshal: %v", err)
 	}
 	s := string(data)
-	// data should be null (nil slice), total_count and has_more should be present as zero values
-	if !contains(s, `"type":"list"`) {
+	if !strings.Contains(s, `"type":"list"`) {
 		t.Fatalf("expected type field, got %s", s)
+	}
+	if !strings.Contains(s, `"data":null`) {
+		t.Fatalf("expected data:null for nil slice, got %s", s)
+	}
+	if !strings.Contains(s, `"total_count":0`) {
+		t.Fatalf("expected total_count:0, got %s", s)
+	}
+	if !strings.Contains(s, `"has_more":false`) {
+		t.Fatalf("expected has_more:false, got %s", s)
 	}
 }
 
@@ -149,7 +164,7 @@ func TestPart_WithoutNotifiedAt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("marshal: %v", err)
 	}
-	if contains(string(data), "notified_at") {
+	if strings.Contains(string(data), "notified_at") {
 		t.Fatalf("expected notified_at omitted, got %s", string(data))
 	}
 }
@@ -162,7 +177,7 @@ func TestPart_OmitEmpty(t *testing.T) {
 	}
 	s := string(data)
 	for _, field := range []string{"part_type", "body", "created_at", "updated_at", "notified_at", "assigned_to", "author", "external_id", "redacted"} {
-		if contains(s, field) {
+		if strings.Contains(s, field) {
 			t.Fatalf("expected %s omitted, got %s", field, s)
 		}
 	}
@@ -195,7 +210,7 @@ func TestContactRef_BackwardCompat(t *testing.T) {
 		t.Fatalf("marshal: %v", err)
 	}
 	s := string(data)
-	if contains(s, "external_id") {
+	if strings.Contains(s, "external_id") {
 		t.Fatalf("expected external_id omitted, got %s", s)
 	}
 	// Unmarshal without external_id
@@ -288,6 +303,14 @@ func TestDeleted_DeletedFalse(t *testing.T) {
 	if d.Deleted {
 		t.Fatal("expected Deleted=false")
 	}
+	// Marshal direction: deleted:false must be present (no omitempty on Deleted field)
+	data, err := json.Marshal(Deleted{ID: "789", Object: "ticket", Deleted: false})
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	if !strings.Contains(string(data), `"deleted":false`) {
+		t.Fatalf("expected deleted:false in output, got %s", string(data))
+	}
 }
 
 func TestTagRefList_JSONRoundTrip(t *testing.T) {
@@ -339,23 +362,10 @@ func TestTagRefList_JSONKey(t *testing.T) {
 		t.Fatalf("marshal: %v", err)
 	}
 	s := string(data)
-	if !contains(s, `"tags"`) {
+	if !strings.Contains(s, `"tags"`) {
 		t.Fatalf("expected 'tags' key, got %s", s)
 	}
-	if contains(s, `"data"`) {
+	if strings.Contains(s, `"data"`) {
 		t.Fatalf("expected no 'data' key, got %s", s)
 	}
-}
-
-func contains(s, sub string) bool {
-	return len(s) >= len(sub) && searchString(s, sub)
-}
-
-func searchString(s, sub string) bool {
-	for i := 0; i <= len(s)-len(sub); i++ {
-		if s[i:i+len(sub)] == sub {
-			return true
-		}
-	}
-	return false
 }

@@ -142,8 +142,8 @@ var (
 
 // Messaging sub-package aliases re-export messaging types so consumers can use
 // intercom.Message, intercom.SubscriptionType, etc. without importing the messaging package.
-type SubscriptionType = messaging.SubscriptionType
-type Translation = messaging.Translation
+type SubscriptionType = api.SubscriptionType
+type Translation = api.Translation
 type SubscriptionTypeList = messaging.SubscriptionTypeList
 type Message = messaging.Message
 type MessageSender = messaging.MessageSender
