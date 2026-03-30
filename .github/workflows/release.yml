@@ -44,7 +44,7 @@ jobs:
             echo "Error: .github/CODEOWNERS file not found"
             exit 1
           fi
-          owners=$(grep -oP '@\K[^\s]+' .github/CODEOWNERS | sort -u)
+          owners=$(grep -oE '@[^[:space:]]+' .github/CODEOWNERS | sed 's/^@//' | grep -v '/' | sort -u)
           authorized=false
           for owner in $owners; do
             if [ "$owner" = "$ACTOR" ]; then
@@ -74,18 +74,21 @@ jobs:
         run: |
           current="${CURRENT_TAG#v}"
           IFS='.' read -r major minor patch <<< "$current"
-          if [ "$BUMP" = "minor" ]; then
+          if [ "$major" -eq 0 ] && [ "$minor" -eq 0 ] && [ "$patch" -eq 0 ]; then
+            # No prior release — first release is always v1.0.0
+            next="v1.0.0"
+          elif [ "$major" -eq 0 ]; then
+            echo "Error: unexpected pre-v1 tag $CURRENT_TAG exists. First release must be v1.0.0."
+            exit 1
+          elif [ "$BUMP" = "minor" ]; then
             minor=$((minor + 1))
             patch=0
+            next="v${major}.${minor}.${patch}"
           elif [ "$BUMP" = "patch" ]; then
             patch=$((patch + 1))
+            next="v${major}.${minor}.${patch}"
           else
             echo "Error: unknown bump type: $BUMP"
-            exit 1
-          fi
-          next="v${major}.${minor}.${patch}"
-          if [ "$major" -eq 0 ]; then
-            echo "Error: calculated version $next is below v1.0.0. Use a manual tag for the initial release."
             exit 1
           fi
           echo "version=$next" >> "$GITHUB_OUTPUT"
@@ -94,6 +97,10 @@ jobs:
         env:
           VERSION: ${{ steps.next.outputs.version }}
         run: |
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "Error: tag $VERSION already exists"
+            exit 1
+          fi
           git tag "$VERSION"
           git push origin "$VERSION"
 
