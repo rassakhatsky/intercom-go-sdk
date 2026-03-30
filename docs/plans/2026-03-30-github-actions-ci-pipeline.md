@@ -49,12 +49,12 @@
 - [x] verify YAML syntax is valid
 
 ### Task 2: Verify acceptance criteria
-- [ ] workflow triggers on push to main and PRs to main
-- [ ] all 6 checks are present and ordered correctly
-- [ ] Go version matches go.mod (1.26.x)
-- [ ] format check fails the build on unformatted code (not just warns)
-- [ ] mod tidy check fails on stale go.mod/go.sum
-- [ ] review final YAML for correctness
+- [x] workflow triggers on push to main and PRs to main
+- [x] all 6 checks are present and ordered correctly
+- [x] Go version matches go.mod (1.26.x)
+- [x] format check fails the build on unformatted code (not just warns)
+- [x] mod tidy check fails on stale go.mod/go.sum
+- [x] review final YAML for correctness
 
 ### Task 3: [Final] Update documentation
 - [ ] update README.md with CI badge if desired
