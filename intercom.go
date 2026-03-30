@@ -84,7 +84,11 @@ type Client struct {
 type ClientOption func(*Client)
 
 // WithHTTPClient sets a custom HTTP client for API requests.
+// It panics if hc is nil.
 func WithHTTPClient(hc *http.Client) ClientOption {
+	if hc == nil {
+		panic("intercom: WithHTTPClient requires a non-nil *http.Client")
+	}
 	return func(c *Client) {
 		c.httpClient = hc
 	}
@@ -393,12 +397,9 @@ func (c *Client) DoRaw(ctx context.Context, req *http.Request) (*api.Result, err
 // HTTP redirects. This is used when the API returns a redirect (e.g., 302)
 // and the caller needs the Location header rather than the redirect target.
 func (c *Client) DoRawNoRedirect(ctx context.Context, req *http.Request) (*api.Result, error) {
-	noRedirectClient := &http.Client{
-		Transport: c.httpClient.Transport,
-		Timeout:   c.httpClient.Timeout,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
+	noRedirectClient := *c.httpClient
+	noRedirectClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
 	}
 
 	req = req.WithContext(ctx)

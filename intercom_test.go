@@ -42,6 +42,16 @@ func TestNewClient_WithHTTPClient(t *testing.T) {
 	}
 }
 
+func TestWithHTTPClient_Nil_Panics(t *testing.T) {
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Fatal("expected panic for nil *http.Client, got none")
+		}
+	}()
+	WithHTTPClient(nil)
+}
+
 func TestNewClient_WithLogger(t *testing.T) {
 	l := slog.New(slog.NewTextHandler(&bytes.Buffer{}, nil))
 	c := NewClient("tok", WithLogger(l))
