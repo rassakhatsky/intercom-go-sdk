@@ -73,9 +73,9 @@
 - [x] run tests `go test ./contacts/... ./tags/... ./conversations/... ./tickets/...` — must pass before next task
 
 ### Task 4: Add CONTRIBUTING.md
-- [ ] create `CONTRIBUTING.md` covering: dev setup, running tests, coding conventions (3-layer pattern, naming), PR process
-- [ ] keep it concise — reference CLAUDE.md for detailed architecture
-- [ ] run `go vet ./...` — must pass (sanity check)
+- [x] create `CONTRIBUTING.md` covering: dev setup, running tests, coding conventions (3-layer pattern, naming), PR process
+- [x] keep it concise — reference CLAUDE.md for detailed architecture
+- [x] run `go vet ./...` — must pass (sanity check)
 
 ### Task 5: Polish README.md
 - [ ] add link to CONTRIBUTING.md
