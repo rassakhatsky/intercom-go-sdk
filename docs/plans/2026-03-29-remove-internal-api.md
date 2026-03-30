@@ -71,13 +71,13 @@
 - [x] Run `gofmt -l .` — no formatting issues (pre-existing issues in test files unrelated to this refactor)
 
 ### Task 7: Verify acceptance criteria
-- [ ] Verify `internal/` directory no longer exists
-- [ ] Verify `aliases.go` no longer exists
-- [ ] Verify no Go files reference `internal/api`
-- [ ] Run full test suite: `go test ./...`
-- [ ] Run `go vet ./...`
-- [ ] Verify TDD test from Task 1 passes (green phase)
-- [ ] Clean up TDD test if it duplicates existing coverage
+- [x] Verify `internal/` directory no longer exists
+- [x] Verify `aliases.go` no longer exists
+- [x] Verify no Go files reference `internal/api`
+- [x] Run full test suite: `go test ./...`
+- [x] Run `go vet ./...`
+- [x] Verify TDD test from Task 1 passes (green phase)
+- [x] Clean up TDD test if it duplicates existing coverage — kept as lightweight import smoke test (no meaningful duplication)
 
 ## Technical Details
 - Package declaration in `api/*.go` is already `package api` — no changes needed
