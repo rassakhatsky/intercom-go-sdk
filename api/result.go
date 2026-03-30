@@ -48,7 +48,7 @@ func (e *ErrorResult) Error() string {
 type Empty struct{}
 
 // Decode unmarshals the JSON body of a Result into a value of type T.
-// For 2xx responses with an empty body, it returns a zero-value T.
+// For 2xx responses with an empty body, it returns a pointer to a zero-value T.
 // For non-2xx responses with an empty body, it returns an error.
 func Decode[T any](r *Result) (*T, error) {
 	if r == nil {

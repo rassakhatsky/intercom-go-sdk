@@ -2,5 +2,5 @@
 //
 // The ContentService manages AI content import sources and external pages
 // used to train the AI agent. The VoiceService handles Fin Voice call
-// configuration and credit balance.
+// registration and retrieval.
 package ai

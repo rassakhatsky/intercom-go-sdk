@@ -109,6 +109,7 @@ Helper functions `testMethod` and `testHeader` assert request properties. Tests 
 - Timestamps are `int64` (Unix epoch); optional timestamps are `*int64`
 - 3-layer pattern per method: see Architecture above
 - Every public method (regular + Raw) includes a `// See:` comment linking to the Intercom API reference. Format: `// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/{tag}/{operationId}`. Skip: Parse functions, ListAll methods, model structs, service type declarations
+- No defensive validation for caller misuse — the user is responsible for correct usage
 - Sub-packages never import each other; shared types live in `api`
 
 ## Package Grouping
@@ -153,5 +154,6 @@ Helper functions `testMethod` and `testHeader` assert request properties. Tests 
 
 5. **If adding a new sub-package**:
    - Create the directory and add a `testutil_test.go` with `setup()`, `testMethod`, `testHeader` helpers
+   - Add a `doc.go` with a `// Package X ...` godoc comment (2-5 lines)
    - Import `api` for the `Caller` interface and shared types
    - If the new service needs types used by other sub-packages, add them to `api/types.go`
