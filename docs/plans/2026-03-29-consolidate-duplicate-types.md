@@ -90,9 +90,9 @@
 - [x] Run `go test ./...` — must pass before next task
 
 ### Task 7: Update aliases.go (root package re-exports)
-- [ ] Add type aliases in `aliases.go` for new shared types: `Author`, `LinkedObjectList`, `Part`, `ContactRefList`, `Deleted`, `TagRefList`
-- [ ] Verify the root package compiles: `go build ./...`
-- [ ] Run `go test ./...` — must pass before next task
+- [x] Add type aliases in `aliases.go` for new shared types: `Author`, `LinkedObjectList`, `Part`, `ContactRefList`, `Deleted`, `TagRefList`
+- [x] Verify the root package compiles: `go build ./...`
+- [x] Run `go test ./...` — must pass before next task
 
 ### Task 8: Verify acceptance criteria
 - [ ] Verify all 7 types consolidated: Author, LinkedObjectList, Part, ContactRef (extended), Deleted, TagRefList, ContactRefList

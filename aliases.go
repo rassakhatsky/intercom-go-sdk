@@ -54,6 +54,7 @@ const (
 type TagRef = api.TagRef
 type AdminRef = api.AdminRef
 type ContactRef = api.ContactRef
+type ContactRefList = api.ContactRefList
 type NoteAuthor = api.NoteAuthor
 type Note = api.Note
 type NoteListResult = api.NoteListResult
@@ -61,6 +62,11 @@ type SegmentRef = api.SegmentRef
 type SegmentListResult = api.SegmentListResult
 type ArticleContent = api.ArticleContent
 type ArticleTranslatedContent = api.ArticleTranslatedContent
+type Author = api.Author
+type LinkedObjectList = api.LinkedObjectList
+type Part = api.Part
+type Deleted = api.Deleted
+type TagRefList = api.TagRefList
 
 // Tag sub-package aliases re-export tags types so consumers can use
 // intercom.Tag, intercom.TagList, etc. without importing the tags package.
@@ -146,7 +152,7 @@ type CreateMessageRequest = messaging.CreateMessageRequest
 type EmailSetting = messaging.EmailSetting
 type EmailSettingList = messaging.EmailSettingList
 
-// Response wraps a Result to provide additional API-specific data.
+// Response wraps a Result returned by the Do method.
 type Response = api.Response
 
 // Pagination types
