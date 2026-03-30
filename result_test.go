@@ -44,30 +44,30 @@ func TestBuildResult_PopulatesFields(t *testing.T) {
 func TestErrorResult_Error(t *testing.T) {
 	tests := []struct {
 		name string
-		err  ErrorResult
+		err  api.ErrorResult
 		want string
 	}{
 		{
 			name: "with errors",
-			err: ErrorResult{
+			err: api.ErrorResult{
 				Type:      "error.list",
 				RequestID: "req-123",
 				Code:      "not_found",
 				Message:   "Resource not found",
-				Errors:    []ErrorDetail{{Code: "not_found", Message: "Resource not found"}},
+				Errors:    []api.ErrorDetail{{Code: "not_found", Message: "Resource not found"}},
 			},
 			want: "not_found: Resource not found",
 		},
 		{
 			name: "message only no code",
-			err: ErrorResult{
+			err: api.ErrorResult{
 				Message: "Bad Gateway",
 			},
 			want: "Bad Gateway",
 		},
 		{
 			name: "empty errors",
-			err: ErrorResult{
+			err: api.ErrorResult{
 				Type: "error.list",
 			},
 			want: "unknown API error",
@@ -124,7 +124,7 @@ func TestResult_SuccessAccess(t *testing.T) {
 		Name string `json:"name"`
 	}
 
-	r := &Result{
+	r := &api.Result{
 		StatusCode: 200,
 		Header:     http.Header{"Content-Type": {"application/json"}},
 		URL:        "https://api.intercom.io/contacts/1",
@@ -135,7 +135,7 @@ func TestResult_SuccessAccess(t *testing.T) {
 		t.Errorf("StatusCode = %d, want 200", r.StatusCode)
 	}
 
-	data, err := Decode[testData](r)
+	data, err := api.Decode[testData](r)
 	if err != nil {
 		t.Fatalf("Decode returned error: %v", err)
 	}
@@ -156,12 +156,12 @@ func TestDecode_Success(t *testing.T) {
 		Name string `json:"name"`
 	}
 
-	r := &Result{
+	r := &api.Result{
 		StatusCode: 200,
 		Body:       []byte(`{"id":"1","name":"Alice"}`),
 	}
 
-	got, err := Decode[contact](r)
+	got, err := api.Decode[contact](r)
 	if err != nil {
 		t.Fatalf("Decode returned error: %v", err)
 	}
@@ -178,12 +178,12 @@ func TestDecode_EmptyBodyNon2xx(t *testing.T) {
 		ID string `json:"id"`
 	}
 
-	r := &Result{
+	r := &api.Result{
 		StatusCode: 400,
 		Body:       nil,
 	}
 
-	got, err := Decode[contact](r)
+	got, err := api.Decode[contact](r)
 	if err == nil {
 		t.Fatal("expected error for empty body on non-2xx, got nil")
 	}
@@ -199,12 +199,12 @@ func TestDecode_EmptyBody2xx(t *testing.T) {
 
 	for _, code := range []int{200, 202, 204} {
 		t.Run(fmt.Sprintf("HTTP_%d", code), func(t *testing.T) {
-			r := &Result{
+			r := &api.Result{
 				StatusCode: code,
 				Body:       nil,
 			}
 
-			got, err := Decode[contact](r)
+			got, err := api.Decode[contact](r)
 			if err != nil {
 				t.Fatalf("Decode returned error: %v", err)
 			}
@@ -219,7 +219,7 @@ func TestDecode_EmptyBody2xx(t *testing.T) {
 }
 
 func TestDecode_NoContent(t *testing.T) {
-	r := &Result{
+	r := &api.Result{
 		StatusCode: http.StatusNoContent,
 		Body:       nil,
 	}
@@ -228,7 +228,7 @@ func TestDecode_NoContent(t *testing.T) {
 		ID string `json:"id"`
 	}
 
-	got, err := Decode[contact](r)
+	got, err := api.Decode[contact](r)
 	if err != nil {
 		t.Fatalf("Decode returned error: %v", err)
 	}
@@ -238,7 +238,7 @@ func TestDecode_NoContent(t *testing.T) {
 }
 
 func TestDecode_MalformedJSON(t *testing.T) {
-	r := &Result{
+	r := &api.Result{
 		StatusCode: 200,
 		Body:       []byte(`{not json`),
 	}
@@ -247,7 +247,7 @@ func TestDecode_MalformedJSON(t *testing.T) {
 		ID string `json:"id"`
 	}
 
-	_, err := Decode[contact](r)
+	_, err := api.Decode[contact](r)
 	if err == nil {
 		t.Fatal("expected error for malformed JSON")
 	}

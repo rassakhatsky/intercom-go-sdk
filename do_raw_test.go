@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 )
 
 // Tests for Client.DoRaw (non-generic method)
@@ -243,14 +245,14 @@ func TestClient_DoDownload_Error(t *testing.T) {
 		t.Fatal("DoDownload returned nil error, want error for 404")
 	}
 
-	var errResp *ErrorResponse
+	var errResp *api.ErrorResponse
 	if !errors.As(err, &errResp) {
 		t.Fatalf("error type = %T, want *ErrorResponse", err)
 	}
 	if errResp.StatusCode != http.StatusNotFound {
 		t.Errorf("ErrorResponse.StatusCode = %d, want %d", errResp.StatusCode, http.StatusNotFound)
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Error("IsNotFound(err) = false, want true")
 	}
 }

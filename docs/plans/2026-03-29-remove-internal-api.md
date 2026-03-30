@@ -58,11 +58,11 @@
 - [x] Run `go test ./...` — all tests must pass
 
 ### Task 5: Delete `aliases.go`
-- [ ] Delete `aliases.go`
-- [ ] Fix any compilation errors from removed aliases (check if `intercom.go` or root test files reference alias types like `Result`, `Logger`)
-- [ ] For types used in `intercom.go` (e.g., `Result`, `Response`, `Logger`), add direct `api.` qualification
-- [ ] Run `go build ./...` — must compile
-- [ ] Run `go test ./...` — all tests must pass
+- [x] Delete `aliases.go`
+- [x] Fix any compilation errors from removed aliases (check if `intercom.go` or root test files reference alias types like `Result`, `Logger`)
+- [x] For types used in `intercom.go` (e.g., `Result`, `Response`, `Logger`), add direct `api.` qualification
+- [x] Run `go build ./...` — must compile
+- [x] Run `go test ./...` — all tests must pass
 
 ### Task 6: Update documentation
 - [ ] Update `doc.go`: remove references to `internal/api` and aliases pattern

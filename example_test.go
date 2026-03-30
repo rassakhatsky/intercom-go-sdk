@@ -8,11 +8,13 @@ import (
 	"time"
 
 	intercom "github.com/rassakhatsky/intercom-go-sdk"
+	"github.com/rassakhatsky/intercom-go-sdk/api"
+	"github.com/rassakhatsky/intercom-go-sdk/contacts"
 )
 
 // ExampleContactsService_GetRaw demonstrates using a Raw method to access
 // HTTP metadata alongside the typed response data.
-func ExampleContactsService_GetRaw() {
+func Example_contactsGetRaw() {
 	client := intercom.NewClient("your-bearer-token")
 	ctx := context.Background()
 
@@ -28,7 +30,7 @@ func ExampleContactsService_GetRaw() {
 	}
 
 	// Decode the typed response data using the Parse function
-	contact, err := intercom.ParseContactGetResult(result)
+	contact, err := contacts.ParseGetResult(result)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,12 +46,12 @@ func ExampleContactsService_GetRaw() {
 
 // ExampleContactsService_SearchRaw demonstrates using a Raw search method
 // with access to rate-limit headers for custom retry logic.
-func ExampleContactsService_SearchRaw() {
+func Example_contactsSearchRaw() {
 	client := intercom.NewClient("your-bearer-token")
 	ctx := context.Background()
 
-	result, err := client.Contacts().SearchRaw(ctx, &intercom.SearchRequest{
-		Query: intercom.SingleFilterOf("email", intercom.OpEquals, "alice@example.com"),
+	result, err := client.Contacts().SearchRaw(ctx, &api.SearchRequest{
+		Query: api.SingleFilterOf("email", api.OpEquals, "alice@example.com"),
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -60,7 +62,7 @@ func ExampleContactsService_SearchRaw() {
 		return
 	}
 
-	page, err := intercom.ParseContactSearchResult(result)
+	page, err := contacts.ParseSearchResult(result)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -75,8 +77,8 @@ func ExampleIsRateLimited() {
 	ctx := context.Background()
 
 	_, err := client.Contacts().Get(ctx, "contact-id")
-	if intercom.IsRateLimited(err) {
-		var apiErr *intercom.ErrorResponse
+	if api.IsRateLimited(err) {
+		var apiErr *api.ErrorResponse
 		if errors.As(err, &apiErr) && apiErr.RateLimit != nil {
 			fmt.Printf("Rate limited. Limit: %d, Remaining: %d\n",
 				apiErr.RateLimit.Limit, apiErr.RateLimit.Remaining)
@@ -95,14 +97,14 @@ func ExampleErrorResponse_HasErrorCode() {
 
 	_, err := client.Contacts().Get(ctx, "contact-id")
 	if err != nil {
-		var apiErr *intercom.ErrorResponse
+		var apiErr *api.ErrorResponse
 		if errors.As(err, &apiErr) {
 			switch {
-			case apiErr.HasErrorCode(intercom.ErrParameterInvalid):
+			case apiErr.HasErrorCode(api.ErrParameterInvalid):
 				fmt.Println("Invalid parameter:", apiErr.Error())
-			case apiErr.HasErrorCode(intercom.ErrTokenUnauthorized):
+			case apiErr.HasErrorCode(api.ErrTokenUnauthorized):
 				fmt.Println("Token is unauthorized, check your API key")
-			case apiErr.HasErrorCode(intercom.ErrRateLimitExceeded):
+			case apiErr.HasErrorCode(api.ErrRateLimitExceeded):
 				fmt.Println("Rate limit exceeded, back off and retry")
 			default:
 				fmt.Println("API error:", apiErr.Error())
@@ -120,10 +122,10 @@ func ExampleIsServerError() {
 	ctx := context.Background()
 
 	_, err := client.Contacts().Get(ctx, "contact-id")
-	if intercom.IsServerError(err) {
+	if api.IsServerError(err) {
 		fmt.Println("Server error, retrying...")
 		// implement retry with backoff
-	} else if intercom.IsNotFound(err) {
+	} else if api.IsNotFound(err) {
 		fmt.Println("Contact not found")
 	} else if err != nil {
 		log.Fatal(err)

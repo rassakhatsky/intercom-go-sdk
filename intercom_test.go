@@ -391,4 +391,4 @@ func TestNewClient_ValidToken_NoPanic(t *testing.T) {
 }
 
 // Ensure *slog.Logger satisfies the Logger interface at compile time.
-var _ Logger = slog.Default()
+var _ api.Logger = slog.Default()

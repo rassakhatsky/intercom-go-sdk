@@ -42,7 +42,7 @@ type Client struct {
 	token      string
 	baseURL    string
 	httpClient *http.Client
-	logger     Logger
+	logger     api.Logger
 
 	admins              *admins.Service
 	aiContent           *aiPkg.ContentService
@@ -91,7 +91,7 @@ func WithHTTPClient(hc *http.Client) ClientOption {
 }
 
 // WithLogger sets a custom logger.
-func WithLogger(l Logger) ClientOption {
+func WithLogger(l api.Logger) ClientOption {
 	return func(c *Client) {
 		c.logger = l
 	}
@@ -371,7 +371,7 @@ func (c *Client) NewRequest(method, urlStr string, body any) (*http.Request, err
 // DoRaw executes an HTTP request and returns a Result with raw HTTP metadata
 // and body. API errors (4xx/5xx) populate Result.Error instead of returning a
 // Go error; only transport/IO failures return a Go error.
-func (c *Client) DoRaw(ctx context.Context, req *http.Request) (*Result, error) {
+func (c *Client) DoRaw(ctx context.Context, req *http.Request) (*api.Result, error) {
 	req = req.WithContext(ctx)
 	c.logger.Debug("http request", "method", req.Method, "url", req.URL)
 
@@ -392,7 +392,7 @@ func (c *Client) DoRaw(ctx context.Context, req *http.Request) (*Result, error) 
 // DoRawNoRedirect executes an HTTP request like DoRaw, but does not follow
 // HTTP redirects. This is used when the API returns a redirect (e.g., 302)
 // and the caller needs the Location header rather than the redirect target.
-func (c *Client) DoRawNoRedirect(ctx context.Context, req *http.Request) (*Result, error) {
+func (c *Client) DoRawNoRedirect(ctx context.Context, req *http.Request) (*api.Result, error) {
 	noRedirectClient := &http.Client{
 		Transport: c.httpClient.Transport,
 		Timeout:   c.httpClient.Timeout,
@@ -448,13 +448,13 @@ func (c *Client) DoDownload(ctx context.Context, req *http.Request, w io.Writer)
 // body is decoded into v if v is non-nil. API errors (4xx/5xx) are returned
 // as *ErrorResponse errors suitable for inspection with status predicates
 // (IsNotFound, IsBadRequest, etc.).
-func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*Response, error) {
+func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*api.Response, error) {
 	result, err := c.DoRaw(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	response := &Response{Result: result}
+	response := &api.Response{Result: result}
 
 	if result.Error != nil {
 		return response, api.ResultError(result)

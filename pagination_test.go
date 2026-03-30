@@ -59,10 +59,10 @@ func TestIter_MultiplePages(t *testing.T) {
 		Name string `json:"name"`
 	}
 
-	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
+	fetcher := func(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[item], error) {
 		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
-		result := new(PagedResult[item])
+		result := new(api.PagedResult[item])
 		_, err := client.Do(ctx, req, result)
 		if err != nil {
 			return nil, err
@@ -70,7 +70,7 @@ func TestIter_MultiplePages(t *testing.T) {
 		return result, nil
 	}
 
-	iter := NewIter[item](context.Background(), nil, fetcher)
+	iter := api.NewIter[item](context.Background(), nil, fetcher)
 
 	var got []item
 	for iter.Next() {
@@ -114,10 +114,10 @@ func TestIter_EmptyFirstPage(t *testing.T) {
 		ID string `json:"id"`
 	}
 
-	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
+	fetcher := func(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[item], error) {
 		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
-		result := new(PagedResult[item])
+		result := new(api.PagedResult[item])
 		_, err := client.Do(ctx, req, result)
 		if err != nil {
 			return nil, err
@@ -125,7 +125,7 @@ func TestIter_EmptyFirstPage(t *testing.T) {
 		return result, nil
 	}
 
-	iter := NewIter[item](context.Background(), nil, fetcher)
+	iter := api.NewIter[item](context.Background(), nil, fetcher)
 
 	count := 0
 	for iter.Next() {
@@ -169,10 +169,10 @@ func TestIter_ErrorMidPagination(t *testing.T) {
 		ID string `json:"id"`
 	}
 
-	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
+	fetcher := func(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[item], error) {
 		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
-		result := new(PagedResult[item])
+		result := new(api.PagedResult[item])
 		_, err := client.Do(ctx, req, result)
 		if err != nil {
 			return nil, err
@@ -180,7 +180,7 @@ func TestIter_ErrorMidPagination(t *testing.T) {
 		return result, nil
 	}
 
-	iter := NewIter[item](context.Background(), nil, fetcher)
+	iter := api.NewIter[item](context.Background(), nil, fetcher)
 
 	// First item should succeed
 	if !iter.Next() {
@@ -218,10 +218,10 @@ func TestIter_Current(t *testing.T) {
 		Val string `json:"val"`
 	}
 
-	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
+	fetcher := func(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[item], error) {
 		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
-		result := new(PagedResult[item])
+		result := new(api.PagedResult[item])
 		_, err := client.Do(ctx, req, result)
 		if err != nil {
 			return nil, err
@@ -229,7 +229,7 @@ func TestIter_Current(t *testing.T) {
 		return result, nil
 	}
 
-	iter := NewIter[item](context.Background(), nil, fetcher)
+	iter := api.NewIter[item](context.Background(), nil, fetcher)
 
 	iter.Next()
 	if c := iter.Current(); c.ID != "1" || c.Val != "x" {
@@ -259,10 +259,10 @@ func TestIter_PageResponse(t *testing.T) {
 		ID string `json:"id"`
 	}
 
-	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
+	fetcher := func(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[item], error) {
 		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
-		result := new(PagedResult[item])
+		result := new(api.PagedResult[item])
 		_, err := client.Do(ctx, req, result)
 		if err != nil {
 			return nil, err
@@ -270,7 +270,7 @@ func TestIter_PageResponse(t *testing.T) {
 		return result, nil
 	}
 
-	iter := NewIter[item](context.Background(), nil, fetcher)
+	iter := api.NewIter[item](context.Background(), nil, fetcher)
 
 	// Must call Next at least once to have a page loaded
 	iter.Next()
@@ -308,7 +308,7 @@ func TestPagedResult_JSON(t *testing.T) {
 		}
 	}`
 
-	var result PagedResult[item]
+	var result api.PagedResult[item]
 	if err := json.Unmarshal([]byte(raw), &result); err != nil {
 		t.Fatalf("Unmarshal error: %v", err)
 	}
@@ -379,10 +379,10 @@ func TestIter_Collect_MultiplePages(t *testing.T) {
 		Name string `json:"name"`
 	}
 
-	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
+	fetcher := func(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[item], error) {
 		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
-		result := new(PagedResult[item])
+		result := new(api.PagedResult[item])
 		_, err := client.Do(ctx, req, result)
 		if err != nil {
 			return nil, err
@@ -390,7 +390,7 @@ func TestIter_Collect_MultiplePages(t *testing.T) {
 		return result, nil
 	}
 
-	iter := NewIter[item](context.Background(), nil, fetcher)
+	iter := api.NewIter[item](context.Background(), nil, fetcher)
 	got, err := iter.Collect()
 	if err != nil {
 		t.Fatalf("Collect() error: %v", err)
@@ -430,10 +430,10 @@ func TestIter_Collect_EmptyResult(t *testing.T) {
 		ID string `json:"id"`
 	}
 
-	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
+	fetcher := func(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[item], error) {
 		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
-		result := new(PagedResult[item])
+		result := new(api.PagedResult[item])
 		_, err := client.Do(ctx, req, result)
 		if err != nil {
 			return nil, err
@@ -441,7 +441,7 @@ func TestIter_Collect_EmptyResult(t *testing.T) {
 		return result, nil
 	}
 
-	iter := NewIter[item](context.Background(), nil, fetcher)
+	iter := api.NewIter[item](context.Background(), nil, fetcher)
 	got, err := iter.Collect()
 	if err != nil {
 		t.Fatalf("Collect() error: %v", err)
@@ -484,10 +484,10 @@ func TestIter_Collect_Error(t *testing.T) {
 		ID string `json:"id"`
 	}
 
-	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
+	fetcher := func(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[item], error) {
 		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
-		result := new(PagedResult[item])
+		result := new(api.PagedResult[item])
 		_, err := client.Do(ctx, req, result)
 		if err != nil {
 			return nil, err
@@ -495,13 +495,13 @@ func TestIter_Collect_Error(t *testing.T) {
 		return result, nil
 	}
 
-	iter := NewIter[item](context.Background(), nil, fetcher)
+	iter := api.NewIter[item](context.Background(), nil, fetcher)
 	got, err := iter.Collect()
 	if err == nil {
 		t.Fatal("Collect() expected error, got nil")
 	}
 	// Verify the error is an ErrorResponse with the expected code
-	var errResp *ErrorResponse
+	var errResp *api.ErrorResponse
 	if !errors.As(err, &errResp) {
 		t.Fatalf("Collect() error type = %T, want *ErrorResponse", err)
 	}
@@ -563,10 +563,10 @@ func TestIter_ForEach_AllItems(t *testing.T) {
 		Name string `json:"name"`
 	}
 
-	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
+	fetcher := func(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[item], error) {
 		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
-		result := new(PagedResult[item])
+		result := new(api.PagedResult[item])
 		_, err := client.Do(ctx, req, result)
 		if err != nil {
 			return nil, err
@@ -574,7 +574,7 @@ func TestIter_ForEach_AllItems(t *testing.T) {
 		return result, nil
 	}
 
-	iter := NewIter[item](context.Background(), nil, fetcher)
+	iter := api.NewIter[item](context.Background(), nil, fetcher)
 	var got []item
 	err := iter.ForEach(func(it item) error {
 		got = append(got, it)
@@ -612,10 +612,10 @@ func TestIter_ForEach_EarlyExit(t *testing.T) {
 		ID string `json:"id"`
 	}
 
-	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
+	fetcher := func(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[item], error) {
 		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
-		result := new(PagedResult[item])
+		result := new(api.PagedResult[item])
 		_, err := client.Do(ctx, req, result)
 		if err != nil {
 			return nil, err
@@ -624,7 +624,7 @@ func TestIter_ForEach_EarlyExit(t *testing.T) {
 	}
 
 	stopErr := fmt.Errorf("stop after 2")
-	iter := NewIter[item](context.Background(), nil, fetcher)
+	iter := api.NewIter[item](context.Background(), nil, fetcher)
 	var count int
 	err := iter.ForEach(func(it item) error {
 		count++
@@ -675,10 +675,10 @@ func TestIter_ForEach_FetchError(t *testing.T) {
 		ID string `json:"id"`
 	}
 
-	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
+	fetcher := func(ctx context.Context, opts *api.ListOptions) (*api.PagedResult[item], error) {
 		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
-		result := new(PagedResult[item])
+		result := new(api.PagedResult[item])
 		_, err := client.Do(ctx, req, result)
 		if err != nil {
 			return nil, err
@@ -686,7 +686,7 @@ func TestIter_ForEach_FetchError(t *testing.T) {
 		return result, nil
 	}
 
-	iter := NewIter[item](context.Background(), nil, fetcher)
+	iter := api.NewIter[item](context.Background(), nil, fetcher)
 	var visited int
 	err := iter.ForEach(func(it item) error {
 		visited++
@@ -696,7 +696,7 @@ func TestIter_ForEach_FetchError(t *testing.T) {
 		t.Fatal("ForEach() expected error, got nil")
 	}
 	// Verify the error is an ErrorResponse with the expected code
-	var errResp *ErrorResponse
+	var errResp *api.ErrorResponse
 	if !errors.As(err, &errResp) {
 		t.Fatalf("ForEach() error type = %T, want *ErrorResponse", err)
 	}
@@ -713,7 +713,7 @@ func TestIter_ForEach_FetchError(t *testing.T) {
 }
 
 func TestListOptions_QueryParams(t *testing.T) {
-	opts := &ListOptions{PerPage: 25, StartingAfter: "cursor-abc"}
+	opts := &api.ListOptions{PerPage: 25, StartingAfter: "cursor-abc"}
 	path, err := api.AddQueryOptions("contacts", opts)
 	if err != nil {
 		t.Fatalf("addQueryOptions error: %v", err)

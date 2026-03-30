@@ -31,7 +31,7 @@ func TestCheckResponse_ParsesErrorList(t *testing.T) {
 		t.Fatal("expected error for 404 response")
 	}
 
-	var errResp *ErrorResponse
+	var errResp *api.ErrorResponse
 	if !errors.As(err, &errResp) {
 		t.Fatalf("expected *ErrorResponse, got %T", err)
 	}
@@ -54,9 +54,9 @@ func TestCheckResponse_ParsesErrorList(t *testing.T) {
 }
 
 func TestErrorResponse_ErrorFormat(t *testing.T) {
-	err := &ErrorResponse{
+	err := &api.ErrorResponse{
 		StatusCode: 422,
-		Errors: []ErrorDetail{
+		Errors: []api.ErrorDetail{
 			{Code: "parameter_invalid", Message: "email is required"},
 		},
 	}
@@ -69,7 +69,7 @@ func TestErrorResponse_ErrorFormat(t *testing.T) {
 }
 
 func TestErrorResponse_ErrorFormat_NoErrors(t *testing.T) {
-	err := &ErrorResponse{
+	err := &api.ErrorResponse{
 		StatusCode: 500,
 		Errors:     nil,
 	}
@@ -94,16 +94,16 @@ func TestIsNotFound_True(t *testing.T) {
 	req, _ := client.NewRequest(http.MethodGet, "contacts/999", nil)
 	_, err := client.Do(context.Background(), req, nil)
 
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Errorf("IsNotFound() = false, want true for 404")
 	}
 }
 
 func TestIsNotFound_FalseForOther(t *testing.T) {
-	if IsNotFound(errors.New("random error")) {
+	if api.IsNotFound(errors.New("random error")) {
 		t.Error("IsNotFound() = true for non-ErrorResponse")
 	}
-	if IsNotFound(nil) {
+	if api.IsNotFound(nil) {
 		t.Error("IsNotFound() = true for nil")
 	}
 }
@@ -121,13 +121,13 @@ func TestIsRateLimited_True(t *testing.T) {
 	req, _ := client.NewRequest(http.MethodGet, "contacts", nil)
 	_, err := client.Do(context.Background(), req, nil)
 
-	if !IsRateLimited(err) {
+	if !api.IsRateLimited(err) {
 		t.Errorf("IsRateLimited() = false, want true for 429")
 	}
 }
 
 func TestIsRateLimited_FalseForOther(t *testing.T) {
-	if IsRateLimited(errors.New("random error")) {
+	if api.IsRateLimited(errors.New("random error")) {
 		t.Error("IsRateLimited() = true for non-ErrorResponse")
 	}
 }
@@ -145,13 +145,13 @@ func TestIsUnauthorized_True(t *testing.T) {
 	req, _ := client.NewRequest(http.MethodGet, "contacts", nil)
 	_, err := client.Do(context.Background(), req, nil)
 
-	if !IsUnauthorized(err) {
+	if !api.IsUnauthorized(err) {
 		t.Errorf("IsUnauthorized() = false, want true for 401")
 	}
 }
 
 func TestIsUnauthorized_FalseForOther(t *testing.T) {
-	if IsUnauthorized(errors.New("random error")) {
+	if api.IsUnauthorized(errors.New("random error")) {
 		t.Error("IsUnauthorized() = true for non-ErrorResponse")
 	}
 }
@@ -169,7 +169,7 @@ func TestIsBadRequest_True(t *testing.T) {
 	req, _ := client.NewRequest("GET", "contacts/bad", nil)
 	_, err := client.Do(context.Background(), req, nil)
 
-	if !IsBadRequest(err) {
+	if !api.IsBadRequest(err) {
 		t.Errorf("IsBadRequest() = false, want true for 400")
 	}
 }
@@ -187,7 +187,7 @@ func TestIsForbidden_True(t *testing.T) {
 	req, _ := client.NewRequest("GET", "contacts/forbidden", nil)
 	_, err := client.Do(context.Background(), req, nil)
 
-	if !IsForbidden(err) {
+	if !api.IsForbidden(err) {
 		t.Errorf("IsForbidden() = false, want true for 403")
 	}
 }
@@ -205,7 +205,7 @@ func TestIsConflict_True(t *testing.T) {
 	req, _ := client.NewRequest("GET", "contacts/conflict", nil)
 	_, err := client.Do(context.Background(), req, nil)
 
-	if !IsConflict(err) {
+	if !api.IsConflict(err) {
 		t.Errorf("IsConflict() = false, want true for 409")
 	}
 }
@@ -223,7 +223,7 @@ func TestIsUnprocessableEntity_True(t *testing.T) {
 	req, _ := client.NewRequest("GET", "contacts/invalid", nil)
 	_, err := client.Do(context.Background(), req, nil)
 
-	if !IsUnprocessableEntity(err) {
+	if !api.IsUnprocessableEntity(err) {
 		t.Errorf("IsUnprocessableEntity() = false, want true for 422")
 	}
 }
@@ -241,7 +241,7 @@ func TestIsServerError_True(t *testing.T) {
 	req, _ := client.NewRequest("GET", "contacts/error", nil)
 	_, err := client.Do(context.Background(), req, nil)
 
-	if !IsServerError(err) {
+	if !api.IsServerError(err) {
 		t.Errorf("IsServerError() = false, want true for 500")
 	}
 }
@@ -263,11 +263,11 @@ func TestIsRateLimited_RateLimitInfo(t *testing.T) {
 	req, _ := client.NewRequest("GET", "contacts/ratelimit", nil)
 	_, err := client.Do(context.Background(), req, nil)
 
-	if !IsRateLimited(err) {
+	if !api.IsRateLimited(err) {
 		t.Fatal("IsRateLimited() = false, want true")
 	}
 
-	var errResp *ErrorResponse
+	var errResp *api.ErrorResponse
 	if !errors.As(err, &errResp) {
 		t.Fatalf("expected *ErrorResponse, got %T", err)
 	}
@@ -298,15 +298,15 @@ func TestHasErrorCode_Integration(t *testing.T) {
 	req, _ := client.NewRequest("GET", "contacts/hascode", nil)
 	_, err := client.Do(context.Background(), req, nil)
 
-	var errResp *ErrorResponse
+	var errResp *api.ErrorResponse
 	if !errors.As(err, &errResp) {
 		t.Fatalf("expected *ErrorResponse, got %T", err)
 	}
-	if !errResp.HasErrorCode(ErrParameterInvalid) {
-		t.Error("HasErrorCode(ErrParameterInvalid) = false, want true")
+	if !errResp.HasErrorCode(api.ErrParameterInvalid) {
+		t.Error("HasErrorCode(api.ErrParameterInvalid) = false, want true")
 	}
-	if errResp.HasErrorCode(ErrConflict) {
-		t.Error("HasErrorCode(ErrConflict) = true, want false")
+	if errResp.HasErrorCode(api.ErrConflict) {
+		t.Error("HasErrorCode(api.ErrConflict) = true, want false")
 	}
 }
 
@@ -326,7 +326,7 @@ func TestCheckResponse_NonJSONBody(t *testing.T) {
 		t.Fatal("expected error for 502 response")
 	}
 
-	var errResp *ErrorResponse
+	var errResp *api.ErrorResponse
 	if !errors.As(err, &errResp) {
 		t.Fatalf("expected *ErrorResponse, got %T", err)
 	}
@@ -350,7 +350,7 @@ func TestCheckResponse_EmptyBody(t *testing.T) {
 		t.Fatal("expected error for 500 response")
 	}
 
-	var errResp *ErrorResponse
+	var errResp *api.ErrorResponse
 	if !errors.As(err, &errResp) {
 		t.Fatalf("expected *ErrorResponse, got %T", err)
 	}
@@ -376,14 +376,14 @@ func TestCheckResponse_2xxSuccess(t *testing.T) {
 }
 
 func TestResultError_404(t *testing.T) {
-	r := &Result{
+	r := &api.Result{
 		StatusCode: http.StatusNotFound,
-		Error: &ErrorResult{
+		Error: &api.ErrorResult{
 			Type:      "error.list",
 			RequestID: "req-456",
 			Code:      "not_found",
 			Message:   "Contact not found",
-			Errors:    []ErrorDetail{{Code: "not_found", Message: "Contact not found"}},
+			Errors:    []api.ErrorDetail{{Code: "not_found", Message: "Contact not found"}},
 		},
 	}
 
@@ -392,7 +392,7 @@ func TestResultError_404(t *testing.T) {
 		t.Fatal("expected non-nil error")
 	}
 
-	var errResp *ErrorResponse
+	var errResp *api.ErrorResponse
 	if !errors.As(err, &errResp) {
 		t.Fatalf("expected *ErrorResponse, got %T", err)
 	}
@@ -405,47 +405,47 @@ func TestResultError_404(t *testing.T) {
 	if len(errResp.Errors) != 1 || errResp.Errors[0].Code != "not_found" {
 		t.Errorf("Errors = %v, want [{not_found Contact not found}]", errResp.Errors)
 	}
-	if !IsNotFound(err) {
+	if !api.IsNotFound(err) {
 		t.Error("IsNotFound() = false, want true")
 	}
 }
 
 func TestResultError_429(t *testing.T) {
-	r := &Result{
+	r := &api.Result{
 		StatusCode: http.StatusTooManyRequests,
-		Error: &ErrorResult{
+		Error: &api.ErrorResult{
 			Type:   "error.list",
 			Code:   "rate_limit_exceeded",
-			Errors: []ErrorDetail{{Code: "rate_limit_exceeded", Message: "rate limit exceeded"}},
+			Errors: []api.ErrorDetail{{Code: "rate_limit_exceeded", Message: "rate limit exceeded"}},
 		},
 	}
 
 	err := api.ResultError(r)
-	if !IsRateLimited(err) {
+	if !api.IsRateLimited(err) {
 		t.Error("IsRateLimited() = false, want true")
 	}
 }
 
 func TestResultError_401(t *testing.T) {
-	r := &Result{
+	r := &api.Result{
 		StatusCode: http.StatusUnauthorized,
-		Error: &ErrorResult{
+		Error: &api.ErrorResult{
 			Type:   "error.list",
 			Code:   "unauthorized",
-			Errors: []ErrorDetail{{Code: "unauthorized", Message: "invalid token"}},
+			Errors: []api.ErrorDetail{{Code: "unauthorized", Message: "invalid token"}},
 		},
 	}
 
 	err := api.ResultError(r)
-	if !IsUnauthorized(err) {
+	if !api.IsUnauthorized(err) {
 		t.Error("IsUnauthorized() = false, want true")
 	}
 }
 
 func TestResultError_500_NonJSON(t *testing.T) {
-	r := &Result{
+	r := &api.Result{
 		StatusCode: http.StatusInternalServerError,
-		Error: &ErrorResult{
+		Error: &api.ErrorResult{
 			Message: "Internal Server Error",
 		},
 	}
@@ -455,7 +455,7 @@ func TestResultError_500_NonJSON(t *testing.T) {
 		t.Fatal("expected non-nil error")
 	}
 
-	var errResp *ErrorResponse
+	var errResp *api.ErrorResponse
 	if !errors.As(err, &errResp) {
 		t.Fatalf("expected *ErrorResponse, got %T", err)
 	}
@@ -468,7 +468,7 @@ func TestResultError_500_NonJSON(t *testing.T) {
 }
 
 func TestResultError_NilError(t *testing.T) {
-	r := &Result{StatusCode: http.StatusOK}
+	r := &api.Result{StatusCode: http.StatusOK}
 
 	err := api.ResultError(r)
 	if err != nil {
@@ -483,23 +483,23 @@ func TestErrorAliases(t *testing.T) {
 		predicate  func(error) bool
 		wantTrue   bool
 	}{
-		{"IsBadRequest/400", 400, IsBadRequest, true},
-		{"IsBadRequest/404", 404, IsBadRequest, false},
-		{"IsForbidden/403", 403, IsForbidden, true},
-		{"IsForbidden/401", 401, IsForbidden, false},
-		{"IsConflict/409", 409, IsConflict, true},
-		{"IsConflict/400", 400, IsConflict, false},
-		{"IsUnprocessableEntity/422", 422, IsUnprocessableEntity, true},
-		{"IsUnprocessableEntity/400", 400, IsUnprocessableEntity, false},
-		{"IsServerError/500", 500, IsServerError, true},
-		{"IsServerError/502", 502, IsServerError, true},
-		{"IsServerError/599", 599, IsServerError, true},
-		{"IsServerError/400", 400, IsServerError, false},
+		{"IsBadRequest/400", 400, api.IsBadRequest, true},
+		{"IsBadRequest/404", 404, api.IsBadRequest, false},
+		{"IsForbidden/403", 403, api.IsForbidden, true},
+		{"IsForbidden/401", 401, api.IsForbidden, false},
+		{"IsConflict/409", 409, api.IsConflict, true},
+		{"IsConflict/400", 400, api.IsConflict, false},
+		{"IsUnprocessableEntity/422", 422, api.IsUnprocessableEntity, true},
+		{"IsUnprocessableEntity/400", 400, api.IsUnprocessableEntity, false},
+		{"IsServerError/500", 500, api.IsServerError, true},
+		{"IsServerError/502", 502, api.IsServerError, true},
+		{"IsServerError/599", 599, api.IsServerError, true},
+		{"IsServerError/400", 400, api.IsServerError, false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := &ErrorResponse{StatusCode: tt.statusCode}
+			err := &api.ErrorResponse{StatusCode: tt.statusCode}
 			if got := tt.predicate(err); got != tt.wantTrue {
 				t.Errorf("%s = %v, want %v", tt.name, got, tt.wantTrue)
 			}
@@ -511,11 +511,11 @@ func TestErrorAliases(t *testing.T) {
 		name string
 		fn   func(error) bool
 	}{
-		{"IsBadRequest", IsBadRequest},
-		{"IsForbidden", IsForbidden},
-		{"IsConflict", IsConflict},
-		{"IsUnprocessableEntity", IsUnprocessableEntity},
-		{"IsServerError", IsServerError},
+		{"IsBadRequest", api.IsBadRequest},
+		{"IsForbidden", api.IsForbidden},
+		{"IsConflict", api.IsConflict},
+		{"IsUnprocessableEntity", api.IsUnprocessableEntity},
+		{"IsServerError", api.IsServerError},
 	}
 	for _, p := range predicates {
 		if p.fn(nil) {
