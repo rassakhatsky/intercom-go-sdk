@@ -66,11 +66,11 @@
 - [x] run tests `go test ./api/...` — must pass before next task
 
 ### Task 3: Add testable examples for key sub-packages
-- [ ] create `contacts/example_test.go` with examples for Create, Get, ListAll, Search
-- [ ] create `tags/example_test.go` with examples for Create, List, Tag/Untag
-- [ ] create `conversations/example_test.go` with examples for Get, Reply, ListAll
-- [ ] create `tickets/example_test.go` with examples for Create, Get, Update
-- [ ] run tests `go test ./contacts/... ./tags/... ./conversations/... ./tickets/...` — must pass before next task
+- [x] create `contacts/example_test.go` with examples for Create, Get, ListAll, Search
+- [x] create `tags/example_test.go` with examples for Create, List, Tag/Untag
+- [x] create `conversations/example_test.go` with examples for Get, Reply, ListAll
+- [x] create `tickets/example_test.go` with examples for Create, Get, Update
+- [x] run tests `go test ./contacts/... ./tags/... ./conversations/... ./tickets/...` — must pass before next task
 
 ### Task 4: Add CONTRIBUTING.md
 - [ ] create `CONTRIBUTING.md` covering: dev setup, running tests, coding conventions (3-layer pattern, naming), PR process
