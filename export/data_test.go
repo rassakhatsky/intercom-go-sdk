@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/rassakhatsky/intercom-go-sdk/export"
-	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 )
 
 func setupData() (svc *export.DataService, mux *http.ServeMux, teardown func()) {

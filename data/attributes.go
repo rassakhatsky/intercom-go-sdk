@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 )
 
 // AttributesService handles communication with the data attribute related

@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/rassakhatsky/intercom-go-sdk/contacts"
-	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 )
 
 // testCaller implements api.Caller for testing, backed by an httptest.Server.

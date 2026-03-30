@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/rassakhatsky/intercom-go-sdk/contacts"
-	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 	"github.com/rassakhatsky/intercom-go-sdk/messaging"
 	"github.com/rassakhatsky/intercom-go-sdk/tags"
 )

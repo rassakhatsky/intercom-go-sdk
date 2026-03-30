@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 )
 
 // Service handles communication with the help center related methods

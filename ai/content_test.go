@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/rassakhatsky/intercom-go-sdk/ai"
-	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 )
 
 // --- Content Import Sources ---

@@ -47,10 +47,10 @@
 - [x] Run `go test ./api/...` — existing api tests must pass
 
 ### Task 3: Update sub-package imports (34 files)
-- [ ] Replace `github.com/rassakhatsky/intercom-go-sdk/internal/api` → `github.com/rassakhatsky/intercom-go-sdk/api` in all sub-package source files
-- [ ] Replace same import in all sub-package test files (17 files with testutil helpers)
-- [ ] Run `go build ./...` — all packages must compile
-- [ ] Run `go test ./...` — all tests must pass
+- [x] Replace `github.com/rassakhatsky/intercom-go-sdk/internal/api` → `github.com/rassakhatsky/intercom-go-sdk/api` in all sub-package source files
+- [x] Replace same import in all sub-package test files (17 files with testutil helpers)
+- [x] Run `go build ./...` — all packages must compile
+- [x] Run `go test ./...` — all tests must pass
 
 ### Task 4: Replace unexported vars with direct `api.` calls
 - [ ] In `intercom.go`: replace `buildResult(...)` → `api.BuildResult(...)`, `resultError(...)` → `api.ResultError(...)` (add `api` import)

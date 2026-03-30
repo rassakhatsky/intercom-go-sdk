@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 )
 
 // MessagesService handles communication with the message related

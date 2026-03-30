@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/rassakhatsky/intercom-go-sdk/internal/api"
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 )
 
 // ReportingService handles communication with the reporting data export
