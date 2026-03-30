@@ -1,0 +1,74 @@
+package api
+
+// Operator represents a filter operator for Intercom search queries.
+type Operator string
+
+// Filter operators for single field filters.
+const (
+	OpEquals      Operator = "="
+	OpNotEquals   Operator = "!="
+	OpGreaterThan Operator = ">"
+	OpLessThan    Operator = "<"
+	OpContains    Operator = "~"
+	OpNotContains Operator = "!~"
+	OpIn          Operator = "IN"
+	OpNotIn       Operator = "NIN"
+	OpStarts      Operator = "^"
+	OpEnds        Operator = "$"
+)
+
+// Compound filter operators.
+const (
+	OpAND Operator = "AND"
+	OpOR  Operator = "OR"
+)
+
+// SearchRequest represents a request body for Intercom's search endpoints.
+type SearchRequest struct {
+	Query      *Filter           `json:"query"`
+	Pagination *SearchPagination `json:"pagination,omitempty"`
+}
+
+// SearchPagination controls pagination in search requests.
+type SearchPagination struct {
+	PerPage       int    `json:"per_page,omitempty"`
+	StartingAfter string `json:"starting_after,omitempty"`
+}
+
+// Filter represents either a single field filter or a compound (AND/OR) filter.
+// Use SingleFilterOf, And, and Or to construct filters.
+//
+// Value holds a scalar (string, int) for single field filters, a slice for
+// IN/NIN operators, or []*Filter for compound (AND/OR) filters. Callers should
+// use the constructor functions rather than setting Value directly.
+type Filter struct {
+	Field    string   `json:"field,omitempty"`
+	Operator Operator `json:"operator"`
+	Value    any      `json:"value"`
+}
+
+// SingleFilterOf creates a filter that matches a single field.
+// The value can be a string, int, or slice for IN/NIN operators.
+func SingleFilterOf(field string, operator Operator, value any) *Filter {
+	return &Filter{
+		Field:    field,
+		Operator: operator,
+		Value:    value,
+	}
+}
+
+// And creates a compound filter that requires all sub-filters to match.
+func And(filters ...*Filter) *Filter {
+	return &Filter{
+		Operator: OpAND,
+		Value:    filters,
+	}
+}
+
+// Or creates a compound filter that requires any sub-filter to match.
+func Or(filters ...*Filter) *Filter {
+	return &Filter{
+		Operator: OpOR,
+		Value:    filters,
+	}
+}

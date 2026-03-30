@@ -1,0 +1,209 @@
+package data
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"net/url"
+
+	"github.com/rassakhatsky/intercom-go-sdk/api"
+)
+
+// ObjectsService handles communication with the custom object instance
+// related methods of the Intercom API.
+type ObjectsService struct {
+	client api.Caller
+}
+
+// NewObjectsService creates a new custom objects service.
+func NewObjectsService(c api.Caller) *ObjectsService {
+	return &ObjectsService{client: c}
+}
+
+// ObjectInstance represents an Intercom custom object instance.
+type ObjectInstance struct {
+	ID                string         `json:"id"`
+	ExternalID        string         `json:"external_id,omitempty"`
+	Type              string         `json:"type,omitempty"`
+	ExternalCreatedAt *int64         `json:"external_created_at,omitempty"`
+	ExternalUpdatedAt *int64         `json:"external_updated_at,omitempty"`
+	CreatedAt         int64          `json:"created_at,omitempty"`
+	UpdatedAt         int64          `json:"updated_at,omitempty"`
+	CustomAttributes  map[string]any `json:"custom_attributes,omitempty"`
+}
+
+// ObjectInstanceDeleted represents the response from deleting a custom object instance.
+type ObjectInstanceDeleted struct {
+	ID      string `json:"id"`
+	Object  string `json:"object"`
+	Deleted bool   `json:"deleted"`
+}
+
+// CreateOrUpdateObjectRequest represents a request to create or update a custom object instance.
+type CreateOrUpdateObjectRequest struct {
+	ExternalID        string         `json:"external_id,omitempty"`
+	ExternalCreatedAt *int64         `json:"external_created_at,omitempty"`
+	ExternalUpdatedAt *int64         `json:"external_updated_at,omitempty"`
+	CustomAttributes  map[string]any `json:"custom_attributes,omitempty"`
+}
+
+// --- Parse Functions ---
+
+// ParseObjectGetResult decodes a Result into an ObjectInstance.
+func ParseObjectGetResult(r *api.Result) (*ObjectInstance, error) {
+	return api.Decode[ObjectInstance](r)
+}
+
+// ParseObjectGetByExternalIDResult decodes a Result into an ObjectInstance.
+func ParseObjectGetByExternalIDResult(r *api.Result) (*ObjectInstance, error) {
+	return api.Decode[ObjectInstance](r)
+}
+
+// ParseObjectCreateOrUpdateResult decodes a Result into an ObjectInstance.
+func ParseObjectCreateOrUpdateResult(r *api.Result) (*ObjectInstance, error) {
+	return api.Decode[ObjectInstance](r)
+}
+
+// ParseObjectDeleteResult decodes a Result into an ObjectInstanceDeleted.
+func ParseObjectDeleteResult(r *api.Result) (*ObjectInstanceDeleted, error) {
+	return api.Decode[ObjectInstanceDeleted](r)
+}
+
+// ParseObjectDeleteByExternalIDResult decodes a Result into an ObjectInstanceDeleted.
+func ParseObjectDeleteByExternalIDResult(r *api.Result) (*ObjectInstanceDeleted, error) {
+	return api.Decode[ObjectInstanceDeleted](r)
+}
+
+// --- Regular Methods ---
+
+// Get retrieves a custom object instance by type identifier and instance ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/getcustomobjectinstancesbyid
+func (s *ObjectsService) Get(ctx context.Context, typeIdentifier, instanceID string) (*ObjectInstance, error) {
+	result, err := s.GetRaw(ctx, typeIdentifier, instanceID)
+	if err != nil {
+		return nil, err
+	}
+	if result.Error != nil {
+		return nil, api.ResultError(result)
+	}
+	return ParseObjectGetResult(result)
+}
+
+// GetByExternalID retrieves a custom object instance by type identifier and external ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/getcustomobjectinstancesbyexternalid
+func (s *ObjectsService) GetByExternalID(ctx context.Context, typeIdentifier, externalID string) (*ObjectInstance, error) {
+	result, err := s.GetByExternalIDRaw(ctx, typeIdentifier, externalID)
+	if err != nil {
+		return nil, err
+	}
+	if result.Error != nil {
+		return nil, api.ResultError(result)
+	}
+	return ParseObjectGetByExternalIDResult(result)
+}
+
+// CreateOrUpdate creates or updates a custom object instance (upsert by external_id).
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/createcustomobjectinstances
+func (s *ObjectsService) CreateOrUpdate(ctx context.Context, typeIdentifier string, body *CreateOrUpdateObjectRequest) (*ObjectInstance, error) {
+	result, err := s.CreateOrUpdateRaw(ctx, typeIdentifier, body)
+	if err != nil {
+		return nil, err
+	}
+	if result.Error != nil {
+		return nil, api.ResultError(result)
+	}
+	return ParseObjectCreateOrUpdateResult(result)
+}
+
+// Delete deletes a custom object instance by type identifier and instance ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/deletecustomobjectinstancesbyid
+func (s *ObjectsService) Delete(ctx context.Context, typeIdentifier, instanceID string) (*ObjectInstanceDeleted, error) {
+	result, err := s.DeleteRaw(ctx, typeIdentifier, instanceID)
+	if err != nil {
+		return nil, err
+	}
+	if result.Error != nil {
+		return nil, api.ResultError(result)
+	}
+	return ParseObjectDeleteResult(result)
+}
+
+// DeleteByExternalID deletes a custom object instance by type identifier and external ID.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/deletecustomobjectinstancesbyexternalid
+func (s *ObjectsService) DeleteByExternalID(ctx context.Context, typeIdentifier, externalID string) (*ObjectInstanceDeleted, error) {
+	result, err := s.DeleteByExternalIDRaw(ctx, typeIdentifier, externalID)
+	if err != nil {
+		return nil, err
+	}
+	if result.Error != nil {
+		return nil, api.ResultError(result)
+	}
+	return ParseObjectDeleteByExternalIDResult(result)
+}
+
+// --- Raw Methods ---
+
+// GetRaw retrieves a custom object instance by type identifier and instance ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/getcustomobjectinstancesbyid
+func (s *ObjectsService) GetRaw(ctx context.Context, typeIdentifier, instanceID string) (*api.Result, error) {
+	path := fmt.Sprintf("custom_object_instances/%s/%s", url.PathEscape(typeIdentifier), url.PathEscape(instanceID))
+	req, err := s.client.NewRequest(http.MethodGet, path, nil)
+	if err != nil {
+		return nil, err
+	}
+	return s.client.DoRaw(ctx, req)
+}
+
+// GetByExternalIDRaw retrieves a custom object instance by type identifier and external ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/getcustomobjectinstancesbyexternalid
+func (s *ObjectsService) GetByExternalIDRaw(ctx context.Context, typeIdentifier, externalID string) (*api.Result, error) {
+	path := fmt.Sprintf("custom_object_instances/%s?external_id=%s", url.PathEscape(typeIdentifier), url.QueryEscape(externalID))
+	req, err := s.client.NewRequest(http.MethodGet, path, nil)
+	if err != nil {
+		return nil, err
+	}
+	return s.client.DoRaw(ctx, req)
+}
+
+// CreateOrUpdateRaw creates or updates a custom object instance with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/createcustomobjectinstances
+func (s *ObjectsService) CreateOrUpdateRaw(ctx context.Context, typeIdentifier string, body *CreateOrUpdateObjectRequest) (*api.Result, error) {
+	path := fmt.Sprintf("custom_object_instances/%s", url.PathEscape(typeIdentifier))
+	req, err := s.client.NewRequest(http.MethodPost, path, body)
+	if err != nil {
+		return nil, err
+	}
+	return s.client.DoRaw(ctx, req)
+}
+
+// DeleteRaw deletes a custom object instance by type identifier and instance ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/deletecustomobjectinstancesbyid
+func (s *ObjectsService) DeleteRaw(ctx context.Context, typeIdentifier, instanceID string) (*api.Result, error) {
+	path := fmt.Sprintf("custom_object_instances/%s/%s", url.PathEscape(typeIdentifier), url.PathEscape(instanceID))
+	req, err := s.client.NewRequest(http.MethodDelete, path, nil)
+	if err != nil {
+		return nil, err
+	}
+	return s.client.DoRaw(ctx, req)
+}
+
+// DeleteByExternalIDRaw deletes a custom object instance by type identifier and external ID with the full HTTP result.
+//
+// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/custom-object-instances/deletecustomobjectinstancesbyexternalid
+func (s *ObjectsService) DeleteByExternalIDRaw(ctx context.Context, typeIdentifier, externalID string) (*api.Result, error) {
+	path := fmt.Sprintf("custom_object_instances/%s?external_id=%s", url.PathEscape(typeIdentifier), url.QueryEscape(externalID))
+	req, err := s.client.NewRequest(http.MethodDelete, path, nil)
+	if err != nil {
+		return nil, err
+	}
+	return s.client.DoRaw(ctx, req)
+}

@@ -30,3 +30,6 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Raw API specs (used for reference, not needed at runtime)
+raw/
