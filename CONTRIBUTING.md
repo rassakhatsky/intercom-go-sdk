@@ -62,6 +62,19 @@ For a new sub-package, also create `testutil_test.go` with `setup()`, `testMetho
 
 See [CLAUDE.md](CLAUDE.md) for the detailed step-by-step guide.
 
+## CI
+
+A GitHub Actions workflow runs on every push to `main` and on pull requests targeting `main`. It performs the following checks in order:
+
+1. `go vet ./...` — static analysis
+2. `gofmt -l .` — format check (fails if any files need formatting)
+3. `go mod verify` — dependency integrity
+4. `go mod tidy` + `git diff --exit-code` — catch stale go.mod/go.sum
+5. `go build ./...` — compilation check
+6. `go test -race -cover ./...` — tests with race detector and coverage
+
+All checks must pass before a PR can be merged.
+
 ## Pull Requests
 
 - Keep changes focused — one feature or fix per PR

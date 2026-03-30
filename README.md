@@ -1,5 +1,7 @@
 # intercom-go-sdk
 
+[![CI](https://github.com/rassakhatsky/intercom-go-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/rassakhatsky/intercom-go-sdk/actions/workflows/ci.yml)
+
 Go SDK for the [Intercom REST API](https://developers.intercom.com/docs/references/rest-api/api.intercom.io/) v2.15.
 
 - Minimal dependencies (stdlib + [`google/go-querystring`](https://github.com/google/go-querystring))
