@@ -92,8 +92,16 @@ func BuildResult(resp *http.Response, body []byte) *Result {
 		if len(errResult.Errors) > 0 {
 			errResult.Code = errResult.Errors[0].Code
 			errResult.Message = errResult.Errors[0].Message
-		} else if errResult.Message == "" && len(body) > 0 {
-			errResult.Message = string(body)
+		} else {
+			code := ErrClientError
+			if resp.StatusCode >= 500 {
+				code = ErrServerError
+			}
+			if errResult.Message == "" && len(body) > 0 {
+				errResult.Message = string(body)
+			}
+			errResult.Code = code
+			errResult.Errors = []ErrorDetail{{Code: code, Message: errResult.Message}}
 		}
 		result.Error = &errResult
 	}

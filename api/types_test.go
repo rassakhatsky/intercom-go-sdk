@@ -54,8 +54,11 @@ func TestAuthor_UnmarshalMinimal(t *testing.T) {
 
 func TestLinkedObjectList_JSONRoundTrip(t *testing.T) {
 	l := LinkedObjectList{
-		Type:       "list",
-		Data:       []any{"ticket_1", float64(42)},
+		Type: "list",
+		Data: []LinkedObject{
+			{Type: "ticket", ID: "ticket-1", Category: "Customer"},
+			{Type: "conversation", ID: "conv-2"},
+		},
 		TotalCount: 2,
 		HasMore:    true,
 	}
@@ -73,11 +76,11 @@ func TestLinkedObjectList_JSONRoundTrip(t *testing.T) {
 	if len(got.Data) != 2 {
 		t.Fatalf("expected 2 data items, got %d", len(got.Data))
 	}
-	if s, ok := got.Data[0].(string); !ok || s != "ticket_1" {
-		t.Fatalf("expected Data[0]=%q, got %v", "ticket_1", got.Data[0])
+	if got.Data[0].Type != "ticket" || got.Data[0].ID != "ticket-1" || got.Data[0].Category != "Customer" {
+		t.Fatalf("unexpected Data[0]: %+v", got.Data[0])
 	}
-	if n, ok := got.Data[1].(float64); !ok || n != 42 {
-		t.Fatalf("expected Data[1]=42, got %v", got.Data[1])
+	if got.Data[1].Type != "conversation" || got.Data[1].ID != "conv-2" {
+		t.Fatalf("unexpected Data[1]: %+v", got.Data[1])
 	}
 }
 

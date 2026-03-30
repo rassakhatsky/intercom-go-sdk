@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -208,6 +209,95 @@ func TestBuildResult_500_NonJSON(t *testing.T) {
 	}
 	if r.Error.Message != "Internal Server Error" {
 		t.Errorf("Error.Message = %q, want %q", r.Error.Message, "Internal Server Error")
+	}
+}
+
+func TestBuildResult_NonJSON_HasErrorCode(t *testing.T) {
+	tests := []struct {
+		name       string
+		statusCode int
+		body       string
+		wantCode   ErrorCode
+	}{
+		{
+			name:       "502 non-JSON uses ErrServerError",
+			statusCode: 502,
+			body:       "Bad Gateway",
+			wantCode:   ErrServerError,
+		},
+		{
+			name:       "500 non-JSON uses ErrServerError",
+			statusCode: 500,
+			body:       "Internal Server Error",
+			wantCode:   ErrServerError,
+		},
+		{
+			name:       "400 non-JSON uses ErrClientError",
+			statusCode: 400,
+			body:       "Bad Request",
+			wantCode:   ErrClientError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resp := &http.Response{
+				StatusCode: tt.statusCode,
+				Header:     http.Header{},
+				Request:    httptest.NewRequest(http.MethodGet, "https://api.intercom.io/contacts", nil),
+			}
+			r := BuildResult(resp, []byte(tt.body))
+
+			if r.Error == nil {
+				t.Fatal("Error is nil, want non-nil")
+			}
+			if len(r.Error.Errors) == 0 {
+				t.Fatal("Error.Errors is empty, want synthetic fallback entry")
+			}
+			if r.Error.Code != tt.wantCode {
+				t.Errorf("Error.Code = %q, want %q", r.Error.Code, tt.wantCode)
+			}
+
+			// Verify HasErrorCode works through the full pipeline
+			errResp := ResultError(r)
+			var apiErr *ErrorResponse
+			if !errors.As(errResp, &apiErr) {
+				t.Fatal("ResultError did not return *ErrorResponse")
+			}
+			if !apiErr.HasErrorCode(tt.wantCode) {
+				t.Errorf("HasErrorCode(%q) = false, want true", tt.wantCode)
+			}
+		})
+	}
+}
+
+func TestBuildResult_JSONWithoutErrorsArray_HasErrorCode(t *testing.T) {
+	body := []byte(`{"type":"error","message":"Resource not found"}`)
+	resp := &http.Response{
+		StatusCode: 404,
+		Header:     http.Header{},
+		Request:    httptest.NewRequest(http.MethodGet, "https://api.intercom.io/contacts/999", nil),
+	}
+
+	r := BuildResult(resp, body)
+
+	if r.Error == nil {
+		t.Fatal("Error is nil, want non-nil")
+	}
+	if len(r.Error.Errors) == 0 {
+		t.Fatal("Error.Errors is empty, want synthetic fallback entry for JSON without errors array")
+	}
+	if r.Error.Code != ErrClientError {
+		t.Errorf("Error.Code = %q, want %q", r.Error.Code, ErrClientError)
+	}
+
+	errResp := ResultError(r)
+	var apiErr *ErrorResponse
+	if !errors.As(errResp, &apiErr) {
+		t.Fatal("ResultError did not return *ErrorResponse")
+	}
+	if !apiErr.HasErrorCode(ErrClientError) {
+		t.Error("HasErrorCode(ErrClientError) = false, want true")
 	}
 }
 

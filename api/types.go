@@ -9,13 +9,22 @@ type Author struct {
 	Email string `json:"email,omitempty"`
 }
 
+// LinkedObject represents a single linked object (ticket, conversation, etc.)
+// within a LinkedObjectList.
+// Used by: conversations, tickets.
+type LinkedObject struct {
+	Type     string `json:"type"`
+	ID       string `json:"id"`
+	Category string `json:"category,omitempty"`
+}
+
 // LinkedObjectList holds linked objects on a conversation or ticket.
 // Used by: conversations, tickets.
 type LinkedObjectList struct {
-	Type       string `json:"type"`
-	Data       []any  `json:"data"`
-	TotalCount int    `json:"total_count"`
-	HasMore    bool   `json:"has_more"`
+	Type       string         `json:"type"`
+	Data       []LinkedObject `json:"data"`
+	TotalCount int            `json:"total_count"`
+	HasMore    bool           `json:"has_more"`
 }
 
 // Part represents a conversation part or ticket part.

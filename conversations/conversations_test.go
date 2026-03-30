@@ -472,7 +472,7 @@ func TestService_Close(t *testing.T) {
 
 	mux.HandleFunc("/conversations/123/parts", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body conversations.ManageRequest
+		var body conversations.CloseRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -486,7 +486,7 @@ func TestService_Close(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := svc.Close(ctx, "123", &conversations.ManageRequest{
+	conv, err := svc.Close(ctx, "123", &conversations.CloseRequest{
 		MessageType: "close",
 		Type:        "admin",
 		AdminID:     "admin-1",
@@ -506,7 +506,7 @@ func TestService_Open(t *testing.T) {
 
 	mux.HandleFunc("/conversations/123/parts", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body conversations.ManageRequest
+		var body conversations.OpenRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -517,7 +517,7 @@ func TestService_Open(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := svc.Open(ctx, "123", &conversations.ManageRequest{
+	conv, err := svc.Open(ctx, "123", &conversations.OpenRequest{
 		MessageType: "open",
 		AdminID:     "admin-1",
 	})
@@ -535,7 +535,7 @@ func TestService_Snooze(t *testing.T) {
 
 	mux.HandleFunc("/conversations/123/parts", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body conversations.ManageRequest
+		var body conversations.SnoozeRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -550,7 +550,7 @@ func TestService_Snooze(t *testing.T) {
 
 	ctx := context.Background()
 	snoozeUntil := int64(1734541187)
-	conv, err := svc.Snooze(ctx, "123", &conversations.ManageRequest{
+	conv, err := svc.Snooze(ctx, "123", &conversations.SnoozeRequest{
 		MessageType:  "snoozed",
 		AdminID:      "admin-1",
 		SnoozedUntil: &snoozeUntil,
@@ -569,7 +569,7 @@ func TestService_Assign(t *testing.T) {
 
 	mux.HandleFunc("/conversations/123/parts", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, http.MethodPost)
-		var body conversations.ManageRequest
+		var body conversations.AssignRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Fatalf("decode request body: %v", err)
 		}
@@ -583,7 +583,7 @@ func TestService_Assign(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	conv, err := svc.Assign(ctx, "123", &conversations.ManageRequest{
+	conv, err := svc.Assign(ctx, "123", &conversations.AssignRequest{
 		MessageType: "assignment",
 		Type:        "admin",
 		AdminID:     "admin-1",
@@ -1079,7 +1079,7 @@ func TestService_CloseRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := svc.CloseRaw(ctx, "123", &conversations.ManageRequest{
+	result, err := svc.CloseRaw(ctx, "123", &conversations.CloseRequest{
 		MessageType: "close",
 		Type:        "admin",
 		AdminID:     "admin-1",
@@ -1106,7 +1106,7 @@ func TestService_OpenRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := svc.OpenRaw(ctx, "123", &conversations.ManageRequest{
+	result, err := svc.OpenRaw(ctx, "123", &conversations.OpenRequest{
 		MessageType: "open",
 		AdminID:     "admin-1",
 	})
@@ -1133,7 +1133,7 @@ func TestService_SnoozeRaw(t *testing.T) {
 
 	ctx := context.Background()
 	snoozeUntil := int64(1734541187)
-	result, err := svc.SnoozeRaw(ctx, "123", &conversations.ManageRequest{
+	result, err := svc.SnoozeRaw(ctx, "123", &conversations.SnoozeRequest{
 		MessageType:  "snoozed",
 		AdminID:      "admin-1",
 		SnoozedUntil: &snoozeUntil,
@@ -1160,7 +1160,7 @@ func TestService_AssignRaw(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	result, err := svc.AssignRaw(ctx, "123", &conversations.ManageRequest{
+	result, err := svc.AssignRaw(ctx, "123", &conversations.AssignRequest{
 		MessageType: "assignment",
 		Type:        "admin",
 		AdminID:     "admin-1",

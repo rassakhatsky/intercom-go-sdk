@@ -330,9 +330,12 @@ func TestCheckResponse_NonJSONBody(t *testing.T) {
 	if !errors.As(err, &errResp) {
 		t.Fatalf("expected *ErrorResponse, got %T", err)
 	}
-	// Should include raw body since JSON parsing failed on non-JSON content
-	if got := errResp.Error(); got != "HTTP 502: Bad Gateway" {
-		t.Errorf("Error() = %q, want %q", got, "HTTP 502: Bad Gateway")
+	// Non-JSON body gets a synthetic server_error code with the raw body as message
+	if got := errResp.Error(); got != "server_error: Bad Gateway" {
+		t.Errorf("Error() = %q, want %q", got, "server_error: Bad Gateway")
+	}
+	if !errResp.HasErrorCode(api.ErrServerError) {
+		t.Error("HasErrorCode(ErrServerError) = false, want true for non-JSON 5xx")
 	}
 }
 
@@ -354,8 +357,12 @@ func TestCheckResponse_EmptyBody(t *testing.T) {
 	if !errors.As(err, &errResp) {
 		t.Fatalf("expected *ErrorResponse, got %T", err)
 	}
-	if got := errResp.Error(); got != "HTTP 500" {
-		t.Errorf("Error() = %q, want %q", got, "HTTP 500")
+	// Empty body gets a synthetic server_error code with no message
+	if got := errResp.Error(); got != "server_error" {
+		t.Errorf("Error() = %q, want %q", got, "server_error")
+	}
+	if !errResp.HasErrorCode(api.ErrServerError) {
+		t.Error("HasErrorCode(ErrServerError) = false, want true for empty-body 5xx")
 	}
 }
 

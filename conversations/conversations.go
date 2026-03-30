@@ -125,14 +125,38 @@ type QuickReplyOption struct {
 	UUID string `json:"uuid"`
 }
 
-// ManageRequest is the body for close/open/snooze/assign operations.
-type ManageRequest struct {
+// CloseRequest represents the body for closing a conversation.
+type CloseRequest struct {
+	MessageType string `json:"message_type"`
+	Type        string `json:"type,omitempty"`
+	AdminID     string `json:"admin_id"`
+	Body        string `json:"body,omitempty"`
+}
+
+// OpenRequest represents the body for opening a conversation.
+type OpenRequest struct {
+	MessageType string `json:"message_type"`
+	Type        string `json:"type,omitempty"`
+	AdminID     string `json:"admin_id"`
+	Body        string `json:"body,omitempty"`
+}
+
+// SnoozeRequest represents the body for snoozing a conversation.
+type SnoozeRequest struct {
 	MessageType  string `json:"message_type"`
 	Type         string `json:"type,omitempty"`
 	AdminID      string `json:"admin_id"`
 	Body         string `json:"body,omitempty"`
-	AssigneeID   string `json:"assignee_id,omitempty"`
 	SnoozedUntil *int64 `json:"snoozed_until,omitempty"`
+}
+
+// AssignRequest represents the body for assigning a conversation.
+type AssignRequest struct {
+	MessageType string `json:"message_type"`
+	Type        string `json:"type,omitempty"`
+	AdminID     string `json:"admin_id"`
+	Body        string `json:"body,omitempty"`
+	AssigneeID  string `json:"assignee_id,omitempty"`
 }
 
 // ConvertRequest is the body for converting a conversation to a ticket.
@@ -374,7 +398,7 @@ func (s *Service) Reply(ctx context.Context, id string, body *ReplyRequest) (*Co
 // Close closes a conversation. The request body should have MessageType "close".
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
-func (s *Service) Close(ctx context.Context, id string, body *ManageRequest) (*Conversation, error) {
+func (s *Service) Close(ctx context.Context, id string, body *CloseRequest) (*Conversation, error) {
 	result, err := s.CloseRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
@@ -388,7 +412,7 @@ func (s *Service) Close(ctx context.Context, id string, body *ManageRequest) (*C
 // Open opens a snoozed or closed conversation. The request body should have MessageType "open".
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
-func (s *Service) Open(ctx context.Context, id string, body *ManageRequest) (*Conversation, error) {
+func (s *Service) Open(ctx context.Context, id string, body *OpenRequest) (*Conversation, error) {
 	result, err := s.OpenRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
@@ -402,7 +426,7 @@ func (s *Service) Open(ctx context.Context, id string, body *ManageRequest) (*Co
 // Snooze snoozes a conversation until a given time. The request body should have MessageType "snoozed".
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
-func (s *Service) Snooze(ctx context.Context, id string, body *ManageRequest) (*Conversation, error) {
+func (s *Service) Snooze(ctx context.Context, id string, body *SnoozeRequest) (*Conversation, error) {
 	result, err := s.SnoozeRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
@@ -416,7 +440,7 @@ func (s *Service) Snooze(ctx context.Context, id string, body *ManageRequest) (*
 // Assign assigns a conversation to an admin or team. The request body should have MessageType "assignment".
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
-func (s *Service) Assign(ctx context.Context, id string, body *ManageRequest) (*Conversation, error) {
+func (s *Service) Assign(ctx context.Context, id string, body *AssignRequest) (*Conversation, error) {
 	result, err := s.AssignRaw(ctx, id, body)
 	if err != nil {
 		return nil, err
@@ -595,33 +619,33 @@ func (s *Service) ReplyRaw(ctx context.Context, id string, body *ReplyRequest) (
 // CloseRaw closes a conversation and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
-func (s *Service) CloseRaw(ctx context.Context, id string, body *ManageRequest) (*api.Result, error) {
+func (s *Service) CloseRaw(ctx context.Context, id string, body *CloseRequest) (*api.Result, error) {
 	return s.managePartsRaw(ctx, id, body)
 }
 
 // OpenRaw opens a conversation and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
-func (s *Service) OpenRaw(ctx context.Context, id string, body *ManageRequest) (*api.Result, error) {
+func (s *Service) OpenRaw(ctx context.Context, id string, body *OpenRequest) (*api.Result, error) {
 	return s.managePartsRaw(ctx, id, body)
 }
 
 // SnoozeRaw snoozes a conversation and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
-func (s *Service) SnoozeRaw(ctx context.Context, id string, body *ManageRequest) (*api.Result, error) {
+func (s *Service) SnoozeRaw(ctx context.Context, id string, body *SnoozeRequest) (*api.Result, error) {
 	return s.managePartsRaw(ctx, id, body)
 }
 
 // AssignRaw assigns a conversation and returns the full HTTP result.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/manageconversation
-func (s *Service) AssignRaw(ctx context.Context, id string, body *ManageRequest) (*api.Result, error) {
+func (s *Service) AssignRaw(ctx context.Context, id string, body *AssignRequest) (*api.Result, error) {
 	return s.managePartsRaw(ctx, id, body)
 }
 
 // managePartsRaw sends a POST to the /parts endpoint and returns the full HTTP result.
-func (s *Service) managePartsRaw(ctx context.Context, id string, body *ManageRequest) (*api.Result, error) {
+func (s *Service) managePartsRaw(ctx context.Context, id string, body any) (*api.Result, error) {
 	req, err := s.client.NewRequest(http.MethodPost, fmt.Sprintf("conversations/%s/parts", url.PathEscape(id)), body)
 	if err != nil {
 		return nil, err

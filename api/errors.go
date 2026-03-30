@@ -61,7 +61,10 @@ func (e *ErrorResponse) Error() string {
 		return "unknown API error"
 	}
 	if len(e.Errors) > 0 {
-		return fmt.Sprintf("%s: %s", e.Errors[0].Code, e.Errors[0].Message)
+		if e.Errors[0].Message != "" {
+			return fmt.Sprintf("%s: %s", e.Errors[0].Code, e.Errors[0].Message)
+		}
+		return string(e.Errors[0].Code)
 	}
 	if e.StatusCode != 0 {
 		if e.RawBody != "" {

@@ -24,7 +24,7 @@ All tests use the standard `testing` package — no external frameworks.
 
 ## Project Structure
 
-Services live in 16 domain-scoped sub-packages (`contacts/`, `tickets/`, `tags/`, etc.). Core types and the HTTP client live in the root `intercom` package. Shared types used across sub-packages live in `api/`.
+Services live in 17 domain-scoped sub-packages (`contacts/`, `tickets/`, `tags/`, etc.). Core types and the HTTP client live in the root `intercom` package. Shared types used across sub-packages live in `api/`.
 
 Sub-packages never import each other. If a type is needed by multiple packages, it belongs in `api/`.
 
