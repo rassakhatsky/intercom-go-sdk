@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 )
 
 func TestCheckResponse_ParsesErrorList(t *testing.T) {
@@ -385,7 +387,7 @@ func TestResultError_404(t *testing.T) {
 		},
 	}
 
-	err := resultError(r)
+	err := api.ResultError(r)
 	if err == nil {
 		t.Fatal("expected non-nil error")
 	}
@@ -418,7 +420,7 @@ func TestResultError_429(t *testing.T) {
 		},
 	}
 
-	err := resultError(r)
+	err := api.ResultError(r)
 	if !IsRateLimited(err) {
 		t.Error("IsRateLimited() = false, want true")
 	}
@@ -434,7 +436,7 @@ func TestResultError_401(t *testing.T) {
 		},
 	}
 
-	err := resultError(r)
+	err := api.ResultError(r)
 	if !IsUnauthorized(err) {
 		t.Error("IsUnauthorized() = false, want true")
 	}
@@ -448,7 +450,7 @@ func TestResultError_500_NonJSON(t *testing.T) {
 		},
 	}
 
-	err := resultError(r)
+	err := api.ResultError(r)
 	if err == nil {
 		t.Fatal("expected non-nil error")
 	}
@@ -468,7 +470,7 @@ func TestResultError_500_NonJSON(t *testing.T) {
 func TestResultError_NilError(t *testing.T) {
 	r := &Result{StatusCode: http.StatusOK}
 
-	err := resultError(r)
+	err := api.ResultError(r)
 	if err != nil {
 		t.Errorf("expected nil error for result without Error, got %v", err)
 	}

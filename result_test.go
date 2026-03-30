@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 )
 
 func TestBuildResult_PopulatesFields(t *testing.T) {
@@ -23,7 +25,7 @@ func TestBuildResult_PopulatesFields(t *testing.T) {
 	}
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
-	r := buildResult(resp, body)
+	r := api.BuildResult(resp, body)
 
 	if r.StatusCode != 200 {
 		t.Errorf("StatusCode = %d, want 200", r.StatusCode)
@@ -97,7 +99,7 @@ func TestBuildResult_404_PopulatesError(t *testing.T) {
 	}
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
-	r := buildResult(resp, body)
+	r := api.BuildResult(resp, body)
 
 	if r.StatusCode != 404 {
 		t.Errorf("StatusCode = %d, want 404", r.StatusCode)
@@ -259,7 +261,7 @@ func TestBuildResult_200(t *testing.T) {
 		Request:    httptest.NewRequest(http.MethodGet, "https://api.intercom.io/contacts/1", nil),
 	}
 
-	r := buildResult(resp, body)
+	r := api.BuildResult(resp, body)
 
 	if r.StatusCode != 200 {
 		t.Errorf("StatusCode = %d, want 200", r.StatusCode)
@@ -283,7 +285,7 @@ func TestBuildResult_404(t *testing.T) {
 		Request:    httptest.NewRequest(http.MethodGet, "https://api.intercom.io/contacts/999", nil),
 	}
 
-	r := buildResult(resp, body)
+	r := api.BuildResult(resp, body)
 
 	if r.StatusCode != 404 {
 		t.Errorf("StatusCode = %d, want 404", r.StatusCode)
@@ -307,7 +309,7 @@ func TestBuildResult_404_JSONWithoutErrorsArray(t *testing.T) {
 		Request:    httptest.NewRequest(http.MethodGet, "https://api.intercom.io/contacts/999", nil),
 	}
 
-	r := buildResult(resp, body)
+	r := api.BuildResult(resp, body)
 
 	if r.Error == nil {
 		t.Fatal("Error is nil, want non-nil")
@@ -325,7 +327,7 @@ func TestBuildResult_500_NonJSON(t *testing.T) {
 		Request:    httptest.NewRequest(http.MethodGet, "https://api.intercom.io/contacts", nil),
 	}
 
-	r := buildResult(resp, body)
+	r := api.BuildResult(resp, body)
 
 	if r.StatusCode != 500 {
 		t.Errorf("StatusCode = %d, want 500", r.StatusCode)

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 )
 
 func TestIter_MultiplePages(t *testing.T) {
@@ -58,7 +60,7 @@ func TestIter_MultiplePages(t *testing.T) {
 	}
 
 	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
-		path, _ := addQueryOptions("items", opts)
+		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
 		result := new(PagedResult[item])
 		_, err := client.Do(ctx, req, result)
@@ -113,7 +115,7 @@ func TestIter_EmptyFirstPage(t *testing.T) {
 	}
 
 	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
-		path, _ := addQueryOptions("items", opts)
+		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
 		result := new(PagedResult[item])
 		_, err := client.Do(ctx, req, result)
@@ -168,7 +170,7 @@ func TestIter_ErrorMidPagination(t *testing.T) {
 	}
 
 	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
-		path, _ := addQueryOptions("items", opts)
+		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
 		result := new(PagedResult[item])
 		_, err := client.Do(ctx, req, result)
@@ -217,7 +219,7 @@ func TestIter_Current(t *testing.T) {
 	}
 
 	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
-		path, _ := addQueryOptions("items", opts)
+		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
 		result := new(PagedResult[item])
 		_, err := client.Do(ctx, req, result)
@@ -258,7 +260,7 @@ func TestIter_PageResponse(t *testing.T) {
 	}
 
 	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
-		path, _ := addQueryOptions("items", opts)
+		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
 		result := new(PagedResult[item])
 		_, err := client.Do(ctx, req, result)
@@ -378,7 +380,7 @@ func TestIter_Collect_MultiplePages(t *testing.T) {
 	}
 
 	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
-		path, _ := addQueryOptions("items", opts)
+		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
 		result := new(PagedResult[item])
 		_, err := client.Do(ctx, req, result)
@@ -429,7 +431,7 @@ func TestIter_Collect_EmptyResult(t *testing.T) {
 	}
 
 	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
-		path, _ := addQueryOptions("items", opts)
+		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
 		result := new(PagedResult[item])
 		_, err := client.Do(ctx, req, result)
@@ -483,7 +485,7 @@ func TestIter_Collect_Error(t *testing.T) {
 	}
 
 	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
-		path, _ := addQueryOptions("items", opts)
+		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
 		result := new(PagedResult[item])
 		_, err := client.Do(ctx, req, result)
@@ -562,7 +564,7 @@ func TestIter_ForEach_AllItems(t *testing.T) {
 	}
 
 	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
-		path, _ := addQueryOptions("items", opts)
+		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
 		result := new(PagedResult[item])
 		_, err := client.Do(ctx, req, result)
@@ -611,7 +613,7 @@ func TestIter_ForEach_EarlyExit(t *testing.T) {
 	}
 
 	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
-		path, _ := addQueryOptions("items", opts)
+		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
 		result := new(PagedResult[item])
 		_, err := client.Do(ctx, req, result)
@@ -674,7 +676,7 @@ func TestIter_ForEach_FetchError(t *testing.T) {
 	}
 
 	fetcher := func(ctx context.Context, opts *ListOptions) (*PagedResult[item], error) {
-		path, _ := addQueryOptions("items", opts)
+		path, _ := api.AddQueryOptions("items", opts)
 		req, _ := client.NewRequest(http.MethodGet, path, nil)
 		result := new(PagedResult[item])
 		_, err := client.Do(ctx, req, result)
@@ -712,7 +714,7 @@ func TestIter_ForEach_FetchError(t *testing.T) {
 
 func TestListOptions_QueryParams(t *testing.T) {
 	opts := &ListOptions{PerPage: 25, StartingAfter: "cursor-abc"}
-	path, err := addQueryOptions("contacts", opts)
+	path, err := api.AddQueryOptions("contacts", opts)
 	if err != nil {
 		t.Fatalf("addQueryOptions error: %v", err)
 	}

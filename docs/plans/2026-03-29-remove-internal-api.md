@@ -53,9 +53,9 @@
 - [x] Run `go test ./...` — all tests must pass
 
 ### Task 4: Replace unexported vars with direct `api.` calls
-- [ ] In `intercom.go`: replace `buildResult(...)` → `api.BuildResult(...)`, `resultError(...)` → `api.ResultError(...)` (add `api` import)
-- [ ] In root test files (`result_test.go`, `errors_test.go`, `intercom_test.go`, `pagination_test.go`): replace `buildResult` → `api.BuildResult`, `resultError` → `api.ResultError`, `addQueryOptions` → `api.AddQueryOptions`
-- [ ] Run `go test ./...` — all tests must pass
+- [x] In `intercom.go`: replace `buildResult(...)` → `api.BuildResult(...)`, `resultError(...)` → `api.ResultError(...)` (add `api` import)
+- [x] In root test files (`result_test.go`, `errors_test.go`, `intercom_test.go`, `pagination_test.go`): replace `buildResult` → `api.BuildResult`, `resultError` → `api.ResultError`, `addQueryOptions` → `api.AddQueryOptions`
+- [x] Run `go test ./...` — all tests must pass
 
 ### Task 5: Delete `aliases.go`
 - [ ] Delete `aliases.go`

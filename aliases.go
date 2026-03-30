@@ -234,9 +234,3 @@ func And(filters ...*Filter) *Filter { return api.And(filters...) }
 // Or creates a compound filter that requires any sub-filter to match.
 func Or(filters ...*Filter) *Filter { return api.Or(filters...) }
 
-// Unexported function wrappers used by service files and intercom.go.
-var (
-	buildResult     = api.BuildResult
-	resultError     = api.ResultError
-	addQueryOptions = api.AddQueryOptions
-)

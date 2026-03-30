@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 )
 
 func TestNewClient_Defaults(t *testing.T) {
@@ -218,7 +220,7 @@ func TestAddQueryOptions(t *testing.T) {
 		Empty string `url:"empty,omitempty"`
 	}
 
-	got, err := addQueryOptions("contacts", &opts{Page: 2, Name: "alice"})
+	got, err := api.AddQueryOptions("contacts", &opts{Page: 2, Name: "alice"})
 	if err != nil {
 		t.Fatalf("addQueryOptions error: %v", err)
 	}
@@ -236,7 +238,7 @@ func TestAddQueryOptions(t *testing.T) {
 }
 
 func TestAddQueryOptions_NilOpts(t *testing.T) {
-	got, err := addQueryOptions("contacts", nil)
+	got, err := api.AddQueryOptions("contacts", nil)
 	if err != nil {
 		t.Fatalf("addQueryOptions error: %v", err)
 	}
@@ -253,7 +255,7 @@ func TestAddQueryOptions_PointerFields(t *testing.T) {
 
 	active := true
 	name := "bob"
-	got, err := addQueryOptions("contacts", &opts{Active: &active, Name: &name})
+	got, err := api.AddQueryOptions("contacts", &opts{Active: &active, Name: &name})
 	if err != nil {
 		t.Fatalf("addQueryOptions error: %v", err)
 	}
@@ -265,7 +267,7 @@ func TestAddQueryOptions_PointerFields(t *testing.T) {
 	}
 
 	// nil pointers should be omitted
-	got, err = addQueryOptions("contacts", &opts{})
+	got, err = api.AddQueryOptions("contacts", &opts{})
 	if err != nil {
 		t.Fatalf("addQueryOptions error: %v", err)
 	}
@@ -280,7 +282,7 @@ func TestAddQueryOptions_SkipTag(t *testing.T) {
 		Secret string `url:"-"`
 	}
 
-	got, err := addQueryOptions("contacts", &opts{Page: 1, Secret: "hidden"})
+	got, err := api.AddQueryOptions("contacts", &opts{Page: 1, Secret: "hidden"})
 	if err != nil {
 		t.Fatalf("addQueryOptions error: %v", err)
 	}
@@ -293,7 +295,7 @@ func TestAddQueryOptions_SkipTag(t *testing.T) {
 }
 
 func TestAddQueryOptions_NonStruct(t *testing.T) {
-	_, err := addQueryOptions("contacts", "not-a-struct")
+	_, err := api.AddQueryOptions("contacts", "not-a-struct")
 	if err == nil {
 		t.Error("expected error for non-struct input")
 	}

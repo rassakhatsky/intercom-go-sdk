@@ -13,6 +13,7 @@ import (
 
 	"github.com/rassakhatsky/intercom-go-sdk/admins"
 	aiPkg "github.com/rassakhatsky/intercom-go-sdk/ai"
+	"github.com/rassakhatsky/intercom-go-sdk/api"
 	"github.com/rassakhatsky/intercom-go-sdk/articles"
 	"github.com/rassakhatsky/intercom-go-sdk/calls"
 	"github.com/rassakhatsky/intercom-go-sdk/companies"
@@ -385,7 +386,7 @@ func (c *Client) DoRaw(ctx context.Context, req *http.Request) (*Result, error) 
 		return nil, err
 	}
 
-	return buildResult(resp, body), nil
+	return api.BuildResult(resp, body), nil
 }
 
 // DoRawNoRedirect executes an HTTP request like DoRaw, but does not follow
@@ -414,7 +415,7 @@ func (c *Client) DoRawNoRedirect(ctx context.Context, req *http.Request) (*Resul
 		return nil, err
 	}
 
-	return buildResult(resp, body), nil
+	return api.BuildResult(resp, body), nil
 }
 
 // DoDownload executes an HTTP request and streams the response body to w.
@@ -435,8 +436,8 @@ func (c *Client) DoDownload(ctx context.Context, req *http.Request, w io.Writer)
 		if readErr != nil {
 			return fmt.Errorf("HTTP %d: failed to read error body: %w", resp.StatusCode, readErr)
 		}
-		result := buildResult(resp, body)
-		return resultError(result)
+		result := api.BuildResult(resp, body)
+		return api.ResultError(result)
 	}
 
 	_, err = io.Copy(w, resp.Body)
@@ -456,7 +457,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*Response, e
 	response := &Response{Result: result}
 
 	if result.Error != nil {
-		return response, resultError(result)
+		return response, api.ResultError(result)
 	}
 
 	if v != nil && result.StatusCode != http.StatusNoContent && len(result.Body) > 0 {
