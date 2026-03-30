@@ -582,6 +582,13 @@ func TestErrorDetail_Code_IsErrorCode(t *testing.T) {
 	}
 }
 
+func TestHasErrorCode_NilReceiver(t *testing.T) {
+	var e *ErrorResponse
+	if e.HasErrorCode(ErrServerError) {
+		t.Error("HasErrorCode on nil receiver should return false")
+	}
+}
+
 func TestHasErrorCode(t *testing.T) {
 	tests := []struct {
 		name string

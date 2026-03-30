@@ -74,6 +74,9 @@ func (e *ErrorResponse) Error() string {
 
 // HasErrorCode reports whether any error in the Errors slice matches the given code.
 func (e *ErrorResponse) HasErrorCode(code ErrorCode) bool {
+	if e == nil {
+		return false
+	}
 	for _, detail := range e.Errors {
 		if detail.Code == code {
 			return true

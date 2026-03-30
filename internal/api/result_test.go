@@ -235,6 +235,15 @@ func TestBuildResult_NilRequest(t *testing.T) {
 	}
 }
 
+func TestErrorResult_Error_NilReceiver(t *testing.T) {
+	var e *ErrorResult
+	got := e.Error()
+	want := "unknown API error"
+	if got != want {
+		t.Errorf("Error() = %q, want %q", got, want)
+	}
+}
+
 func TestErrorResult_Error(t *testing.T) {
 	tests := []struct {
 		name string

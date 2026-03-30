@@ -32,6 +32,9 @@ type ErrorDetail struct {
 
 // Error returns a human-readable description of the API error.
 func (e *ErrorResult) Error() string {
+	if e == nil {
+		return "unknown API error"
+	}
 	if e.Code != "" {
 		return string(e.Code) + ": " + e.Message
 	}
