@@ -84,12 +84,12 @@
 - [x] run full test suite `go test ./...` — must pass
 
 ### Task 6: Verify acceptance criteria
-- [ ] verify all 18 sub-packages (16 domain + api + root) have package-level godoc
-- [ ] verify example tests compile and pass
-- [ ] verify CONTRIBUTING.md exists and is accurate
-- [ ] run full test suite `go test ./...`
-- [ ] run linter `go vet ./...` — all issues must be fixed
-- [ ] run `gofmt -l .` — no formatting issues
+- [x] verify all 18 sub-packages (16 domain + api + root) have package-level godoc
+- [x] verify example tests compile and pass
+- [x] verify CONTRIBUTING.md exists and is accurate
+- [x] run full test suite `go test ./...`
+- [x] run linter `go vet ./...` — all issues must be fixed
+- [x] run `gofmt -l .` — no formatting issues
 
 ### Task 7: [Final] Update project knowledge
 - [ ] update CLAUDE.md if new patterns discovered
