@@ -96,6 +96,9 @@ func WithHTTPClient(hc *http.Client) ClientOption {
 
 // WithLogger sets a custom logger.
 func WithLogger(l api.Logger) ClientOption {
+	if l == nil {
+		panic("intercom: WithLogger requires a non-nil Logger")
+	}
 	return func(c *Client) {
 		c.logger = l
 	}
