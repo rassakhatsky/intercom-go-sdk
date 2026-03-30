@@ -41,7 +41,7 @@ type Conversation struct {
 	ConversationParts *PartList         `json:"conversation_parts,omitempty"`
 	Statistics        map[string]any    `json:"statistics,omitempty"`
 	CustomAttributes  map[string]any    `json:"custom_attributes,omitempty"`
-	LinkedObjects     *LinkedObjectList `json:"linked_objects,omitempty"`
+	LinkedObjects     *api.LinkedObjectList `json:"linked_objects,omitempty"`
 }
 
 // Source represents the originating message of a conversation.
@@ -99,13 +99,6 @@ type Part struct {
 	Redacted   bool        `json:"redacted,omitempty"`
 }
 
-// LinkedObjectList holds linked objects for a conversation.
-type LinkedObjectList struct {
-	Type       string `json:"type"`
-	Data       []any  `json:"data"`
-	TotalCount int    `json:"total_count"`
-	HasMore    bool   `json:"has_more"`
-}
 
 // Deleted represents the response from deleting a conversation.
 type Deleted struct {

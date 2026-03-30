@@ -9,6 +9,15 @@ type Author struct {
 	Email string `json:"email,omitempty"`
 }
 
+// LinkedObjectList holds linked objects on a conversation or ticket.
+// It is shared across conversations and tickets services.
+type LinkedObjectList struct {
+	Type       string `json:"type"`
+	Data       []any  `json:"data"`
+	TotalCount int    `json:"total_count"`
+	HasMore    bool   `json:"has_more"`
+}
+
 // TagRef represents a tag in sub-resource responses.
 // It is shared across multiple services (contacts, companies, conversations, tickets).
 type TagRef struct {

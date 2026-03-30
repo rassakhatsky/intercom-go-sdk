@@ -36,7 +36,7 @@ type Ticket struct {
 	UpdatedAt        int64             `json:"updated_at,omitempty"`
 	Open             bool              `json:"open,omitempty"`
 	SnoozedUntil     *int64            `json:"snoozed_until,omitempty"`
-	LinkedObjects    *LinkedObjectList `json:"linked_objects,omitempty"`
+	LinkedObjects    *api.LinkedObjectList `json:"linked_objects,omitempty"`
 	TicketParts      *PartList         `json:"ticket_parts,omitempty"`
 	IsShared         bool              `json:"is_shared,omitempty"`
 }
@@ -94,13 +94,6 @@ type Part struct {
 }
 
 
-// LinkedObjectList holds linked objects on a ticket.
-type LinkedObjectList struct {
-	Type       string `json:"type"`
-	Data       []any  `json:"data"`
-	TotalCount int    `json:"total_count"`
-	HasMore    bool   `json:"has_more"`
-}
 
 // Deleted represents the response from deleting a ticket.
 type Deleted struct {

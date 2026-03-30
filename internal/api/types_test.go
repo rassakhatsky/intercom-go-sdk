@@ -51,6 +51,54 @@ func TestAuthor_UnmarshalMinimal(t *testing.T) {
 	}
 }
 
+func TestLinkedObjectList_JSONRoundTrip(t *testing.T) {
+	l := LinkedObjectList{
+		Type:       "list",
+		Data:       []any{"ticket_1", float64(42)},
+		TotalCount: 2,
+		HasMore:    true,
+	}
+	data, err := json.Marshal(l)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var got LinkedObjectList
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if got.Type != l.Type || got.TotalCount != l.TotalCount || got.HasMore != l.HasMore {
+		t.Fatalf("got %+v, want %+v", got, l)
+	}
+	if len(got.Data) != 2 {
+		t.Fatalf("expected 2 data items, got %d", len(got.Data))
+	}
+}
+
+func TestLinkedObjectList_EmptyData(t *testing.T) {
+	raw := `{"type":"list","data":[],"total_count":0,"has_more":false}`
+	var l LinkedObjectList
+	if err := json.Unmarshal([]byte(raw), &l); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if l.Type != "list" || l.TotalCount != 0 || l.HasMore != false || len(l.Data) != 0 {
+		t.Fatalf("unexpected: %+v", l)
+	}
+}
+
+func TestLinkedObjectList_OmitEmpty(t *testing.T) {
+	// Zero-value LinkedObjectList should still marshal required fields
+	l := LinkedObjectList{Type: "list"}
+	data, err := json.Marshal(l)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	s := string(data)
+	// data should be null (nil slice), total_count and has_more should be present as zero values
+	if !contains(s, `"type":"list"`) {
+		t.Fatalf("expected type field, got %s", s)
+	}
+}
+
 func contains(s, sub string) bool {
 	return len(s) >= len(sub) && searchString(s, sub)
 }

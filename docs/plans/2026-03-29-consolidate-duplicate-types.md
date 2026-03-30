@@ -49,11 +49,11 @@
 - [x] Run `go test ./...` — must pass before next task
 
 ### Task 2: Add LinkedObjectList to internal/api/types.go
-- [ ] Write tests in `internal/api/types_test.go` for `LinkedObjectList` JSON marshal/unmarshal
-- [ ] Add `LinkedObjectList` struct to `internal/api/types.go` with fields: `Type`, `Data []any`, `TotalCount`, `HasMore`
-- [ ] Update `conversations/conversations.go`: remove local `LinkedObjectList`, use `api.LinkedObjectList`
-- [ ] Update `tickets/tickets.go`: remove local `LinkedObjectList`, use `api.LinkedObjectList`
-- [ ] Run `go test ./...` — must pass before next task
+- [x] Write tests in `internal/api/types_test.go` for `LinkedObjectList` JSON marshal/unmarshal
+- [x] Add `LinkedObjectList` struct to `internal/api/types.go` with fields: `Type`, `Data []any`, `TotalCount`, `HasMore`
+- [x] Update `conversations/conversations.go`: remove local `LinkedObjectList`, use `api.LinkedObjectList`
+- [x] Update `tickets/tickets.go`: remove local `LinkedObjectList`, use `api.LinkedObjectList`
+- [x] Run `go test ./...` — must pass before next task
 
 ### Task 3: Add Part (superset) to internal/api/types.go
 - [ ] Write tests in `internal/api/types_test.go` for `Part` JSON marshal/unmarshal — include `NotifiedAt` present and absent cases
