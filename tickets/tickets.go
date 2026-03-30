@@ -74,23 +74,9 @@ type ContactItem struct {
 
 // PartList holds the list of ticket parts.
 type PartList struct {
-	Type       string `json:"type"`
-	Parts      []Part `json:"ticket_parts"`
-	TotalCount int    `json:"total_count"`
-}
-
-// Part represents a single message/event in a ticket.
-type Part struct {
-	Type       string  `json:"type"`
-	ID         string  `json:"id"`
-	PartType   string  `json:"part_type,omitempty"`
-	Body       string  `json:"body,omitempty"`
-	CreatedAt  int64   `json:"created_at,omitempty"`
-	UpdatedAt  int64   `json:"updated_at,omitempty"`
-	AssignedTo *api.Author `json:"assigned_to,omitempty"`
-	Author     *api.Author `json:"author,omitempty"`
-	ExternalID string  `json:"external_id,omitempty"`
-	Redacted   bool    `json:"redacted,omitempty"`
+	Type       string     `json:"type"`
+	Parts      []api.Part `json:"ticket_parts"`
+	TotalCount int        `json:"total_count"`
 }
 
 
@@ -217,8 +203,8 @@ func ParseSearchResult(r *api.Result) (*api.PagedResult[Ticket], error) {
 }
 
 // ParseReplyResult decodes a Result into a Part.
-func ParseReplyResult(r *api.Result) (*Part, error) {
-	return api.Decode[Part](r)
+func ParseReplyResult(r *api.Result) (*api.Part, error) {
+	return api.Decode[api.Part](r)
 }
 
 // ParseAddTagResult decodes a Result into a TagRef.
@@ -311,7 +297,7 @@ func (s *Service) Search(ctx context.Context, body *api.SearchRequest) (*api.Pag
 // Reply adds a reply to a ticket.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/replyticket
-func (s *Service) Reply(ctx context.Context, id string, body *ReplyRequest) (*Part, error) {
+func (s *Service) Reply(ctx context.Context, id string, body *ReplyRequest) (*api.Part, error) {
 	result, err := s.ReplyRaw(ctx, id, body)
 	if err != nil {
 		return nil, err

@@ -99,6 +99,75 @@ func TestLinkedObjectList_OmitEmpty(t *testing.T) {
 	}
 }
 
+func TestPart_JSONRoundTrip(t *testing.T) {
+	p := Part{
+		Type:       "conversation_part",
+		ID:         "part_1",
+		PartType:   "comment",
+		Body:       "Hello",
+		CreatedAt:  1700000000,
+		UpdatedAt:  1700001000,
+		NotifiedAt: 1700002000,
+		AssignedTo: &Author{Type: "admin", ID: "a1"},
+		Author:     &Author{Type: "admin", ID: "a2", Name: "Bob"},
+		ExternalID: "ext_1",
+		Redacted:   true,
+	}
+	data, err := json.Marshal(p)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var got Part
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if got.Type != p.Type || got.ID != p.ID || got.PartType != p.PartType ||
+		got.Body != p.Body || got.CreatedAt != p.CreatedAt || got.UpdatedAt != p.UpdatedAt ||
+		got.NotifiedAt != p.NotifiedAt || got.ExternalID != p.ExternalID || got.Redacted != p.Redacted {
+		t.Fatalf("got %+v, want %+v", got, p)
+	}
+	if got.AssignedTo == nil || got.AssignedTo.ID != "a1" {
+		t.Fatalf("AssignedTo mismatch: %+v", got.AssignedTo)
+	}
+	if got.Author == nil || got.Author.Name != "Bob" {
+		t.Fatalf("Author mismatch: %+v", got.Author)
+	}
+}
+
+func TestPart_WithoutNotifiedAt(t *testing.T) {
+	// Tickets don't have NotifiedAt — verify it stays zero and is omitted
+	raw := `{"type":"ticket_part","id":"tp_1","part_type":"note","body":"Hi"}`
+	var p Part
+	if err := json.Unmarshal([]byte(raw), &p); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if p.Type != "ticket_part" || p.ID != "tp_1" || p.NotifiedAt != 0 {
+		t.Fatalf("unexpected: %+v", p)
+	}
+	// Re-marshal: notified_at should be absent
+	data, err := json.Marshal(p)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	if contains(string(data), "notified_at") {
+		t.Fatalf("expected notified_at omitted, got %s", string(data))
+	}
+}
+
+func TestPart_OmitEmpty(t *testing.T) {
+	p := Part{Type: "conversation_part", ID: "p1"}
+	data, err := json.Marshal(p)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	s := string(data)
+	for _, field := range []string{"part_type", "body", "created_at", "updated_at", "notified_at", "assigned_to", "author", "external_id", "redacted"} {
+		if contains(s, field) {
+			t.Fatalf("expected %s omitted, got %s", field, s)
+		}
+	}
+}
+
 func contains(s, sub string) bool {
 	return len(s) >= len(sub) && searchString(s, sub)
 }

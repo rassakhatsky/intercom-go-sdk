@@ -56,12 +56,12 @@
 - [x] Run `go test ./...` — must pass before next task
 
 ### Task 3: Add Part (superset) to internal/api/types.go
-- [ ] Write tests in `internal/api/types_test.go` for `Part` JSON marshal/unmarshal — include `NotifiedAt` present and absent cases
-- [ ] Add `Part` struct to `internal/api/types.go` — superset of conversations + tickets fields: `Type`, `ID`, `PartType`, `Body`, `CreatedAt`, `UpdatedAt`, `NotifiedAt`, `AssignedTo *Author`, `Author *Author`, `ExternalID`, `Redacted`
-- [ ] Update `conversations/conversations.go`: remove local `Part`, use `api.Part`
-- [ ] Update `tickets/tickets.go`: remove local `Part`, use `api.Part`
-- [ ] Update `PartList` structs in both packages to reference `[]api.Part` (keep PartList local — different JSON tags)
-- [ ] Run `go test ./...` — must pass before next task
+- [x] Write tests in `internal/api/types_test.go` for `Part` JSON marshal/unmarshal — include `NotifiedAt` present and absent cases
+- [x] Add `Part` struct to `internal/api/types.go` — superset of conversations + tickets fields: `Type`, `ID`, `PartType`, `Body`, `CreatedAt`, `UpdatedAt`, `NotifiedAt`, `AssignedTo *Author`, `Author *Author`, `ExternalID`, `Redacted`
+- [x] Update `conversations/conversations.go`: remove local `Part`, use `api.Part`
+- [x] Update `tickets/tickets.go`: remove local `Part`, use `api.Part`
+- [x] Update `PartList` structs in both packages to reference `[]api.Part` (keep PartList local — different JSON tags)
+- [x] Run `go test ./...` — must pass before next task
 
 ### Task 4: Consolidate ContactItem into extended ContactRef
 - [ ] Write tests in `internal/api/types_test.go` for `ContactRef` with `ExternalID` field (backward compat: existing `ContactRef` usage without ExternalID must still work)

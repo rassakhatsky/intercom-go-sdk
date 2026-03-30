@@ -79,24 +79,9 @@ type TagList struct {
 
 // PartList holds the list of conversation parts.
 type PartList struct {
-	Type       string `json:"type"`
-	Parts      []Part `json:"conversation_parts"`
-	TotalCount int    `json:"total_count"`
-}
-
-// Part represents a single message/action in a conversation.
-type Part struct {
-	Type       string  `json:"type"`
-	ID         string  `json:"id"`
-	PartType   string  `json:"part_type,omitempty"`
-	Body       string  `json:"body,omitempty"`
-	CreatedAt  int64   `json:"created_at,omitempty"`
-	UpdatedAt  int64   `json:"updated_at,omitempty"`
-	NotifiedAt int64   `json:"notified_at,omitempty"`
-	AssignedTo *api.Author `json:"assigned_to,omitempty"`
-	Author     *api.Author `json:"author,omitempty"`
-	ExternalID string      `json:"external_id,omitempty"`
-	Redacted   bool        `json:"redacted,omitempty"`
+	Type       string     `json:"type"`
+	Parts      []api.Part `json:"conversation_parts"`
+	TotalCount int        `json:"total_count"`
 }
 
 

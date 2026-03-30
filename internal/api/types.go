@@ -18,6 +18,23 @@ type LinkedObjectList struct {
 	HasMore    bool   `json:"has_more"`
 }
 
+// Part represents a conversation part or ticket part.
+// It is the superset of conversations and tickets Part types.
+// Conversations use NotifiedAt; tickets do not (omitted via omitempty).
+type Part struct {
+	Type       string  `json:"type"`
+	ID         string  `json:"id"`
+	PartType   string  `json:"part_type,omitempty"`
+	Body       string  `json:"body,omitempty"`
+	CreatedAt  int64   `json:"created_at,omitempty"`
+	UpdatedAt  int64   `json:"updated_at,omitempty"`
+	NotifiedAt int64   `json:"notified_at,omitempty"`
+	AssignedTo *Author `json:"assigned_to,omitempty"`
+	Author     *Author `json:"author,omitempty"`
+	ExternalID string  `json:"external_id,omitempty"`
+	Redacted   bool    `json:"redacted,omitempty"`
+}
+
 // TagRef represents a tag in sub-resource responses.
 // It is shared across multiple services (contacts, companies, conversations, tickets).
 type TagRef struct {
