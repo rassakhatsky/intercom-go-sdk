@@ -3,7 +3,7 @@
 Go SDK for the [Intercom REST API](https://developers.intercom.com/docs/references/rest-api/api.intercom.io/) v2.15.
 
 - Minimal dependencies (stdlib + [`google/go-querystring`](https://github.com/google/go-querystring))
-- 167 endpoints across 34 services organized in 16 domain-scoped sub-packages
+- 167 endpoints across 34 services organized in 17 domain-scoped sub-packages
 - Generic auto-pagination iterator
 - Search filter builder
 
