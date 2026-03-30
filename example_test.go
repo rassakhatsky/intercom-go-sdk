@@ -70,9 +70,9 @@ func Example_contactsSearchRaw() {
 	fmt.Printf("Rate limit remaining: %s\n", result.Header.Get("X-RateLimit-Remaining"))
 }
 
-// ExampleIsRateLimited demonstrates handling rate-limited responses
+// Example_rateLimitHandling demonstrates handling rate-limited responses
 // with parsed rate limit metadata.
-func ExampleIsRateLimited() {
+func Example_rateLimitHandling() {
 	client := intercom.NewClient("your-bearer-token")
 	ctx := context.Background()
 
@@ -89,9 +89,9 @@ func ExampleIsRateLimited() {
 	}
 }
 
-// ExampleErrorResponse_HasErrorCode demonstrates matching specific
+// Example_errorCodeMatching demonstrates matching specific
 // Intercom API error codes returned in error responses.
-func ExampleErrorResponse_HasErrorCode() {
+func Example_errorCodeMatching() {
 	client := intercom.NewClient("your-bearer-token")
 	ctx := context.Background()
 
@@ -115,9 +115,9 @@ func ExampleErrorResponse_HasErrorCode() {
 	}
 }
 
-// ExampleIsServerError demonstrates checking for server-side errors
+// Example_serverErrorRetry demonstrates checking for server-side errors
 // to implement retry logic.
-func ExampleIsServerError() {
+func Example_serverErrorRetry() {
 	client := intercom.NewClient("your-bearer-token")
 	ctx := context.Background()
 

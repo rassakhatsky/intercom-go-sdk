@@ -67,8 +67,10 @@ deleted, err := client.Contacts().Delete(ctx, contact.ID)
 ## Pagination
 
 ```go
+import "github.com/rassakhatsky/intercom-go-sdk/api"
+
 // Auto-paginate with iterator
-iter := client.Contacts().ListAll(ctx, &intercom.ListOptions{PerPage: 50})
+iter := client.Contacts().ListAll(ctx, &api.ListOptions{PerPage: 50})
 for iter.Next() {
     fmt.Println(iter.Current().Email)
 }
@@ -77,7 +79,7 @@ if err := iter.Err(); err != nil {
 }
 
 // Or collect all at once
-contacts, err := client.Contacts().ListAll(ctx, &intercom.ListOptions{PerPage: 50}).Collect()
+contacts, err := client.Contacts().ListAll(ctx, &api.ListOptions{PerPage: 50}).Collect()
 
 // Callback-based iteration
 err := client.Contacts().ListAll(ctx, nil).ForEach(func(c contacts.Contact) error {
@@ -91,16 +93,18 @@ Companies use scroll-based pagination via `client.Companies().Scroll(ctx, scroll
 ## Search
 
 ```go
+import "github.com/rassakhatsky/intercom-go-sdk/api"
+
 // Single filter — using typed operator constants
-result, err := client.Contacts().Search(ctx, &intercom.SearchRequest{
-    Query: intercom.SingleFilterOf("email", intercom.OpEquals, "alice@example.com"),
+result, err := client.Contacts().Search(ctx, &api.SearchRequest{
+    Query: api.SingleFilterOf("email", api.OpEquals, "alice@example.com"),
 })
 
 // Compound filter
-result, err = client.Contacts().Search(ctx, &intercom.SearchRequest{
-    Query: intercom.And(
-        intercom.SingleFilterOf("role", intercom.OpEquals, "user"),
-        intercom.SingleFilterOf("email", intercom.OpContains, "example.com"),
+result, err = client.Contacts().Search(ctx, &api.SearchRequest{
+    Query: api.And(
+        api.SingleFilterOf("role", api.OpEquals, "user"),
+        api.SingleFilterOf("email", api.OpContains, "example.com"),
     ),
 })
 ```
@@ -108,13 +112,15 @@ result, err = client.Contacts().Search(ctx, &intercom.SearchRequest{
 ## Error Handling
 
 ```go
+import "github.com/rassakhatsky/intercom-go-sdk/api"
+
 contact, err := client.Contacts().Get(ctx, "nonexistent")
 if err != nil {
-    if intercom.IsNotFound(err) {
+    if api.IsNotFound(err) {
         fmt.Println("Contact not found")
-    } else if intercom.IsRateLimited(err) {
+    } else if api.IsRateLimited(err) {
         fmt.Println("Rate limited")
-    } else if intercom.IsServerError(err) {
+    } else if api.IsServerError(err) {
         fmt.Println("Server error, retry with backoff")
     } else {
         fmt.Printf("Error: %v\n", err)
@@ -122,15 +128,17 @@ if err != nil {
 }
 ```
 
-Additional status helpers: `IsUnauthorized` (401), `IsBadRequest` (400), `IsForbidden` (403), `IsConflict` (409), `IsUnprocessableEntity` (422).
+Additional status helpers: `api.IsUnauthorized` (401), `api.IsBadRequest` (400), `api.IsForbidden` (403), `api.IsConflict` (409), `api.IsUnprocessableEntity` (422).
 
 ### Rate Limit Details
 
 Rate-limited (429) responses include parsed rate limit metadata:
 
 ```go
-if intercom.IsRateLimited(err) {
-    var apiErr *intercom.ErrorResponse
+import "github.com/rassakhatsky/intercom-go-sdk/api"
+
+if api.IsRateLimited(err) {
+    var apiErr *api.ErrorResponse
     if errors.As(err, &apiErr) && apiErr.RateLimit != nil {
         fmt.Printf("Retry after %v\n", apiErr.RateLimit.RetryAfter)
         time.Sleep(apiErr.RateLimit.RetryAfter)
@@ -143,9 +151,11 @@ if intercom.IsRateLimited(err) {
 Match specific Intercom API error codes using `HasErrorCode` and predefined `ErrorCode` constants:
 
 ```go
-var apiErr *intercom.ErrorResponse
+import "github.com/rassakhatsky/intercom-go-sdk/api"
+
+var apiErr *api.ErrorResponse
 if errors.As(err, &apiErr) {
-    if apiErr.HasErrorCode(intercom.ErrParameterInvalid) {
+    if apiErr.HasErrorCode(api.ErrParameterInvalid) {
         fmt.Println("Invalid parameter")
     }
 }
@@ -153,10 +163,13 @@ if errors.As(err, &apiErr) {
 
 ## Raw Methods
 
-Every method has a `*Raw` companion returning `(*Result, error)` with raw response bytes and HTTP metadata. API errors (4xx/5xx) populate `Result.Error` instead of returning a Go error.
+Every method has a `*Raw` companion returning `(*api.Result, error)` with raw response bytes and HTTP metadata. API errors (4xx/5xx) populate `Result.Error` instead of returning a Go error.
 
 ```go
-import "github.com/rassakhatsky/intercom-go-sdk/contacts"
+import (
+    "github.com/rassakhatsky/intercom-go-sdk/api"
+    "github.com/rassakhatsky/intercom-go-sdk/contacts"
+)
 
 result, err := client.Contacts().GetRaw(ctx, "contact-id")
 if err != nil {
@@ -169,7 +182,7 @@ if result.Error != nil {
 contact, err := contacts.ParseGetResult(result)
 
 // Or use the generic Decode helper
-contact, err = intercom.Decode[contacts.Contact](result)
+contact, err = api.Decode[contacts.Contact](result)
 ```
 
 ## Sub-Packages
@@ -196,7 +209,7 @@ Services are organized into domain-scoped sub-packages. Each service is accessed
 | `settings` | `Brands()`, `IPAllowlist()`, `CustomChannelEvents()`, `Jobs()`, `Notes()` | Account settings |
 | `workflows` | `Workflows()` | Workflow export |
 
-Core types (`Result`, `Iter[T]`, `Filter`, `ErrorResponse`, `ListOptions`, etc.) are re-exported as type aliases in the root `intercom` package.
+Core types (`Result`, `Iter[T]`, `Filter`, `ErrorResponse`, `ListOptions`, etc.) live in the public `api/` package and are imported directly.
 
 ### Importing Sub-Package Types
 
@@ -205,6 +218,7 @@ When you need request/response types from a specific service, import the sub-pac
 ```go
 import (
     intercom "github.com/rassakhatsky/intercom-go-sdk"
+    "github.com/rassakhatsky/intercom-go-sdk/api"
     "github.com/rassakhatsky/intercom-go-sdk/contacts"
     "github.com/rassakhatsky/intercom-go-sdk/tags"
 )
@@ -215,8 +229,8 @@ contact, err := client.Contacts().Create(ctx, &contacts.CreateRequest{
     Email: "alice@example.com",
 })
 
-// Use root aliases for shared types
-iter := client.Tags().ListAll(ctx, &intercom.ListOptions{PerPage: 25})
+// Use api package for shared types
+iter := client.Tags().ListAll(ctx, &api.ListOptions{PerPage: 25})
 ```
 
 ## Documentation

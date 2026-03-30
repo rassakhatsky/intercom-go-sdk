@@ -28,9 +28,9 @@
 //	    return nil
 //	})
 //
-//	// Search contacts with filters
-//	result, err := client.Contacts().Search(ctx, &intercom.SearchRequest{
-//	    Query: intercom.SingleFilterOf("email", intercom.OpEquals, "alice@example.com"),
+//	// Search contacts with filters (types from the api/ package)
+//	result, err := client.Contacts().Search(ctx, &api.SearchRequest{
+//	    Query: api.SingleFilterOf("email", api.OpEquals, "alice@example.com"),
 //	})
 //
 // Every service method has a Raw companion that returns a *Result with
@@ -60,23 +60,23 @@
 // All API methods accept a context.Context as their first parameter for
 // cancellation and timeout control.
 //
-// Error responses from the Intercom API are returned as *ErrorResponse values.
-// Helper functions check for common HTTP status codes:
+// Error responses from the Intercom API are returned as *api.ErrorResponse values.
+// Helper functions in the api/ package check for common HTTP status codes:
 //
-//	intercom.IsNotFound(err)            // 404
-//	intercom.IsRateLimited(err)         // 429
-//	intercom.IsUnauthorized(err)        // 401
-//	intercom.IsBadRequest(err)          // 400
-//	intercom.IsForbidden(err)           // 403
-//	intercom.IsConflict(err)            // 409
-//	intercom.IsUnprocessableEntity(err) // 422
-//	intercom.IsServerError(err)         // 5xx
+//	api.IsNotFound(err)            // 404
+//	api.IsRateLimited(err)         // 429
+//	api.IsUnauthorized(err)        // 401
+//	api.IsBadRequest(err)          // 400
+//	api.IsForbidden(err)           // 403
+//	api.IsConflict(err)            // 409
+//	api.IsUnprocessableEntity(err) // 422
+//	api.IsServerError(err)         // 5xx
 //
 // For rate-limited responses (429), the ErrorResponse includes parsed
 // rate limit headers:
 //
-//	if intercom.IsRateLimited(err) {
-//	    var apiErr *intercom.ErrorResponse
+//	if api.IsRateLimited(err) {
+//	    var apiErr *api.ErrorResponse
 //	    if errors.As(err, &apiErr) && apiErr.RateLimit != nil {
 //	        fmt.Printf("Retry after %v\n", apiErr.RateLimit.RetryAfter)
 //	        time.Sleep(apiErr.RateLimit.RetryAfter)
@@ -86,9 +86,9 @@
 // Intercom API error codes can be matched using HasErrorCode and the
 // predefined ErrorCode constants:
 //
-//	var apiErr *intercom.ErrorResponse
+//	var apiErr *api.ErrorResponse
 //	if errors.As(err, &apiErr) {
-//	    if apiErr.HasErrorCode(intercom.ErrParameterInvalid) {
+//	    if apiErr.HasErrorCode(api.ErrParameterInvalid) {
 //	        // handle invalid parameter
 //	    }
 //	}
