@@ -10,8 +10,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/rassakhatsky/intercom-go-sdk/data"
 	"github.com/rassakhatsky/intercom-go-sdk/api"
+	"github.com/rassakhatsky/intercom-go-sdk/data"
 )
 
 // testCaller implements api.Caller for testing, backed by an httptest.Server.
