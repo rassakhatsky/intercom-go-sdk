@@ -60,10 +60,10 @@
 - [x] run `go vet ./...` — must pass before next task
 
 ### Task 2: Add testable examples for core api/ package
-- [ ] create `api/example_test.go` with examples for `Decode`, `SingleFilterOf`, `And`/`Or` filter builders
-- [ ] add example for `Iter` usage pattern (Next/Current/Err loop)
-- [ ] add example for `ErrorResponse` status predicates
-- [ ] run tests `go test ./api/...` — must pass before next task
+- [x] create `api/example_test.go` with examples for `Decode`, `SingleFilterOf`, `And`/`Or` filter builders
+- [x] add example for `Iter` usage pattern (Next/Current/Err loop)
+- [x] add example for `ErrorResponse` status predicates
+- [x] run tests `go test ./api/...` — must pass before next task
 
 ### Task 3: Add testable examples for key sub-packages
 - [ ] create `contacts/example_test.go` with examples for Create, Get, ListAll, Search
