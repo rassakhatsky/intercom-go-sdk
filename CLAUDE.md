@@ -32,7 +32,7 @@ make fix         # go vet + gofmt -l
 
 ## Architecture
 
-**Sub-package design** — services live in 16 domain-scoped sub-packages (`contacts/`, `tickets/`, `tags/`, etc.). Core types and the Client live in the root `intercom` package.
+**Sub-package design** — services live in 17 domain-scoped sub-packages (`contacts/`, `tickets/`, `tags/`, etc.). Core types and the Client live in the root `intercom` package.
 
 **API package** (`api/`):
 - `Caller` interface: `NewRequest`, `DoRaw`, `DoRawNoRedirect`, `Do`, `DoDownload` — abstracts HTTP operations for sub-packages
