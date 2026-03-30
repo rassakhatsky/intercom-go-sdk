@@ -44,7 +44,7 @@ jobs:
             echo "Error: .github/CODEOWNERS file not found"
             exit 1
           fi
-          owners=$(grep -oE '@[^[:space:]]+' .github/CODEOWNERS | sed 's/^@//' | grep -v '/' | sort -u)
+          owners=$(grep -v '^\s*#' .github/CODEOWNERS | grep -oE '@[^[:space:]]+' | sed 's/^@//' | grep -v '/' | sort -u)
           authorized=false
           for owner in $owners; do
             if [ "$owner" = "$ACTOR" ]; then
@@ -97,7 +97,7 @@ jobs:
         env:
           VERSION: ${{ steps.next.outputs.version }}
         run: |
-          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+          if [ -n "$(git tag -l "$VERSION")" ]; then
             echo "Error: tag $VERSION already exists"
             exit 1
           fi
