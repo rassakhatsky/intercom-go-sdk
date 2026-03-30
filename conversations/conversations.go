@@ -36,7 +36,7 @@ type Conversation struct {
 	AdminAssigneeID   string            `json:"admin_assignee_id,omitempty"`
 	TeamAssigneeID    string            `json:"team_assignee_id,omitempty"`
 	Source            *Source           `json:"source,omitempty"`
-	Contacts          *ContactList      `json:"contacts,omitempty"`
+	Contacts          *api.ContactRefList `json:"contacts,omitempty"`
 	Tags              *TagList          `json:"tags,omitempty"`
 	ConversationParts *PartList         `json:"conversation_parts,omitempty"`
 	Statistics        map[string]any    `json:"statistics,omitempty"`
@@ -58,18 +58,6 @@ type Source struct {
 }
 
 
-// ContactList is the contacts participating in a conversation.
-type ContactList struct {
-	Type     string    `json:"type"`
-	Contacts []Contact `json:"contacts"`
-}
-
-// Contact is a contact reference within a conversation.
-type Contact struct {
-	Type       string `json:"type"`
-	ID         string `json:"id"`
-	ExternalID string `json:"external_id,omitempty"`
-}
 
 // TagList is the list of tags on a conversation.
 type TagList struct {

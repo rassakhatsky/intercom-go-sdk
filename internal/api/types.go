@@ -54,10 +54,18 @@ type AdminRef struct {
 }
 
 // ContactRef is a lightweight reference to a contact.
-// It is shared across notes, contacts, and companies services.
+// It is shared across notes, contacts, companies, conversations, and tickets services.
 type ContactRef struct {
-	Type string `json:"type"`
-	ID   string `json:"id"`
+	Type       string `json:"type"`
+	ID         string `json:"id"`
+	ExternalID string `json:"external_id,omitempty"`
+}
+
+// ContactRefList holds the contacts participating in a conversation or ticket.
+// It is shared across conversations and tickets services.
+type ContactRefList struct {
+	Type     string       `json:"type"`
+	Contacts []ContactRef `json:"contacts"`
 }
 
 // NoteAuthor represents the admin who authored a note.

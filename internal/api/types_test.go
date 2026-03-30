@@ -168,6 +168,85 @@ func TestPart_OmitEmpty(t *testing.T) {
 	}
 }
 
+func TestContactRef_JSONRoundTrip(t *testing.T) {
+	c := ContactRef{
+		Type:       "contact",
+		ID:         "c1",
+		ExternalID: "ext_1",
+	}
+	data, err := json.Marshal(c)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var got ContactRef
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if got != c {
+		t.Fatalf("got %+v, want %+v", got, c)
+	}
+}
+
+func TestContactRef_BackwardCompat(t *testing.T) {
+	// Existing usage without ExternalID must still work
+	c := ContactRef{Type: "contact", ID: "c2"}
+	data, err := json.Marshal(c)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	s := string(data)
+	if contains(s, "external_id") {
+		t.Fatalf("expected external_id omitted, got %s", s)
+	}
+	// Unmarshal without external_id
+	raw := `{"type":"contact","id":"c2"}`
+	var got ContactRef
+	if err := json.Unmarshal([]byte(raw), &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if got.ExternalID != "" {
+		t.Fatalf("expected empty ExternalID, got %q", got.ExternalID)
+	}
+}
+
+func TestContactRefList_JSONRoundTrip(t *testing.T) {
+	l := ContactRefList{
+		Type: "contact_list",
+		Contacts: []ContactRef{
+			{Type: "contact", ID: "c1", ExternalID: "ext_1"},
+			{Type: "contact", ID: "c2"},
+		},
+	}
+	data, err := json.Marshal(l)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var got ContactRefList
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if got.Type != l.Type || len(got.Contacts) != 2 {
+		t.Fatalf("got %+v, want %+v", got, l)
+	}
+	if got.Contacts[0].ExternalID != "ext_1" {
+		t.Fatalf("expected ext_1, got %q", got.Contacts[0].ExternalID)
+	}
+	if got.Contacts[1].ExternalID != "" {
+		t.Fatalf("expected empty ExternalID, got %q", got.Contacts[1].ExternalID)
+	}
+}
+
+func TestContactRefList_Empty(t *testing.T) {
+	raw := `{"type":"contact_list","contacts":[]}`
+	var l ContactRefList
+	if err := json.Unmarshal([]byte(raw), &l); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if l.Type != "contact_list" || len(l.Contacts) != 0 {
+		t.Fatalf("unexpected: %+v", l)
+	}
+}
+
 func contains(s, sub string) bool {
 	return len(s) >= len(sub) && searchString(s, sub)
 }

@@ -29,7 +29,7 @@ type Ticket struct {
 	TicketAttributes map[string]any    `json:"ticket_attributes,omitempty"`
 	TicketState      *StateRef         `json:"ticket_state,omitempty"`
 	TicketType       *TypeRef          `json:"ticket_type,omitempty"`
-	Contacts         *ContactList      `json:"contacts,omitempty"`
+	Contacts         *api.ContactRefList `json:"contacts,omitempty"`
 	AdminAssigneeID  string            `json:"admin_assignee_id,omitempty"`
 	TeamAssigneeID   string            `json:"team_assignee_id,omitempty"`
 	CreatedAt        int64             `json:"created_at,omitempty"`
@@ -59,18 +59,6 @@ type TypeRef struct {
 	Icon        string `json:"icon,omitempty"`
 }
 
-// ContactList holds the contacts associated with a ticket.
-type ContactList struct {
-	Type     string        `json:"type"`
-	Contacts []ContactItem `json:"contacts"`
-}
-
-// ContactItem is a contact reference within a ticket.
-type ContactItem struct {
-	Type       string `json:"type"`
-	ID         string `json:"id"`
-	ExternalID string `json:"external_id,omitempty"`
-}
 
 // PartList holds the list of ticket parts.
 type PartList struct {

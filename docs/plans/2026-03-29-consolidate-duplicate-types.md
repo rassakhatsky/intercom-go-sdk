@@ -64,13 +64,13 @@
 - [x] Run `go test ./...` — must pass before next task
 
 ### Task 4: Consolidate ContactItem into extended ContactRef
-- [ ] Write tests in `internal/api/types_test.go` for `ContactRef` with `ExternalID` field (backward compat: existing `ContactRef` usage without ExternalID must still work)
-- [ ] Add `ExternalID string` field to existing `api.ContactRef` in `internal/api/types.go`
-- [ ] Add `ContactRefList` struct to `internal/api/types.go` with fields: `Type`, `Contacts []ContactRef`
-- [ ] Update `conversations/conversations.go`: remove local `Contact` and `ContactList`, use `api.ContactRef` and `api.ContactRefList`
-- [ ] Update `tickets/tickets.go`: remove local `ContactItem` and `ContactList`, use `api.ContactRef` and `api.ContactRefList`
-- [ ] Verify existing `ContactRef` consumers (notes, contacts, companies) still compile and pass tests
-- [ ] Run `go test ./...` — must pass before next task
+- [x] Write tests in `internal/api/types_test.go` for `ContactRef` with `ExternalID` field (backward compat: existing `ContactRef` usage without ExternalID must still work)
+- [x] Add `ExternalID string` field to existing `api.ContactRef` in `internal/api/types.go`
+- [x] Add `ContactRefList` struct to `internal/api/types.go` with fields: `Type`, `Contacts []ContactRef`
+- [x] Update `conversations/conversations.go`: remove local `Contact` and `ContactList`, use `api.ContactRef` and `api.ContactRefList`
+- [x] Update `tickets/tickets.go`: remove local `ContactItem` and `ContactList`, use `api.ContactRef` and `api.ContactRefList`
+- [x] Verify existing `ContactRef` consumers (notes, contacts, companies) still compile and pass tests
+- [x] Run `go test ./...` — must pass before next task
 
 ### Task 5: Consolidate Deleted (standard variant)
 - [ ] Write tests in `internal/api/types_test.go` for `Deleted` JSON marshal/unmarshal
