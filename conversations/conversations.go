@@ -51,19 +51,12 @@ type Source struct {
 	DeliveredAs string  `json:"delivered_as,omitempty"`
 	Subject     string  `json:"subject,omitempty"`
 	Body        string  `json:"body,omitempty"`
-	Author      *Author `json:"author,omitempty"`
+	Author      *api.Author `json:"author,omitempty"`
 	Attachments []any   `json:"attachments,omitempty"`
 	URL         string  `json:"url,omitempty"`
 	Redacted    bool    `json:"redacted,omitempty"`
 }
 
-// Author represents the author of a conversation part or source.
-type Author struct {
-	Type  string `json:"type"`
-	ID    string `json:"id"`
-	Name  string `json:"name,omitempty"`
-	Email string `json:"email,omitempty"`
-}
 
 // ContactList is the contacts participating in a conversation.
 type ContactList struct {
@@ -100,10 +93,10 @@ type Part struct {
 	CreatedAt  int64   `json:"created_at,omitempty"`
 	UpdatedAt  int64   `json:"updated_at,omitempty"`
 	NotifiedAt int64   `json:"notified_at,omitempty"`
-	AssignedTo *Author `json:"assigned_to,omitempty"`
-	Author     *Author `json:"author,omitempty"`
-	ExternalID string  `json:"external_id,omitempty"`
-	Redacted   bool    `json:"redacted,omitempty"`
+	AssignedTo *api.Author `json:"assigned_to,omitempty"`
+	Author     *api.Author `json:"author,omitempty"`
+	ExternalID string      `json:"external_id,omitempty"`
+	Redacted   bool        `json:"redacted,omitempty"`
 }
 
 // LinkedObjectList holds linked objects for a conversation.

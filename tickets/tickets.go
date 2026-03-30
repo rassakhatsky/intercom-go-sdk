@@ -87,19 +87,12 @@ type Part struct {
 	Body       string  `json:"body,omitempty"`
 	CreatedAt  int64   `json:"created_at,omitempty"`
 	UpdatedAt  int64   `json:"updated_at,omitempty"`
-	AssignedTo *Author `json:"assigned_to,omitempty"`
-	Author     *Author `json:"author,omitempty"`
+	AssignedTo *api.Author `json:"assigned_to,omitempty"`
+	Author     *api.Author `json:"author,omitempty"`
 	ExternalID string  `json:"external_id,omitempty"`
 	Redacted   bool    `json:"redacted,omitempty"`
 }
 
-// Author represents the author of a ticket part.
-type Author struct {
-	Type  string `json:"type"`
-	ID    string `json:"id"`
-	Name  string `json:"name,omitempty"`
-	Email string `json:"email,omitempty"`
-}
 
 // LinkedObjectList holds linked objects on a ticket.
 type LinkedObjectList struct {

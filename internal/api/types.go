@@ -1,5 +1,14 @@
 package api
 
+// Author represents the author of a conversation part, ticket part, or source.
+// It is shared across conversations and tickets services.
+type Author struct {
+	Type  string `json:"type"`
+	ID    string `json:"id"`
+	Name  string `json:"name,omitempty"`
+	Email string `json:"email,omitempty"`
+}
+
 // TagRef represents a tag in sub-resource responses.
 // It is shared across multiple services (contacts, companies, conversations, tickets).
 type TagRef struct {
