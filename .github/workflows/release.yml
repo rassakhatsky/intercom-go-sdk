@@ -1,0 +1,87 @@
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate CODEOWNER
+        env:
+          ACTOR: ${{ github.actor }}
+        run: |
+          if [ ! -f .github/CODEOWNERS ]; then
+            echo "Error: .github/CODEOWNERS file not found"
+            exit 1
+          fi
+          owners=$(grep -oP '@\K[^\s]+' .github/CODEOWNERS | sort -u)
+          authorized=false
+          for owner in $owners; do
+            if [ "$owner" = "$ACTOR" ]; then
+              authorized=true
+              break
+            fi
+          done
+          if [ "$authorized" != "true" ]; then
+            echo "Error: $ACTOR is not a CODEOWNER. Only CODEOWNERS can create releases."
+            exit 1
+          fi
+
+      - name: Determine latest tag
+        id: latest
+        run: |
+          tag=$(git tag -l 'v*.*.*' --sort=-version:refname | head -n1)
+          if [ -z "$tag" ]; then
+            tag="v0.0.0"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Calculate next version
+        id: next
+        env:
+          CURRENT_TAG: ${{ steps.latest.outputs.tag }}
+          BUMP: ${{ inputs.bump }}
+        run: |
+          current="${CURRENT_TAG#v}"
+          IFS='.' read -r major minor patch <<< "$current"
+          if [ "$BUMP" = "minor" ]; then
+            minor=$((minor + 1))
+            patch=0
+          else
+            patch=$((patch + 1))
+          fi
+          echo "version=v${major}.${minor}.${patch}" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push tag
+        env:
+          VERSION: ${{ steps.next.outputs.version }}
+        run: |
+          git tag "$VERSION"
+          git push origin "$VERSION"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.next.outputs.version }}
+        run: |
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --generate-notes
