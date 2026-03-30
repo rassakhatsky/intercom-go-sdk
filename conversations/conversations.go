@@ -22,42 +22,40 @@ func NewService(c api.Caller) *Service {
 
 // Conversation represents an Intercom conversation.
 type Conversation struct {
-	Type              string            `json:"type"`
-	ID                string            `json:"id"`
-	CreatedAt         int64             `json:"created_at,omitempty"`
-	UpdatedAt         int64             `json:"updated_at,omitempty"`
-	WaitingSince      *int64            `json:"waiting_since,omitempty"`
-	SnoozedUntil      *int64            `json:"snoozed_until,omitempty"`
-	Title             string            `json:"title,omitempty"`
-	State             string            `json:"state,omitempty"`
-	Open              bool              `json:"open,omitempty"`
-	Read              bool              `json:"read,omitempty"`
-	Priority          string            `json:"priority,omitempty"`
-	AdminAssigneeID   string            `json:"admin_assignee_id,omitempty"`
-	TeamAssigneeID    string            `json:"team_assignee_id,omitempty"`
-	Source            *Source           `json:"source,omitempty"`
-	Contacts          *api.ContactRefList `json:"contacts,omitempty"`
-	Tags              *api.TagRefList   `json:"tags,omitempty"`
-	ConversationParts *PartList         `json:"conversation_parts,omitempty"`
-	Statistics        map[string]any    `json:"statistics,omitempty"`
-	CustomAttributes  map[string]any    `json:"custom_attributes,omitempty"`
+	Type              string                `json:"type"`
+	ID                string                `json:"id"`
+	CreatedAt         int64                 `json:"created_at,omitempty"`
+	UpdatedAt         int64                 `json:"updated_at,omitempty"`
+	WaitingSince      *int64                `json:"waiting_since,omitempty"`
+	SnoozedUntil      *int64                `json:"snoozed_until,omitempty"`
+	Title             string                `json:"title,omitempty"`
+	State             string                `json:"state,omitempty"`
+	Open              bool                  `json:"open,omitempty"`
+	Read              bool                  `json:"read,omitempty"`
+	Priority          string                `json:"priority,omitempty"`
+	AdminAssigneeID   string                `json:"admin_assignee_id,omitempty"`
+	TeamAssigneeID    string                `json:"team_assignee_id,omitempty"`
+	Source            *Source               `json:"source,omitempty"`
+	Contacts          *api.ContactRefList   `json:"contacts,omitempty"`
+	Tags              *api.TagRefList       `json:"tags,omitempty"`
+	ConversationParts *PartList             `json:"conversation_parts,omitempty"`
+	Statistics        map[string]any        `json:"statistics,omitempty"`
+	CustomAttributes  map[string]any        `json:"custom_attributes,omitempty"`
 	LinkedObjects     *api.LinkedObjectList `json:"linked_objects,omitempty"`
 }
 
 // Source represents the originating message of a conversation.
 type Source struct {
-	Type        string  `json:"type"`
-	ID          string  `json:"id"`
-	DeliveredAs string  `json:"delivered_as,omitempty"`
-	Subject     string  `json:"subject,omitempty"`
-	Body        string  `json:"body,omitempty"`
+	Type        string      `json:"type"`
+	ID          string      `json:"id"`
+	DeliveredAs string      `json:"delivered_as,omitempty"`
+	Subject     string      `json:"subject,omitempty"`
+	Body        string      `json:"body,omitempty"`
 	Author      *api.Author `json:"author,omitempty"`
-	Attachments []any   `json:"attachments,omitempty"`
-	URL         string  `json:"url,omitempty"`
-	Redacted    bool    `json:"redacted,omitempty"`
+	Attachments []any       `json:"attachments,omitempty"`
+	URL         string      `json:"url,omitempty"`
+	Redacted    bool        `json:"redacted,omitempty"`
 }
-
-
 
 // PartList holds the list of conversation parts.
 type PartList struct {
@@ -65,8 +63,6 @@ type PartList struct {
 	Parts      []api.Part `json:"conversation_parts"`
 	TotalCount int        `json:"total_count"`
 }
-
-
 
 // Message represents the response from creating a conversation.
 type Message struct {

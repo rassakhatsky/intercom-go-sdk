@@ -95,12 +95,12 @@
 - [x] Run `go test ./...` — must pass before next task
 
 ### Task 8: Verify acceptance criteria
-- [ ] Verify all 7 types consolidated: Author, LinkedObjectList, Part, ContactRef (extended), Deleted, TagRefList, ContactRefList
-- [ ] Verify no duplicate type definitions remain (grep for each type name across sub-packages)
-- [ ] Verify edge cases: contacts.Deleted still has its unique variant, PartList still local with correct JSON tags
-- [ ] Run full test suite: `go test ./...`
-- [ ] Run linter: `go vet ./...`
-- [ ] Run format check: `gofmt -l .`
+- [x] Verify all 7 types consolidated: Author, LinkedObjectList, Part, ContactRef (extended), Deleted, TagRefList, ContactRefList
+- [x] Verify no duplicate type definitions remain (grep for each type name across sub-packages)
+- [x] Verify edge cases: contacts.Deleted still has its unique variant, PartList still local with correct JSON tags
+- [x] Run full test suite: `go test ./...`
+- [x] Run linter: `go vet ./...`
+- [x] Run format check: `gofmt -l .`
 
 ### Task 9: [Final] Update documentation
 - [ ] Update CLAUDE.md to reflect new shared types in internal/api/types.go

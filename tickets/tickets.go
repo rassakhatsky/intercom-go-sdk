@@ -22,23 +22,23 @@ func NewService(c api.Caller) *Service {
 
 // Ticket represents an Intercom ticket.
 type Ticket struct {
-	Type             string            `json:"type"`
-	ID               string            `json:"id"`
-	TicketID         string            `json:"ticket_id,omitempty"`
-	Category         string            `json:"category,omitempty"`
-	TicketAttributes map[string]any    `json:"ticket_attributes,omitempty"`
-	TicketState      *StateRef         `json:"ticket_state,omitempty"`
-	TicketType       *TypeRef          `json:"ticket_type,omitempty"`
-	Contacts         *api.ContactRefList `json:"contacts,omitempty"`
-	AdminAssigneeID  string            `json:"admin_assignee_id,omitempty"`
-	TeamAssigneeID   string            `json:"team_assignee_id,omitempty"`
-	CreatedAt        int64             `json:"created_at,omitempty"`
-	UpdatedAt        int64             `json:"updated_at,omitempty"`
-	Open             bool              `json:"open,omitempty"`
-	SnoozedUntil     *int64            `json:"snoozed_until,omitempty"`
+	Type             string                `json:"type"`
+	ID               string                `json:"id"`
+	TicketID         string                `json:"ticket_id,omitempty"`
+	Category         string                `json:"category,omitempty"`
+	TicketAttributes map[string]any        `json:"ticket_attributes,omitempty"`
+	TicketState      *StateRef             `json:"ticket_state,omitempty"`
+	TicketType       *TypeRef              `json:"ticket_type,omitempty"`
+	Contacts         *api.ContactRefList   `json:"contacts,omitempty"`
+	AdminAssigneeID  string                `json:"admin_assignee_id,omitempty"`
+	TeamAssigneeID   string                `json:"team_assignee_id,omitempty"`
+	CreatedAt        int64                 `json:"created_at,omitempty"`
+	UpdatedAt        int64                 `json:"updated_at,omitempty"`
+	Open             bool                  `json:"open,omitempty"`
+	SnoozedUntil     *int64                `json:"snoozed_until,omitempty"`
 	LinkedObjects    *api.LinkedObjectList `json:"linked_objects,omitempty"`
-	TicketParts      *PartList         `json:"ticket_parts,omitempty"`
-	IsShared         bool              `json:"is_shared,omitempty"`
+	TicketParts      *PartList             `json:"ticket_parts,omitempty"`
+	IsShared         bool                  `json:"is_shared,omitempty"`
 }
 
 // StateRef is a reference to a ticket state within a ticket.
@@ -59,16 +59,12 @@ type TypeRef struct {
 	Icon        string `json:"icon,omitempty"`
 }
 
-
 // PartList holds the list of ticket parts.
 type PartList struct {
 	Type       string     `json:"type"`
 	Parts      []api.Part `json:"ticket_parts"`
 	TotalCount int        `json:"total_count"`
 }
-
-
-
 
 // ContactRef identifies a contact when creating a ticket.
 type ContactRef struct {

@@ -22,25 +22,25 @@ func NewService(c api.Caller) *Service {
 
 // Company represents an Intercom company.
 type Company struct {
-	Type             string         `json:"type"`
-	ID               string         `json:"id"`
-	AppID            string         `json:"app_id,omitempty"`
-	CompanyID        string         `json:"company_id,omitempty"`
-	Name             string         `json:"name,omitempty"`
-	RemoteCreatedAt  int64          `json:"remote_created_at,omitempty"`
-	CreatedAt        int64          `json:"created_at,omitempty"`
-	UpdatedAt        int64          `json:"updated_at,omitempty"`
-	LastRequestAt    int64          `json:"last_request_at,omitempty"`
-	Size             int            `json:"size,omitempty"`
-	Website          string         `json:"website,omitempty"`
-	Industry         string         `json:"industry,omitempty"`
-	MonthlySpend     float64        `json:"monthly_spend,omitempty"`
-	SessionCount     int            `json:"session_count,omitempty"`
-	UserCount        int            `json:"user_count,omitempty"`
-	Plan             *Plan          `json:"plan,omitempty"`
-	CustomAttributes map[string]any `json:"custom_attributes,omitempty"`
+	Type             string          `json:"type"`
+	ID               string          `json:"id"`
+	AppID            string          `json:"app_id,omitempty"`
+	CompanyID        string          `json:"company_id,omitempty"`
+	Name             string          `json:"name,omitempty"`
+	RemoteCreatedAt  int64           `json:"remote_created_at,omitempty"`
+	CreatedAt        int64           `json:"created_at,omitempty"`
+	UpdatedAt        int64           `json:"updated_at,omitempty"`
+	LastRequestAt    int64           `json:"last_request_at,omitempty"`
+	Size             int             `json:"size,omitempty"`
+	Website          string          `json:"website,omitempty"`
+	Industry         string          `json:"industry,omitempty"`
+	MonthlySpend     float64         `json:"monthly_spend,omitempty"`
+	SessionCount     int             `json:"session_count,omitempty"`
+	UserCount        int             `json:"user_count,omitempty"`
+	Plan             *Plan           `json:"plan,omitempty"`
+	CustomAttributes map[string]any  `json:"custom_attributes,omitempty"`
 	Tags             *api.TagRefList `json:"tags,omitempty"`
-	Segments         *SegmentList   `json:"segments,omitempty"`
+	Segments         *SegmentList    `json:"segments,omitempty"`
 }
 
 // Plan represents a company's plan.
@@ -55,7 +55,6 @@ type SegmentList struct {
 	Type     string           `json:"type,omitempty"`
 	Segments []api.SegmentRef `json:"segments,omitempty"`
 }
-
 
 // ScrollResponse represents the response from the scroll endpoint.
 type ScrollResponse struct {

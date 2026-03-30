@@ -52,7 +52,6 @@ type Statistics struct {
 	SadReactionPercentage     float64 `json:"sad_reaction_percentage"`
 }
 
-
 // CreateRequest represents the request body for creating an article.
 type CreateRequest struct {
 	Title             string                        `json:"title"`
