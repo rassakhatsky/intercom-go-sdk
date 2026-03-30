@@ -41,10 +41,10 @@
 - [x] Verify test fails with expected import error (confirms TDD red phase)
 
 ### Task 2: Move `internal/api/` → `api/`
-- [ ] Move directory: `internal/api/` → `api/`
-- [ ] Remove empty `internal/` directory
-- [ ] Verify `api/` package compiles: `go build ./api/...`
-- [ ] Run `go test ./api/...` — existing api tests must pass
+- [x] Move directory: `internal/api/` → `api/`
+- [x] Remove empty `internal/` directory
+- [x] Verify `api/` package compiles: `go build ./api/...`
+- [x] Run `go test ./api/...` — existing api tests must pass
 
 ### Task 3: Update sub-package imports (34 files)
 - [ ] Replace `github.com/rassakhatsky/intercom-go-sdk/internal/api` → `github.com/rassakhatsky/intercom-go-sdk/api` in all sub-package source files
