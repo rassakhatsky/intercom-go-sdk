@@ -93,8 +93,7 @@
 //	    }
 //	}
 //
-// Core types (Result, Iter, Filter, ErrorResponse, ListOptions) are
-// re-exported as type aliases in this root package so consumers do not need
-// to import internal/api directly. Sub-package-specific types (request/response
-// structs, domain models) are imported from their respective packages.
+// Core types (Result, Iter, Filter, ErrorResponse, ListOptions) live in the
+// public api/ package. Sub-package-specific types (request/response structs,
+// domain models) are imported from their respective packages.
 package intercom

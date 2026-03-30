@@ -65,10 +65,10 @@
 - [x] Run `go test ./...` — all tests must pass
 
 ### Task 6: Update documentation
-- [ ] Update `doc.go`: remove references to `internal/api` and aliases pattern
-- [ ] Update `CLAUDE.md`: reflect new `api/` package structure, remove aliases section
-- [ ] Run `go vet ./...` — must pass
-- [ ] Run `gofmt -l .` — no formatting issues
+- [x] Update `doc.go`: remove references to `internal/api` and aliases pattern
+- [x] Update `CLAUDE.md`: reflect new `api/` package structure, remove aliases section
+- [x] Run `go vet ./...` — must pass
+- [x] Run `gofmt -l .` — no formatting issues (pre-existing issues in test files unrelated to this refactor)
 
 ### Task 7: Verify acceptance criteria
 - [ ] Verify `internal/` directory no longer exists

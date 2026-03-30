@@ -34,15 +34,14 @@ make fix         # go vet + gofmt -l
 
 **Sub-package design** — services live in 16 domain-scoped sub-packages (`contacts/`, `tickets/`, `tags/`, etc.). Core types and the Client live in the root `intercom` package.
 
-**Internal API** (`internal/api/`):
+**API package** (`api/`):
 - `Caller` interface: `NewRequest`, `DoRaw`, `DoRawNoRedirect`, `Do`, `DoDownload` — abstracts HTTP operations for sub-packages
 - Shared types: `Result`, `ErrorResult`, `ErrorResponse`, `PagedResult[T]`, `Iter[T]`, `Filter`, `ListOptions`, etc.
 - Cross-service domain types: `TagRef`, `AdminRef`, `ContactRef`, `ContactRefList`, `NoteAuthor`, `Note`, `NoteListResult`, `SegmentRef`, `SegmentListResult`, `Tag`, `TagList`, `TagRefList`, `Author`, `Part`, `LinkedObjectList`, `Deleted`, `SubscriptionType`, `Translation`, `ArticleContent`, `ArticleTranslatedContent`
-- Sub-packages import `internal/api` for the `Caller` interface and shared types; they never import each other
+- Sub-packages import `api` for the `Caller` interface and shared types; they never import each other
 
 **Root package** (`intercom`):
 - `Client` (`intercom.go`): holds auth token, HTTP client, logger, and all service instances; implements `api.Caller`
-- `aliases.go`: type aliases re-exporting `internal/api` types so consumers use `intercom.Result`, `intercom.Iter[T]`, etc. without importing `internal/api`. Also re-exports error code constants (`ErrServerError`, `ErrParameterInvalid`, etc.) and status helper functions (`IsNotFound`, `IsBadRequest`, `IsServerError`, etc.)
 - Accessor methods on `Client` (e.g., `Contacts()`, `Tags()`) return sub-package service pointers
 - `NewRequest` / `Do` / `DoRaw` handle JSON marshaling, auth headers (`Bearer` token), and `Intercom-Version: 2.15`
 
@@ -54,7 +53,7 @@ make fix         # go vet + gofmt -l
 - URL path parameters use `url.PathEscape`
 - **3-layer pattern**: Raw methods (`XxxRaw`) do `NewRequest` → `DoRaw` → return `(*api.Result, error)`; Parse functions (`ParseXxxResult`) decode `Result.Body` into typed structs; regular methods combine Raw + error check + Parse
 
-**Pagination** (`internal/api/pagination.go`):
+**Pagination** (`api/pagination.go`):
 - `PagedResult[T]` — generic paginated response
 - `Iter[T]` — lazy auto-pagination iterator using cursor-based pagination (`starting_after`)
 - `Iter[T].Collect()` — drains all pages into a `[]T` slice; returns items collected so far on error
@@ -62,18 +61,18 @@ make fix         # go vet + gofmt -l
 - `ListAll` methods return `*Iter[T]`, created via `NewIter` with a `PageFetcher[T]` function
 - Companies use separate scroll-based pagination (`ScrollOptions`)
 
-**Search** (`internal/api/search.go`):
+**Search** (`api/search.go`):
 - `Filter` struct serves dual purpose: single field filter or compound (AND/OR) filter
 - Constructed via `SingleFilterOf`, `And`, `Or` helpers
 - `Operator` defined type (`type Operator string`) with typed constants: `OpEquals` (`=`), `OpNotEquals` (`!=`), `OpGreaterThan` (`>`), `OpLessThan` (`<`), `OpContains` (`~`), `OpNotContains` (`!~`), `OpIn` (`IN`), `OpNotIn` (`NIN`), `OpStarts` (`^`), `OpEnds` (`$`), `OpAND` (`AND`), `OpOR` (`OR`). Raw strings cannot be passed where `Operator` is expected — use the typed constants
 
-**Error handling** (`internal/api/errors.go`):
+**Error handling** (`api/errors.go`):
 - `ErrorResponse` wraps API errors with `StatusCode int` and `Headers http.Header` fields (no synthetic `*http.Response`); `ResultError` converts `Result.Error` into `*ErrorResponse` (nil-safe: returns nil for nil input)
 - Status predicates: `IsNotFound` (404), `IsRateLimited` (429), `IsUnauthorized` (401), `IsBadRequest` (400), `IsForbidden` (403), `IsConflict` (409), `IsUnprocessableEntity` (422), `IsServerError` (5xx)
 - `ErrorCode` typed constants (e.g., `ErrParameterInvalid`, `ErrRateLimitExceeded`, `ErrTokenRevoked`); `ErrorResponse.HasErrorCode(code)` matches against the `Errors` slice
 - `RateLimitInfo` (Limit, Remaining, Reset, RetryAfter) — auto-parsed from headers on 429 responses, available via `ErrorResponse.RateLimit`
 
-**Raw results** (`internal/api/result.go`):
+**Raw results** (`api/result.go`):
 - `Result` — non-generic struct: `StatusCode int`, `Header http.Header`, `URL string`, `Body []byte`, `Error *ErrorResult`
 - `ErrorResult` — typed API error with Code, Message, Errors; implements `Error() string`
 - `Decode[T any](r *Result) (*T, error)` — generic helper that JSON-unmarshals `Result.Body` into `*T`; returns zero-value `*T` for any 2xx response with empty body; returns error on empty body for non-2xx responses
@@ -103,7 +102,7 @@ Helper functions `testMethod` and `testHeader` assert request properties. Tests 
 - Timestamps are `int64` (Unix epoch); optional timestamps are `*int64`
 - 3-layer pattern per method: see Architecture above
 - Every public method (regular + Raw) includes a `// See:` comment linking to the Intercom API reference. Format: `// See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/{tag}/{operationId}`. Skip: Parse functions, ListAll methods, model structs, service type declarations
-- Sub-packages never import each other; shared types live in `internal/api`
+- Sub-packages never import each other; shared types live in `api`
 
 ## Package Grouping
 
@@ -147,6 +146,5 @@ Helper functions `testMethod` and `testHeader` assert request properties. Tests 
 
 5. **If adding a new sub-package**:
    - Create the directory and add a `testutil_test.go` with `setup()`, `testMethod`, `testHeader` helpers
-   - Import `internal/api` for the `Caller` interface and shared types
-   - If the new service needs types used by other sub-packages, add them to `internal/api/types.go`
-   - Add type aliases in `aliases.go` if consumers need them from the root package
+   - Import `api` for the `Caller` interface and shared types
+   - If the new service needs types used by other sub-packages, add them to `api/types.go`
