@@ -8,4 +8,4 @@ test-race:
 
 fix:
 	go vet ./...
-	gofmt -l .
+	gofmt -w .
