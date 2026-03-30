@@ -81,6 +81,19 @@ make fix         # go vet + gofmt -l
 - API errors (4xx/5xx) populate `Result.Error`; use `ResultError(r)` to convert to `*ErrorResponse` for predicate checks
 - Excluded from Raw companions: `Download` methods (streaming body) and `ListAll` methods (iterators)
 
+## CI
+
+GitHub Actions workflow (`.github/workflows/ci.yml`) runs on pushes to `main` and PRs targeting `main`. Steps in order:
+
+1. `go vet ./...`
+2. `gofmt -l .` (fails on unformatted files)
+3. `go mod verify`
+4. `go mod tidy` + `git diff --exit-code go.mod go.sum`
+5. `go build ./...`
+6. `go test -race -cover ./...`
+
+All checks must pass before merge.
+
 ## Documentation
 
 - Every sub-package has a `doc.go` with a `// Package X ...` godoc comment (2-5 lines)
