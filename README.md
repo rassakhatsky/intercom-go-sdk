@@ -235,7 +235,9 @@ iter := client.Tags().ListAll(ctx, &api.ListOptions{PerPage: 25})
 
 ## Documentation
 
+- [API Reference (pkg.go.dev)](https://pkg.go.dev/github.com/rassakhatsky/intercom-go-sdk)
 - [Intercom API Reference (v2.15)](https://developers.intercom.com/docs/references/rest-api/api.intercom.io/)
+- [Contributing Guide](CONTRIBUTING.md)
 
 ## License
 

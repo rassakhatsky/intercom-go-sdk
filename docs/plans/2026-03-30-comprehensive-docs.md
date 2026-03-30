@@ -78,10 +78,10 @@
 - [x] run `go vet ./...` — must pass (sanity check)
 
 ### Task 5: Polish README.md
-- [ ] add link to CONTRIBUTING.md
-- [ ] add link to pkg.go.dev for API reference (once published)
-- [ ] review existing examples for accuracy against current API
-- [ ] run full test suite `go test ./...` — must pass
+- [x] add link to CONTRIBUTING.md
+- [x] add link to pkg.go.dev for API reference (once published)
+- [x] review existing examples for accuracy against current API
+- [x] run full test suite `go test ./...` — must pass
 
 ### Task 6: Verify acceptance criteria
 - [ ] verify all 18 sub-packages (16 domain + api + root) have package-level godoc
