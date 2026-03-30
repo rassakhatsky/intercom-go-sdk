@@ -92,8 +92,8 @@
 - [x] run `gofmt -l .` — no formatting issues
 
 ### Task 7: [Final] Update project knowledge
-- [ ] update CLAUDE.md if new patterns discovered
-- [ ] update README.md table of contents if needed
+- [x] update CLAUDE.md if new patterns discovered
+- [x] update README.md table of contents if needed
 
 *Note: ralphex automatically moves completed plans to `docs/plans/completed/`*
 

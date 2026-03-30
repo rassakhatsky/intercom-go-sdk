@@ -81,6 +81,13 @@ make fix         # go vet + gofmt -l
 - API errors (4xx/5xx) populate `Result.Error`; use `ResultError(r)` to convert to `*ErrorResponse` for predicate checks
 - Excluded from Raw companions: `Download` methods (streaming body) and `ListAll` methods (iterators)
 
+## Documentation
+
+- Every sub-package has a `doc.go` with a `// Package X ...` godoc comment (2-5 lines)
+- Testable examples live in `example_test.go` files (root, `api/`, `contacts/`, `tags/`, `conversations/`, `tickets/`)
+- Examples use `Example_*` naming with `// Output:` comments for `go test` verification
+- `CONTRIBUTING.md` covers dev setup, conventions, and PR process; references CLAUDE.md for architecture
+
 ## Testing Patterns
 
 Each sub-package embeds test helpers (`testCaller`, `setup`, `testMethod`, `testHeader`) inline in its `*_test.go` files. The `ai/` package is the exception, using a dedicated `testutil_test.go`. The root package also has a `testutil_test.go`.
