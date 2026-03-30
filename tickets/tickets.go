@@ -69,12 +69,6 @@ type PartList struct {
 
 
 
-// Deleted represents the response from deleting a ticket.
-type Deleted struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Deleted bool   `json:"deleted"`
-}
 
 // ContactRef identifies a contact when creating a ticket.
 type ContactRef struct {
@@ -176,8 +170,8 @@ func ParseUpdateResult(r *api.Result) (*Ticket, error) {
 }
 
 // ParseDeleteResult decodes a Result into a Deleted.
-func ParseDeleteResult(r *api.Result) (*Deleted, error) {
-	return api.Decode[Deleted](r)
+func ParseDeleteResult(r *api.Result) (*api.Deleted, error) {
+	return api.Decode[api.Deleted](r)
 }
 
 // ParseSearchResult decodes a Result into a PagedResult[Ticket].
@@ -257,7 +251,7 @@ func (s *Service) Update(ctx context.Context, id string, body *UpdateRequest) (*
 // Delete permanently deletes a ticket.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/tickets/deleteticket
-func (s *Service) Delete(ctx context.Context, id string) (*Deleted, error) {
+func (s *Service) Delete(ctx context.Context, id string) (*api.Deleted, error) {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
 		return nil, err

@@ -73,12 +73,6 @@ type PartList struct {
 }
 
 
-// Deleted represents the response from deleting a conversation.
-type Deleted struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Deleted bool   `json:"deleted"`
-}
 
 // Message represents the response from creating a conversation.
 type Message struct {
@@ -231,8 +225,8 @@ func ParseCreateResult(r *api.Result) (*Message, error) {
 func ParseUpdateResult(r *api.Result) (*Conversation, error) { return api.Decode[Conversation](r) }
 
 // ParseDeleteResult decodes a Result into a Deleted.
-func ParseDeleteResult(r *api.Result) (*Deleted, error) {
-	return api.Decode[Deleted](r)
+func ParseDeleteResult(r *api.Result) (*api.Deleted, error) {
+	return api.Decode[api.Deleted](r)
 }
 
 // ParseSearchResult decodes a Result into a PagedResult[Conversation].
@@ -348,7 +342,7 @@ func (s *Service) Update(ctx context.Context, id string, body *UpdateRequest) (*
 // Delete permanently deletes a conversation.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/conversations/deleteconversation
-func (s *Service) Delete(ctx context.Context, id string) (*Deleted, error) {
+func (s *Service) Delete(ctx context.Context, id string) (*api.Deleted, error) {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
 		return nil, err

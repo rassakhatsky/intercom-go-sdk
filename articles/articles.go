@@ -52,12 +52,6 @@ type Statistics struct {
 	SadReactionPercentage     float64 `json:"sad_reaction_percentage"`
 }
 
-// Deleted represents the response from deleting an article.
-type Deleted struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Deleted bool   `json:"deleted"`
-}
 
 // CreateRequest represents the request body for creating an article.
 type CreateRequest struct {
@@ -140,8 +134,8 @@ func ParseUpdateResult(r *api.Result) (*Article, error) {
 }
 
 // ParseDeleteResult decodes a Result into a Deleted.
-func ParseDeleteResult(r *api.Result) (*Deleted, error) {
-	return api.Decode[Deleted](r)
+func ParseDeleteResult(r *api.Result) (*api.Deleted, error) {
+	return api.Decode[api.Deleted](r)
 }
 
 // ParseSearchResult decodes a Result into a SearchResponse.
@@ -215,7 +209,7 @@ func (s *Service) Update(ctx context.Context, id string, body *UpdateRequest) (*
 // Delete deletes an article by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/articles/deletearticle
-func (s *Service) Delete(ctx context.Context, id string) (*Deleted, error) {
+func (s *Service) Delete(ctx context.Context, id string) (*api.Deleted, error) {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
 		return nil, err

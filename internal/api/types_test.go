@@ -247,6 +247,49 @@ func TestContactRefList_Empty(t *testing.T) {
 	}
 }
 
+func TestDeleted_JSONRoundTrip(t *testing.T) {
+	d := Deleted{
+		ID:      "123",
+		Object:  "ticket",
+		Deleted: true,
+	}
+	data, err := json.Marshal(d)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var got Deleted
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if got != d {
+		t.Fatalf("got %+v, want %+v", got, d)
+	}
+}
+
+func TestDeleted_UnmarshalVariousObjects(t *testing.T) {
+	for _, obj := range []string{"ticket", "article", "conversation", "company"} {
+		raw := `{"id":"456","object":"` + obj + `","deleted":true}`
+		var d Deleted
+		if err := json.Unmarshal([]byte(raw), &d); err != nil {
+			t.Fatalf("unmarshal %s: %v", obj, err)
+		}
+		if d.ID != "456" || d.Object != obj || !d.Deleted {
+			t.Fatalf("unexpected for %s: %+v", obj, d)
+		}
+	}
+}
+
+func TestDeleted_DeletedFalse(t *testing.T) {
+	raw := `{"id":"789","object":"ticket","deleted":false}`
+	var d Deleted
+	if err := json.Unmarshal([]byte(raw), &d); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if d.Deleted {
+		t.Fatal("expected Deleted=false")
+	}
+}
+
 func contains(s, sub string) bool {
 	return len(s) >= len(sub) && searchString(s, sub)
 }

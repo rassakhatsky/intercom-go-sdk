@@ -62,12 +62,6 @@ type SegmentList struct {
 	Segments []api.SegmentRef `json:"segments,omitempty"`
 }
 
-// Deleted represents the response from deleting a company.
-type Deleted struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Deleted bool   `json:"deleted"`
-}
 
 // ScrollResponse represents the response from the scroll endpoint.
 type ScrollResponse struct {
@@ -132,7 +126,7 @@ func ParseCreateResult(r *api.Result) (*Company, error) { return api.Decode[Comp
 func ParseUpdateResult(r *api.Result) (*Company, error) { return api.Decode[Company](r) }
 
 // ParseDeleteResult decodes a Result into a Deleted.
-func ParseDeleteResult(r *api.Result) (*Deleted, error) { return api.Decode[Deleted](r) }
+func ParseDeleteResult(r *api.Result) (*api.Deleted, error) { return api.Decode[api.Deleted](r) }
 
 // ParseScrollResult decodes a Result into a ScrollResponse.
 func ParseScrollResult(r *api.Result) (*ScrollResponse, error) {
@@ -223,7 +217,7 @@ func (s *Service) Update(ctx context.Context, id string, body *UpdateRequest) (*
 // Delete deletes a company by ID.
 //
 // See: https://developers.intercom.com/docs/references/rest-api/api.intercom.io/companies/deletecompany
-func (s *Service) Delete(ctx context.Context, id string) (*Deleted, error) {
+func (s *Service) Delete(ctx context.Context, id string) (*api.Deleted, error) {
 	result, err := s.DeleteRaw(ctx, id)
 	if err != nil {
 		return nil, err

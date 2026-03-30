@@ -73,14 +73,14 @@
 - [x] Run `go test ./...` — must pass before next task
 
 ### Task 5: Consolidate Deleted (standard variant)
-- [ ] Write tests in `internal/api/types_test.go` for `Deleted` JSON marshal/unmarshal
-- [ ] Add `Deleted` struct to `internal/api/types.go` with fields: `ID`, `Object`, `Deleted` (the 4-way identical variant)
-- [ ] Update `tickets/tickets.go`: remove local `Deleted`, use `api.Deleted`
-- [ ] Update `articles/articles.go`: remove local `Deleted`, use `api.Deleted`
-- [ ] Update `conversations/conversations.go`: remove local `Deleted`, use `api.Deleted`
-- [ ] Update `companies/companies.go`: remove local `Deleted`, use `api.Deleted`
-- [ ] Keep `contacts/contacts.go` `Deleted` as-is (different structure with `Type` and `ExternalID`)
-- [ ] Run `go test ./...` — must pass before next task
+- [x] Write tests in `internal/api/types_test.go` for `Deleted` JSON marshal/unmarshal
+- [x] Add `Deleted` struct to `internal/api/types.go` with fields: `ID`, `Object`, `Deleted` (the 4-way identical variant)
+- [x] Update `tickets/tickets.go`: remove local `Deleted`, use `api.Deleted`
+- [x] Update `articles/articles.go`: remove local `Deleted`, use `api.Deleted`
+- [x] Update `conversations/conversations.go`: remove local `Deleted`, use `api.Deleted`
+- [x] Update `companies/companies.go`: remove local `Deleted`, use `api.Deleted`
+- [x] Keep `contacts/contacts.go` `Deleted` as-is (different structure with `Type` and `ExternalID`)
+- [x] Run `go test ./...` — must pass before next task
 
 ### Task 6: Add TagRefList to internal/api/types.go
 - [ ] Write tests in `internal/api/types_test.go` for `TagRefList` JSON marshal/unmarshal (with `json:"tags"` key)

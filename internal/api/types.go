@@ -68,6 +68,15 @@ type ContactRefList struct {
 	Contacts []ContactRef `json:"contacts"`
 }
 
+// Deleted represents the response from deleting a resource.
+// It is shared across tickets, articles, conversations, and companies services.
+// Note: contacts.Deleted has a different structure (Type + ExternalID instead of Object).
+type Deleted struct {
+	ID      string `json:"id"`
+	Object  string `json:"object"`
+	Deleted bool   `json:"deleted"`
+}
+
 // NoteAuthor represents the admin who authored a note.
 // It is shared across notes, contacts, and companies services.
 type NoteAuthor struct {
