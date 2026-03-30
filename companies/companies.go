@@ -39,7 +39,7 @@ type Company struct {
 	UserCount        int            `json:"user_count,omitempty"`
 	Plan             *Plan          `json:"plan,omitempty"`
 	CustomAttributes map[string]any `json:"custom_attributes,omitempty"`
-	Tags             *TagList       `json:"tags,omitempty"`
+	Tags             *api.TagRefList `json:"tags,omitempty"`
 	Segments         *SegmentList   `json:"segments,omitempty"`
 }
 
@@ -48,12 +48,6 @@ type Plan struct {
 	Type string `json:"type,omitempty"`
 	ID   string `json:"id,omitempty"`
 	Name string `json:"name,omitempty"`
-}
-
-// TagList is the tag list embedded in a company response.
-type TagList struct {
-	Type string       `json:"type,omitempty"`
-	Tags []api.TagRef `json:"tags,omitempty"`
 }
 
 // SegmentList is the segment list embedded in a company response.

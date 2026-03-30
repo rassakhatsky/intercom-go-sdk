@@ -141,6 +141,14 @@ type TagList struct {
 	Data []Tag  `json:"data"`
 }
 
+// TagRefList represents a list of tag references embedded in a parent resource.
+// It is shared across conversations and companies services.
+// Distinct from TagList which uses []Tag with json:"data".
+type TagRefList struct {
+	Type string   `json:"type"`
+	Tags []TagRef `json:"tags"`
+}
+
 // SubscriptionType represents a subscription type in Intercom.
 // It is shared across messaging and contacts services.
 type SubscriptionType struct {

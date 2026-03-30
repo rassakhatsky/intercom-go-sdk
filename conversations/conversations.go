@@ -37,7 +37,7 @@ type Conversation struct {
 	TeamAssigneeID    string            `json:"team_assignee_id,omitempty"`
 	Source            *Source           `json:"source,omitempty"`
 	Contacts          *api.ContactRefList `json:"contacts,omitempty"`
-	Tags              *TagList          `json:"tags,omitempty"`
+	Tags              *api.TagRefList   `json:"tags,omitempty"`
 	ConversationParts *PartList         `json:"conversation_parts,omitempty"`
 	Statistics        map[string]any    `json:"statistics,omitempty"`
 	CustomAttributes  map[string]any    `json:"custom_attributes,omitempty"`
@@ -58,12 +58,6 @@ type Source struct {
 }
 
 
-
-// TagList is the list of tags on a conversation.
-type TagList struct {
-	Type string       `json:"type"`
-	Tags []api.TagRef `json:"tags"`
-}
 
 // PartList holds the list of conversation parts.
 type PartList struct {

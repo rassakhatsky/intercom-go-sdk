@@ -83,11 +83,11 @@
 - [x] Run `go test ./...` — must pass before next task
 
 ### Task 6: Add TagRefList to internal/api/types.go
-- [ ] Write tests in `internal/api/types_test.go` for `TagRefList` JSON marshal/unmarshal (with `json:"tags"` key)
-- [ ] Add `TagRefList` struct to `internal/api/types.go` with fields: `Type string`, `Tags []TagRef` — distinct from existing `TagList` which uses `Data []Tag` with `json:"data"`
-- [ ] Update `conversations/conversations.go`: remove local `TagList`, use `api.TagRefList`
-- [ ] Update `companies/companies.go`: remove local `TagList`, use `api.TagRefList`
-- [ ] Run `go test ./...` — must pass before next task
+- [x] Write tests in `internal/api/types_test.go` for `TagRefList` JSON marshal/unmarshal (with `json:"tags"` key)
+- [x] Add `TagRefList` struct to `internal/api/types.go` with fields: `Type string`, `Tags []TagRef` — distinct from existing `TagList` which uses `Data []Tag` with `json:"data"`
+- [x] Update `conversations/conversations.go`: remove local `TagList`, use `api.TagRefList`
+- [x] Update `companies/companies.go`: remove local `TagList`, use `api.TagRefList`
+- [x] Run `go test ./...` — must pass before next task
 
 ### Task 7: Update aliases.go (root package re-exports)
 - [ ] Add type aliases in `aliases.go` for new shared types: `Author`, `LinkedObjectList`, `Part`, `ContactRefList`, `Deleted`, `TagRefList`

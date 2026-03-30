@@ -290,6 +290,63 @@ func TestDeleted_DeletedFalse(t *testing.T) {
 	}
 }
 
+func TestTagRefList_JSONRoundTrip(t *testing.T) {
+	l := TagRefList{
+		Type: "tag.list",
+		Tags: []TagRef{
+			{Type: "tag", ID: "t1", Name: "VIP"},
+			{Type: "tag", ID: "t2", Name: "Support"},
+		},
+	}
+	data, err := json.Marshal(l)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var got TagRefList
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if got.Type != l.Type || len(got.Tags) != 2 {
+		t.Fatalf("got %+v, want %+v", got, l)
+	}
+	if got.Tags[0].ID != "t1" || got.Tags[0].Name != "VIP" {
+		t.Fatalf("tag 0 mismatch: %+v", got.Tags[0])
+	}
+	if got.Tags[1].ID != "t2" || got.Tags[1].Name != "Support" {
+		t.Fatalf("tag 1 mismatch: %+v", got.Tags[1])
+	}
+}
+
+func TestTagRefList_Empty(t *testing.T) {
+	raw := `{"type":"tag.list","tags":[]}`
+	var l TagRefList
+	if err := json.Unmarshal([]byte(raw), &l); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if l.Type != "tag.list" || len(l.Tags) != 0 {
+		t.Fatalf("unexpected: %+v", l)
+	}
+}
+
+func TestTagRefList_JSONKey(t *testing.T) {
+	// Verify the JSON key is "tags" not "data" (distinct from TagList)
+	l := TagRefList{
+		Type: "tag.list",
+		Tags: []TagRef{{Type: "tag", ID: "t1"}},
+	}
+	data, err := json.Marshal(l)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	s := string(data)
+	if !contains(s, `"tags"`) {
+		t.Fatalf("expected 'tags' key, got %s", s)
+	}
+	if contains(s, `"data"`) {
+		t.Fatalf("expected no 'data' key, got %s", s)
+	}
+}
+
 func contains(s, sub string) bool {
 	return len(s) >= len(sub) && searchString(s, sub)
 }
