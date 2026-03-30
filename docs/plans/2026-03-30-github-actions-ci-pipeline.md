@@ -57,8 +57,8 @@
 - [x] review final YAML for correctness
 
 ### Task 3: [Final] Update documentation
-- [ ] update README.md with CI badge if desired
-- [ ] note in CONTRIBUTING.md that CI runs these checks (if applicable)
+- [x] update README.md with CI badge if desired
+- [x] note in CONTRIBUTING.md that CI runs these checks (if applicable)
 
 ## Technical Details
 - **Runner**: `ubuntu-latest`
