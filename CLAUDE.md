@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Go SDK for the Intercom API v2.15. 34 services organized into 16 domain-scoped sub-packages, minimal dependencies (stdlib + `google/go-querystring`).
+Go SDK for the Intercom API v2.15. 34 services organized into 17 domain-scoped sub-packages, minimal dependencies (stdlib + `google/go-querystring`).
 
 ## Commands
 
@@ -37,7 +37,7 @@ make fix         # go vet + gofmt -l
 **Internal API** (`internal/api/`):
 - `Caller` interface: `NewRequest`, `DoRaw`, `DoRawNoRedirect`, `Do`, `DoDownload` — abstracts HTTP operations for sub-packages
 - Shared types: `Result`, `ErrorResult`, `ErrorResponse`, `PagedResult[T]`, `Iter[T]`, `Filter`, `ListOptions`, etc.
-- Cross-service domain types: `TagRef`, `AdminRef`, `ContactRef`, `Note`, `SegmentRef`, etc.
+- Cross-service domain types: `TagRef`, `AdminRef`, `ContactRef`, `ContactRefList`, `Note`, `SegmentRef`, `Author`, `Part`, `LinkedObjectList`, `Deleted`, `TagRefList`, etc.
 - Sub-packages import `internal/api` for the `Caller` interface and shared types; they never import each other
 
 **Root package** (`intercom`):
@@ -98,7 +98,7 @@ Helper functions `testMethod` and `testHeader` assert request properties. Tests 
 
 - Service type naming: `Service` (or `XxxService` for multi-service packages like `contacts.VisitorsService`)
 - Request structs: `CreateRequest`, `UpdateRequest` (scoped to the sub-package)
-- All JSON field tags use `omitempty` except for required/identity fields (`type`, `id`)
+- All JSON field tags use `omitempty` except for required fields (commonly `type`, `id`, `name` in request structs)
 - Query param structs use `url:"name,omitempty"` tags (encoded via `google/go-querystring`)
 - Timestamps are `int64` (Unix epoch); optional timestamps are `*int64`
 - 3-layer pattern per method: see Architecture above

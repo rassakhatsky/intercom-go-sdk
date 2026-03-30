@@ -103,8 +103,8 @@
 - [x] Run format check: `gofmt -l .`
 
 ### Task 9: [Final] Update documentation
-- [ ] Update CLAUDE.md to reflect new shared types in internal/api/types.go
-- [ ] Add comments to internal/api/types.go documenting which services use each new type
+- [x] Update CLAUDE.md to reflect new shared types in internal/api/types.go
+- [x] Add comments to internal/api/types.go documenting which services use each new type
 
 ## Technical Details
 

@@ -1,7 +1,7 @@
 package api
 
 // Author represents the author of a conversation part, ticket part, or source.
-// It is shared across conversations and tickets services.
+// Used by: conversations, tickets (via Part).
 type Author struct {
 	Type  string `json:"type"`
 	ID    string `json:"id"`
@@ -10,7 +10,7 @@ type Author struct {
 }
 
 // LinkedObjectList holds linked objects on a conversation or ticket.
-// It is shared across conversations and tickets services.
+// Used by: conversations, tickets.
 type LinkedObjectList struct {
 	Type       string `json:"type"`
 	Data       []any  `json:"data"`
@@ -19,8 +19,8 @@ type LinkedObjectList struct {
 }
 
 // Part represents a conversation part or ticket part.
-// It is the superset of conversations and tickets Part types.
-// Conversations use NotifiedAt; tickets do not (omitted via omitempty).
+// Superset of conversations and tickets Part types.
+// Used by: conversations, tickets. Conversations use NotifiedAt; tickets do not.
 type Part struct {
 	Type       string  `json:"type"`
 	ID         string  `json:"id"`
@@ -36,7 +36,7 @@ type Part struct {
 }
 
 // TagRef represents a tag in sub-resource responses.
-// It is shared across multiple services (contacts, companies, conversations, tickets).
+// Used by: contacts, companies, conversations, tickets.
 type TagRef struct {
 	Type      string `json:"type"`
 	ID        string `json:"id"`
@@ -45,7 +45,7 @@ type TagRef struct {
 }
 
 // AdminRef represents an admin in sub-resource responses.
-// It is shared across multiple services (tags, conversations, etc.).
+// Used by: tags, conversations, admins.
 type AdminRef struct {
 	Type  string `json:"type"`
 	ID    string `json:"id"`
@@ -54,7 +54,7 @@ type AdminRef struct {
 }
 
 // ContactRef is a lightweight reference to a contact.
-// It is shared across notes, contacts, companies, conversations, and tickets services.
+// Used by: notes, contacts, companies, conversations, tickets.
 type ContactRef struct {
 	Type       string `json:"type"`
 	ID         string `json:"id"`
@@ -62,14 +62,14 @@ type ContactRef struct {
 }
 
 // ContactRefList holds the contacts participating in a conversation or ticket.
-// It is shared across conversations and tickets services.
+// Used by: conversations, tickets.
 type ContactRefList struct {
 	Type     string       `json:"type"`
 	Contacts []ContactRef `json:"contacts"`
 }
 
 // Deleted represents the response from deleting a resource.
-// It is shared across tickets, articles, conversations, and companies services.
+// Used by: tickets, articles, conversations, companies.
 // Note: contacts.Deleted has a different structure (Type + ExternalID instead of Object).
 type Deleted struct {
 	ID      string `json:"id"`
@@ -78,7 +78,7 @@ type Deleted struct {
 }
 
 // NoteAuthor represents the admin who authored a note.
-// It is shared across notes, contacts, and companies services.
+// Used by: settings/notes, contacts, companies.
 type NoteAuthor struct {
 	Type  string `json:"type"`
 	ID    string `json:"id"`
@@ -87,7 +87,7 @@ type NoteAuthor struct {
 }
 
 // Note represents an Intercom note.
-// It is shared across notes, contacts, and companies services.
+// Used by: settings/notes, contacts, companies.
 type Note struct {
 	Type      string      `json:"type"`
 	ID        string      `json:"id"`
@@ -98,7 +98,7 @@ type Note struct {
 }
 
 // NoteListResult is the response for listing notes on a contact or company.
-// It is shared across contacts and companies services.
+// Used by: contacts, companies.
 type NoteListResult struct {
 	Type       string      `json:"type"`
 	Data       []Note      `json:"data"`
@@ -107,7 +107,7 @@ type NoteListResult struct {
 }
 
 // SegmentRef represents a segment in sub-resource responses.
-// It is shared across contacts and companies services.
+// Used by: contacts, companies.
 type SegmentRef struct {
 	Type       string `json:"type"`
 	ID         string `json:"id"`
@@ -118,14 +118,14 @@ type SegmentRef struct {
 }
 
 // SegmentListResult is the response for listing segments for a contact or company.
-// It is shared across contacts and companies services.
+// Used by: contacts, companies.
 type SegmentListResult struct {
 	Type string       `json:"type"`
 	Data []SegmentRef `json:"data"`
 }
 
 // Tag represents an Intercom tag (full representation).
-// It is shared across tags and contacts services.
+// Used by: tags, contacts.
 type Tag struct {
 	Type      string    `json:"type"`
 	ID        string    `json:"id"`
@@ -134,15 +134,15 @@ type Tag struct {
 	AppliedBy *AdminRef `json:"applied_by,omitempty"`
 }
 
-// TagList represents a list of tags.
-// It is shared across tags and contacts services.
+// TagList represents a list of tags (full Tag objects with json:"data").
+// Used by: tags, contacts.
 type TagList struct {
 	Type string `json:"type"`
 	Data []Tag  `json:"data"`
 }
 
-// TagRefList represents a list of tag references embedded in a parent resource.
-// It is shared across conversations and companies services.
+// TagRefList represents a list of tag references embedded in a parent resource (json:"tags").
+// Used by: conversations, companies.
 // Distinct from TagList which uses []Tag with json:"data".
 type TagRefList struct {
 	Type string   `json:"type"`
@@ -150,7 +150,7 @@ type TagRefList struct {
 }
 
 // SubscriptionType represents a subscription type in Intercom.
-// It is shared across messaging and contacts services.
+// Used by: messaging, contacts.
 type SubscriptionType struct {
 	Type               string        `json:"type"`
 	ID                 string        `json:"id"`
@@ -162,7 +162,7 @@ type SubscriptionType struct {
 }
 
 // Translation represents a localised version of a subscription type.
-// It is shared across messaging and contacts services.
+// Used by: messaging, contacts.
 type Translation struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -170,7 +170,7 @@ type Translation struct {
 }
 
 // ArticleContent represents translated content for a single locale.
-// It is shared across articles and help center services.
+// Used by: articles, helpcenter.
 type ArticleContent struct {
 	Type        string `json:"type,omitempty"`
 	Title       string `json:"title,omitempty"`
@@ -184,7 +184,7 @@ type ArticleContent struct {
 }
 
 // ArticleTranslatedContent holds translations for an article keyed by locale.
-// It is shared across articles and help center services.
+// Used by: articles, helpcenter.
 type ArticleTranslatedContent struct {
 	Type string          `json:"type,omitempty"`
 	AR   *ArticleContent `json:"ar,omitempty"`
